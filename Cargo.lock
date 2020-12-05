@@ -62,7 +62,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "fretboard"
+name = "fblt"
 version = "0.1.0"
 dependencies = [
  "clap",
