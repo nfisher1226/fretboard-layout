@@ -18,7 +18,7 @@ fn draw_centerline(specs: &Specs) -> svg::node::element::Path {
     Path::new()
         .set("fill", "none")
         .set("stroke", "blue")
-        .set("stroke-dasharray", "4.0,4.0")
+        .set("stroke-dasharray", "4.0,8.0")
         .set("stroke-dashoffset", "0")
         .set("stroke-width", 1)
         .set("id", "Centerline")
@@ -60,7 +60,7 @@ fn draw_bridge(specs: &Specs, factors: &Factors) -> svg::node::element::Path {
         .set("d", data)
 }
 
-fn draw_fret(fret: i32, line: &Line) -> svg::node::element::Path {
+fn draw_fret(fret: u32, line: &Line) -> svg::node::element::Path {
     let id = if fret == 0 {
         "Nut".to_string()
     } else {

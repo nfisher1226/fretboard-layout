@@ -1,4 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
+use std::process::Command;
 use clap::{crate_version, App, Arg};
 mod draw;
 mod fretboard;
@@ -7,7 +8,7 @@ use fretboard::Fret;
 
 pub struct Specs {
     scale: f64,
-    count: i32,
+    count: u32,
     multi: bool,
     scale_treble: f64,
     nut: f64,
@@ -84,6 +85,13 @@ fn main() {
                 .default_value("10")
                 .takes_value(true)
         )
+        .arg(
+            Arg::new("EXTERN")
+                .about("Open output file in external program")
+                .short('e')
+                .long("external")
+                .takes_value(true)
+        )
         .get_matches();
     let multi = matches.is_present("MULTI");
     let scale_treble: f64 = if multi {
@@ -107,4 +115,9 @@ fn main() {
     let factors = plot::Factors::get_factors(&fretboard, &specs);
     draw::create_document(&specs, &factors, &fretboard);
     println!("Output saved as {}.", specs.output);
+    let external = matches.is_present("EXTERN");
+    if external {
+        let cmd = matches.value_of("EXTERN").unwrap();
+        Command::new(cmd).args(&[&specs.output]).spawn().unwrap();
+    }
 }

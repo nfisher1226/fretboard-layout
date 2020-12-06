@@ -8,7 +8,7 @@ pub struct Fret {
 }
 
 impl Fret {
-    fn get_fret(fret: i32, specs: &Specs) -> Fret {
+    fn get_fret(fret: u32, specs: &Specs) -> Fret {
         let factor = 2.0_f64.pow(f64::from(fret) / 12.0);
         let ftob_bass = specs.scale / factor;
         let ftob_treble = if specs.multi {
