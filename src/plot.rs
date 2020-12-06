@@ -1,3 +1,4 @@
+#![warn(clippy::all, clippy::pedantic)]
 use crate::fretboard::Fret;
 use crate::Specs;
 use std::f64;
@@ -32,22 +33,22 @@ impl Factors {
 }
 
 impl Point {
-    fn get_point_bass(fretboard: &[Fret], fret: &usize, factors: &Factors, specs: &Specs) -> Point {
-        let x = (factors.x_ratio * fretboard[*fret].ftob_bass) + specs.border;
-        let y = (factors.y_ratio * fretboard[*fret].ftob_bass) + specs.border;
+    fn get_point_bass(fretboard: &[Fret], fret: usize, factors: &Factors, specs: &Specs) -> Point {
+        let x = (factors.x_ratio * fretboard[fret].ftob_bass) + specs.border;
+        let y = (factors.y_ratio * fretboard[fret].ftob_bass) + specs.border;
         Point (x, y)
     }
-    fn get_point_treble(fretboard: &[Fret], fret: &usize, factors: &Factors, specs: &Specs) -> Point {
-        let x = factors.treble_offset + (factors.x_ratio * fretboard[*fret].ftob_treble) + specs.border;
-        let y = specs.bridge - (factors.y_ratio * fretboard[*fret].ftob_treble) + specs.border;
+    fn get_point_treble(fretboard: &[Fret], fret: usize, factors: &Factors, specs: &Specs) -> Point {
+        let x = factors.treble_offset + (factors.x_ratio * fretboard[fret].ftob_treble) + specs.border;
+        let y = specs.bridge - (factors.y_ratio * fretboard[fret].ftob_treble) + specs.border;
         Point (x, y)
     }
 }
 
 impl Line {
-    pub fn get_fret_line(fretboard: &Vec<Fret>, fret: &usize, factors: &Factors, specs: &Specs) -> Line {
-        let start = Point::get_point_bass(&fretboard, &fret, &factors, &specs);
-        let end = Point::get_point_treble(&fretboard, &fret, &factors, &specs);
+    pub fn get_fret_line(fretboard: &[Fret], fret: usize, factors: &Factors, specs: &Specs) -> Line {
+        let start = Point::get_point_bass(&fretboard, fret, &factors, &specs);
+        let end = Point::get_point_treble(&fretboard, fret, &factors, &specs);
         Line {
             start,
             end,

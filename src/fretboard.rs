@@ -1,3 +1,4 @@
+#![warn(clippy::all, clippy::pedantic)]
 use rug::ops::Pow;
 use crate::Specs;
 
@@ -8,7 +9,7 @@ pub struct Fret {
 
 impl Fret {
     fn get_fret(fret: i32, specs: &Specs) -> Fret {
-        let factor = 2.0_f64.pow(fret as f64 / 12.0);
+        let factor = 2.0_f64.pow(f64::from(fret) / 12.0);
         let ftob_bass = specs.scale / factor;
         let ftob_treble = if specs.multi {
             specs.scale_treble / factor
