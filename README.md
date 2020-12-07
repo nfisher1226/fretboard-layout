@@ -22,6 +22,7 @@ of the fretboard in relation to the two outer strings.
 approximation, as the nut is slanted.
 * -B, --border <width> - the border to be placed around the completed image.
 * -o, --output <file> - the name of the output file.
+* -e, --external - open the output file in an external program
 ## Future Development
 There are plans to refine the calculations in regards to the nut and bridge width
 for multiscale designs, as the current method is not properly skewed in relation

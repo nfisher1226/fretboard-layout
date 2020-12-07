@@ -1,23 +1,8 @@
 #![warn(clippy::all, clippy::pedantic)]
-use std::process::Command;
 use clap::{crate_version, App, Arg};
-mod draw;
 mod fretboard;
-mod plot;
-use fretboard::Fret;
-
-pub struct Specs {
-    scale: f64,
-    count: u32,
-    multi: bool,
-    scale_treble: f64,
-    nut: f64,
-    bridge: f64,
-    pfret: usize,
-    output: String,
-    border: f64,
-}
-
+mod run;
+use run::Specs;
 
 fn main() {
     let matches = App::new("fblt")
@@ -43,7 +28,7 @@ fn main() {
                 .short('p')
                 .long("perpendicular")
                 .default_value("8")
-                .takes_value(true)
+                .takes_value(true),
         )
         .arg(
             Arg::new("COUNT")
@@ -51,7 +36,7 @@ fn main() {
                 .short('c')
                 .long("count")
                 .default_value("24")
-                .takes_value(true)
+                .takes_value(true),
         )
         .arg(
             Arg::new("NUT")
@@ -59,7 +44,7 @@ fn main() {
                 .short('n')
                 .long("nut")
                 .default_value("43")
-                .takes_value(true)
+                .takes_value(true),
         )
         .arg(
             Arg::new("BRIDGE")
@@ -67,7 +52,7 @@ fn main() {
                 .short('b')
                 .long("bridge")
                 .default_value("56")
-                .takes_value(true)
+                .takes_value(true),
         )
         .arg(
             Arg::new("OUTPUT")
@@ -75,7 +60,7 @@ fn main() {
                 .short('o')
                 .long("output")
                 .default_value("output.svg")
-                .takes_value(true)
+                .takes_value(true),
         )
         .arg(
             Arg::new("BORDER")
@@ -83,14 +68,15 @@ fn main() {
                 .short('B')
                 .long("border")
                 .default_value("10")
-                .takes_value(true)
+                .takes_value(true),
         )
         .arg(
             Arg::new("EXTERN")
                 .about("Open output file in external program")
                 .short('e')
                 .long("external")
-                .takes_value(true)
+                .default_value("inkscape")
+                .takes_value(true),
         )
         .get_matches();
     let multi = matches.is_present("MULTI");
@@ -99,6 +85,11 @@ fn main() {
     } else {
         matches.value_of_t("SCALE").unwrap()
     };
+    let cmd = if matches.occurrences_of("EXTERN") == 0 {
+		String::from("inkscape")
+	} else {
+		matches.value_of("EXTERN").unwrap().to_string()
+	};
     let bridge: f64 = matches.value_of_t("BRIDGE").unwrap();
     let specs = Specs {
         scale: matches.value_of_t("SCALE").unwrap(),
@@ -110,14 +101,8 @@ fn main() {
         pfret: matches.value_of_t("PERPENDICULAR").unwrap(),
         output: matches.value_of("OUTPUT").unwrap().to_string(),
         border: matches.value_of_t("BORDER").unwrap(),
+        external: matches.is_present("EXTERN"),
+        cmd,
     };
-    let fretboard: Vec<Fret> = fretboard::Fret::get_fretboard(&specs);
-    let factors = plot::Factors::get_factors(&fretboard, &specs);
-    draw::create_document(&specs, &factors, &fretboard);
-    println!("Output saved as {}.", specs.output);
-    let external = matches.is_present("EXTERN");
-    if external {
-        let cmd = matches.value_of("EXTERN").unwrap();
-        Command::new(cmd).args(&[&specs.output]).spawn().unwrap();
-    }
+    specs.run();
 }
