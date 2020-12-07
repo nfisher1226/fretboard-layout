@@ -1,6 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::Specs;
 use crate::run::Factors;
+use crate::Specs;
 use std::f64;
 use svg::node::element::path::Data;
 use svg::node::element::Path;
@@ -10,7 +10,7 @@ pub struct Lengths {
     pub length_treble: f64,
 }
 
-pub struct Point ( pub f64, pub f64 );
+pub struct Point(pub f64, pub f64);
 
 pub struct Line {
     pub start: Point,

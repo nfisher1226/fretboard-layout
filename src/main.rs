@@ -20,6 +20,7 @@ fn main() {
                 .about("Creates a multiscale fretboard with <MULTI> as the treble scale.")
                 .short('m')
                 .long("multi")
+                .default_value("610")
                 .takes_value(true),
         )
         .arg(
@@ -79,17 +80,13 @@ fn main() {
                 .takes_value(true),
         )
         .get_matches();
-    let multi = matches.is_present("MULTI");
+    let multi = matches.occurrences_of("MULTI") > 0;
     let scale_treble: f64 = if multi {
         matches.value_of_t("MULTI").unwrap()
     } else {
         matches.value_of_t("SCALE").unwrap()
     };
-    let cmd = if matches.occurrences_of("EXTERN") == 0 {
-		String::from("inkscape")
-	} else {
-		matches.value_of("EXTERN").unwrap().to_string()
-	};
+    let cmd = matches.value_of("EXTERN").unwrap().to_string();
     let bridge: f64 = matches.value_of_t("BRIDGE").unwrap();
     let specs = Specs {
         scale: matches.value_of_t("SCALE").unwrap(),
@@ -101,7 +98,7 @@ fn main() {
         pfret: matches.value_of_t("PERPENDICULAR").unwrap(),
         output: matches.value_of("OUTPUT").unwrap().to_string(),
         border: matches.value_of_t("BORDER").unwrap(),
-        external: matches.is_present("EXTERN"),
+        external: matches.occurrences_of("EXTERN") > 0,
         cmd,
     };
     specs.run();

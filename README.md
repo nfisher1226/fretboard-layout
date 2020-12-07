@@ -5,7 +5,11 @@ calculate the fret, nut, and bridge locations and output an svg template suitabl
 for using as a pattern for a fretted stringed instrument. Multiscale designs are
 supported. Measurements are currently expected to be in millimeters.
 ## Building
-Just run ```cargo build --release``` to build a release binary in target/release.
+You will need a Rust toolchain installed, including cargo. To build the
+program, run ```cargo build --release``` to build a release binary in target/release.
+
+Alternatively, you can use the included Makefile to build and install the
+program, adjusting the installation path with the PREFIX and DESTDIR variables.
 ## Usage
 The first argument is the scale length in millimeters. If the -m, or --multiscale
 argument is also given, this becomes the bass side scale length.
@@ -22,7 +26,7 @@ of the fretboard in relation to the two outer strings.
 approximation, as the nut is slanted.
 * -B, --border <width> - the border to be placed around the completed image.
 * -o, --output <file> - the name of the output file.
-* -e, --external - open the output file in an external program
+* -e, --external <program> - open the output file in an external program
 ## Future Development
 There are plans to refine the calculations in regards to the nut and bridge width
 for multiscale designs, as the current method is not properly skewed in relation

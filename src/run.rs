@@ -1,10 +1,10 @@
 #![warn(clippy::all, clippy::pedantic)]
+use crate::fretboard::Lengths;
 use rug::ops::Pow;
 use std::process::Command;
 use svg::node::element::path::Data;
 use svg::node::element::{Group, Path};
 use svg::Document;
-use crate::fretboard::Lengths;
 
 pub struct Specs {
     pub scale: f64,
@@ -61,7 +61,7 @@ impl Specs {
         }
         fretboard
     }
-    pub fn get_factors(&self, fretboard: &[Lengths]) -> Factors {
+    fn get_factors(&self, fretboard: &[Lengths]) -> Factors {
         let height = (self.bridge - self.nut) / 2.0;
         let y_ratio = height / self.scale;
         let x_ratio = y_ratio.acos().sin();
@@ -133,7 +133,7 @@ impl Specs {
         }
         frets
     }
-    pub fn create_document(&self, factors: &Factors, fretboard: &[Lengths]) {
+    fn create_document(&self, factors: &Factors, fretboard: &[Lengths]) {
         let width = (self.border * 2.0) + self.scale;
         let widthmm = format!("{}mm", width);
         let height = (self.border * 2.0) + self.bridge;
