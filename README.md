@@ -10,9 +10,17 @@ program, run ```cargo build --release``` to build a release binary in target/rel
 
 Alternatively, you can use the included Makefile to build and install the
 program, adjusting the installation path with the PREFIX and DESTDIR variables.
+
+To install and run the gui frontend (Posix-ey systems only), you will need to
+have Gtk+3 as well as pyGtk libraries installed. Set the ```INSTALL_GUI```
+variable to ```true```, either by editing config.mk or specifying it on the
+command line when running make.
 ## Usage
 The first argument is the scale length in millimeters. If the -m, or --multiscale
 argument is also given, this becomes the bass side scale length.
+
+The gui frontend just wraps the functionality of the compiled binary with an
+interface programmed in pyGtk. Usage should be self explanatory.
 #### Flags
 * -m, --multiscale <scale> - creates a multiscale design where [scale] is
 the treble side scale.
@@ -36,6 +44,3 @@ scale lengths. This is considered a very minor inaccuracy, however.
 
 Currently, when given incorrect input the program panics. There is a need for
 proper, more idiomatic error handling. This is higher priority.
-
-A gui in pyqt5 is planned but not yet implemented. An inkscape plugin is possible
-but not currently planned.
