@@ -141,6 +141,7 @@ impl Specs {
         let mut document = Document::new()
             .set("width", widthmm)
             .set("height", heightmm)
+            .set("preserveAspectRatio", "xMidYMid meet")
             .set("viewBox", (0, 0, width, height));
         document = document.add(self.draw_centerline());
         document = document.add(self.draw_fretboard(&fretboard, &factors));
