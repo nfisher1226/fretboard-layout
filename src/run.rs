@@ -3,7 +3,7 @@ use crate::fretboard::Lengths;
 use rug::ops::Pow;
 use std::process::Command;
 use svg::node::element::path::Data;
-use svg::node::element::{Group, Path};
+use svg::node::element::{Description, Group, Path};
 use svg::Document;
 
 pub struct Specs {
@@ -74,6 +74,33 @@ impl Specs {
             treble_offset,
         }
     }
+    fn create_description(&self) -> svg::node::element::Description {
+        Description::new()
+            .set("Scale", self.scale)
+            .set("Multiscale", self.multi)
+            .set("ScaleTreble", self.scale_treble)
+            .set("PerpendicularFret", self.pfret)
+            .set("BridgeSpacing", self.bridge - 6.0)
+            .set("NutWidth", self.nut)
+    }
+    fn print_data(&self) -> svg::node::element::Text {
+        let mut line = if self.multi {
+            format!("ScaleBass: {:.2}mm | ScaleTreble: {:.2}mm |", self.scale, self.scale_treble)
+        } else {
+            format!("Scale: {:.2}mm |", self.scale)
+        };
+        line = format!("{} PerpendicularFret: {} |", line, self.pfret);
+        line = format!("{} NutWidth: {:.2}mm |", line, self.nut);
+        line = format!("{} BridgeSpacing: {:.2}mm", line, self.bridge - 6.0);
+        svg::node::element::Text::new()
+            .set("x", self.border)
+            .set("y", (self.border * 1.7) + self.bridge)
+            .set("font-family", "sans-serif")
+            .set("font-weight", "normal")
+            .set("font-size", "5px")
+            .set("id", "Specifications")
+            .add(svg::node::Text::new(line))
+    }
     fn draw_centerline(&self) -> svg::node::element::Path {
         let start_x = self.border;
         let start_y = (self.bridge / 2.0) + self.border;
@@ -133,32 +160,38 @@ impl Specs {
         }
         frets
     }
-    fn create_document(&self, factors: &Factors, fretboard: &[Lengths]) {
+    fn create_document(&self, factors: &Factors, fretboard: &[Lengths]) -> svg::Document {
         let width = (self.border * 2.0) + self.scale;
         let widthmm = format!("{}mm", width);
         let height = (self.border * 2.0) + self.bridge;
         let heightmm = format!("{}mm", height);
-        let mut document = Document::new()
+        Document::new()
             .set("width", widthmm)
             .set("height", heightmm)
             .set("preserveAspectRatio", "xMidYMid meet")
-            .set("viewBox", (0, 0, width, height));
-        document = document.add(self.draw_centerline());
-        document = document.add(self.draw_fretboard(&fretboard, &factors));
-        document = document.add(self.draw_bridge(&factors));
-        document = document.add(self.draw_frets(&fretboard, &factors));
-        svg::save(&self.output, &document).unwrap();
+            .set("viewBox", (0, 0, width, height))
+            .add(self.create_description())
+            .add(self.print_data())
+            .add(self.draw_centerline())
+            .add(self.draw_fretboard(&fretboard, &factors))
+            .add(self.draw_bridge(&factors))
+            .add(self.draw_frets(&fretboard, &factors))
     }
     pub fn run(&self) {
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors(&lengths);
-        self.create_document(factors, &lengths);
-        println!("Output saved as {}.", self.output);
-        if self.external {
-            Command::new(&self.cmd)
-                .args(&[&self.output])
-                .spawn()
-                .unwrap();
+        let document = self.create_document(factors, &lengths);
+        if self.output == "-" {
+            println!("{}", document);
+        } else {
+            svg::save(&self.output, &document).unwrap();
+            println!("Output saved as {}.", self.output);
+            if self.external {
+                Command::new(&self.cmd)
+                    .args(&[&self.output])
+                    .spawn()
+                    .unwrap();
+            }
         }
     }
 }

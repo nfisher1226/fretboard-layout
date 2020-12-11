@@ -16,7 +16,7 @@ class GFretBoard(Gtk.Window):
         self.imagePreview = Gtk.Image()
 
         image = "/tmp/gfret-preview.svg"
-        width = 1000
+        width = 800
         height = -1
         preserve_aspect_ratio = True
 
@@ -114,7 +114,7 @@ class GFretBoard(Gtk.Window):
         self.hbox2.pack_start(self.nutLabel, True, True, 0)
 
         self.nut = Gtk.SpinButton()
-        self.nut.set_adjustment(Gtk.Adjustment(upper=100, lower=20, step_increment=1, page_increment=2))
+        self.nut.set_adjustment(Gtk.Adjustment(upper=100, lower=20, step_increment=0.1, page_increment=2))
         self.nut.set_value(43)
         self.nut.set_digits(1)
         self.nut.connect("value-changed", self.refresh_preview)
@@ -127,7 +127,7 @@ class GFretBoard(Gtk.Window):
         self.hbox3.pack_start(self.bridgeLabel, True, True, 0)
 
         self.bridge = Gtk.SpinButton()
-        self.bridge.set_adjustment(Gtk.Adjustment(upper=100, lower=20, step_increment=1, page_increment=2))
+        self.bridge.set_adjustment(Gtk.Adjustment(upper=100, lower=20, step_increment=0.1, page_increment=2))
         self.bridge.set_value(56)
         self.bridge.set_digits(1)
         self.bridge.connect("value-changed", self.refresh_preview)
@@ -222,7 +222,7 @@ class GFretBoard(Gtk.Window):
         cmd = " ".join(cmd)
         os.system(cmd)
         image = "/tmp/gfret-preview.svg"
-        width = 1000
+        width = 800
         height = -1
         preserve_aspect_ratio = True
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(image, width, height, preserve_aspect_ratio)
