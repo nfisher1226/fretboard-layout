@@ -11,10 +11,14 @@ program, run ```cargo build --release``` to build a release binary in target/rel
 Alternatively, you can use the included Makefile to build and install the
 program, adjusting the installation path with the PREFIX and DESTDIR variables.
 
-To install and run the gui frontend (Posix-ey systems only), you will need to
+To install and run the Gtk frontend (Posix-ey systems only), you will need to
 have Gtk+3 as well as pyGtk libraries installed. Set the ```INSTALL_GUI```
 variable to ```true```, either by editing config.mk or specifying it on the
 command line when running make.
+
+Alternatively, there is also a Qt frontend. You will need Qt5 as well as PyQt5
+libraries installed, and installation is as the Gtk version with the additional
+step of setting the ```GUIPROG``` variable to ```qfret```.
 ## Usage
 The first argument is the scale length in millimeters. If the -m, or --multiscale
 argument is also given, this becomes the bass side scale length.

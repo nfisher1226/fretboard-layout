@@ -11,7 +11,7 @@ Exec=gfret
 TryExec=gfret
 Terminal=false
 StartupNotify=true
-Icon=
+Icon=gfret
 X-Ayatana-Desktop-Shortcuts=Drawing
 
 [X-Drawing Shortcut Group]

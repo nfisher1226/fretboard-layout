@@ -6,8 +6,8 @@ VPATH         += target/release
 all: $(PROGNAME)
 
 ifeq ($(INSTALL_GUI),true)
-  VPATH       += gui
-  VPATH       += data
+  VPATH       += gui/src
+  VPATH       += gui/data
   INSTALLDIRS += $(XDGDIR)
   INSTALLDIRS += $(ICONDIR)
   install: install-gui
@@ -33,7 +33,7 @@ $(BINDIR)/$(GUIPROG): $(GUIPROG).py | $(BINDIR)
 $(XDGDIR)/$(GUIPROG).desktop: $(GUIPROG).desktop | $(XDGDIR)
 	install -m644 $< $@
 
-$(ICONDIR)/$(GUIPROG).svg: $(GUIPROG).svg | $(ICONDIR)
+$(ICONDIR)/$(GUIPROG).svg: icon.svg | $(ICONDIR)
 	install -m644 $< $@
 
 $(INSTALLDIRS):
