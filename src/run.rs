@@ -13,7 +13,7 @@ pub struct Specs {
     pub scale_treble: f64,
     pub nut: f64,
     pub bridge: f64,
-    pub pfret: usize,
+    pub pfret: f64,
     pub output: String,
     pub border: f64,
     pub external: bool,
@@ -61,12 +61,19 @@ impl Specs {
         }
         fretboard
     }
-    fn get_factors(&self, fretboard: &[Lengths]) -> Factors {
+    fn get_factors(&self) -> Factors {
         let height = (self.bridge - self.nut) / 2.0;
         let y_ratio = height / self.scale;
         let x_ratio = y_ratio.acos().sin();
-        let bass_pfret = x_ratio * fretboard[self.pfret].length_bass;
-        let treble_pfret = x_ratio * fretboard[self.pfret].length_treble;
+        let factor = 2.0_f64.pow(self.pfret / 12.0);
+        let length_bass = self.scale / factor;
+        let length_treble = if self.multi {
+            self.scale_treble / factor
+        } else {
+            length_bass
+        };
+        let bass_pfret = x_ratio * length_bass;
+        let treble_pfret = x_ratio * length_treble;
         let treble_offset = bass_pfret - treble_pfret;
         Factors {
             x_ratio,
@@ -179,7 +186,7 @@ impl Specs {
     }
     pub fn run(&self) {
         let lengths: Vec<Lengths> = self.get_all_lengths();
-        let factors = &self.get_factors(&lengths);
+        let factors = &self.get_factors();
         let document = self.create_document(factors, &lengths);
         if self.output == "-" {
             println!("{}", document);

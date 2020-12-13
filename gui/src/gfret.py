@@ -31,18 +31,14 @@ class GFretBoard(Gtk.Window):
         labelScale = Gtk.Label(label = "Scale Length:")
         self.hboxScale.pack_start(labelScale, False, True, 0)
 
-        adjustment = Gtk.Adjustment(upper=1000, lower=100, step_increment=0.1, page_increment=5)
-
         self.scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL)
-        self.scale.set_adjustment(Gtk.Adjustment(lower=100, upper=1000, step_increment=1, page_increment=10))
+        self.scale.set_adjustment(Gtk.Adjustment(lower=250, upper=1250, step_increment=1, page_increment=10))
         self.scale.set_value(655)
         self.scale.set_draw_value(False)
-        for i in range(100, 1100, 100):
-            self.scale.add_mark(i, Gtk.PositionType.LEFT, str(i))
         self.hboxScale.pack_start(self.scale, True, True, 0)
 
         self.scaleFine = Gtk.SpinButton()
-        self.scaleFine.set_adjustment(Gtk.Adjustment(upper=1000, lower=100, step_increment=0.1, page_increment=5))
+        self.scaleFine.set_adjustment(Gtk.Adjustment(lower=250, upper=1250, step_increment=0.1, page_increment=5))
         self.scaleFine.set_value(655)
         self.scaleFine.set_digits(1)
         self.hboxScale.pack_start(self.scaleFine, False, True, 0)
@@ -57,16 +53,14 @@ class GFretBoard(Gtk.Window):
         self.hboxMulti.pack_start(self.checkBoxMulti, False, True, 0)
 
         self.scaleMulti = Gtk.HScale()
-        self.scaleMulti.set_adjustment(Gtk.Adjustment(upper=1000, lower=100, step_increment=1, page_increment=10))
+        self.scaleMulti.set_adjustment(Gtk.Adjustment(lower=250, upper=1250, step_increment=1, page_increment=10))
         self.scaleMulti.set_value(610)
         self.scaleMulti.set_draw_value(False)
-        for i in range(100, 1100, 100):
-            self.scaleMulti.add_mark(i, Gtk.PositionType.LEFT, str(i))
         self.scaleMulti.set_sensitive(False)
         self.hboxMulti.pack_start(self.scaleMulti, True, True, 0)
 
         self.scaleMultiFine = Gtk.SpinButton()
-        self.scaleMultiFine.set_adjustment(Gtk.Adjustment(upper=1000, lower=100, step_increment=0.1, page_increment=5))
+        self.scaleMultiFine.set_adjustment(Gtk.Adjustment(lower=250, upper=1250, step_increment=0.1, page_increment=5))
         self.scaleMultiFine.set_value(610)
         self.scaleMultiFine.set_digits(1)
         self.scaleMultiFine.set_sensitive(False)
@@ -96,8 +90,9 @@ class GFretBoard(Gtk.Window):
         self.hbox1.pack_start(self.perpLabel, True, True, 0)
 
         self.perpFret = Gtk.SpinButton()
-        self.perpFret.set_adjustment(Gtk.Adjustment(upper=12, lower=1, step_increment=1, page_increment=2))
+        self.perpFret.set_adjustment(Gtk.Adjustment(upper=12, lower=1, step_increment=0.1, page_increment=1))
         self.perpFret.set_value(8)
+        self.perpFret.set_digits(1)
         self.hbox1.pack_start(self.perpFret, False, True, 0)
 
         self.vboxSettings1 = Gtk.VBox(spacing = 0)
