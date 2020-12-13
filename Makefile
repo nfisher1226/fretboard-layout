@@ -2,12 +2,12 @@ include config.mk
 INSTALLDIRS    = $(BINDIR)
 VPATH         += src
 VPATH         += target/release
+VPATH       += gui/src
+VPATH       += gui/data
 
 all: $(PROGNAME)
 
 ifeq ($(INSTALL_GUI),true)
-  VPATH       += gui/src
-  VPATH       += gui/data
   INSTALLDIRS += $(XDGDIR)
   INSTALLDIRS += $(ICONDIR)
   install: install-gui
