@@ -48,3 +48,6 @@ scale lengths. This is considered a very minor inaccuracy, however.
 
 Currently, when given incorrect input the program panics. There is a need for
 proper, more idiomatic error handling. This is higher priority.
+
+For the gui, it would be nice to save state and allow loading specs from and saving
+to templates. This will be implemented in the Python gui, not the Rust cli.
