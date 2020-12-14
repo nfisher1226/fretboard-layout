@@ -31,7 +31,7 @@ class GFretBoard(Gtk.Window):
         labelScale = Gtk.Label(label = "Scale Length:")
         self.hboxScale.pack_start(labelScale, False, True, 0)
 
-        self.scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL)
+        self.scale = Gtk.HScale()
         self.scale.set_adjustment(Gtk.Adjustment(lower=250, upper=1250, step_increment=1, page_increment=10))
         self.scale.set_value(655)
         self.scale.set_draw_value(False)
@@ -66,85 +66,58 @@ class GFretBoard(Gtk.Window):
         self.scaleMultiFine.set_sensitive(False)
         self.hboxMulti.pack_start(self.scaleMultiFine, False, True, 0)
 
-        self.hboxSettings = Gtk.Box(spacing = 6)
-        self.vbox.pack_start(self.hboxSettings, False, True, 0)
-
-        self.vboxSettings0 = Gtk.VBox(spacing = 0)
-        self.hboxSettings.pack_start(self.vboxSettings0, True, True, 0)
-
-        self.hbox0 = Gtk.Box(spacing = 6)
-        self.vboxSettings0.pack_start(self.hbox0, True, True, 0)
+        self.settingsGrid = Gtk.Grid()
+        self.vbox.pack_start(self.settingsGrid, False, True, 0)
 
         self.fretsLabel = Gtk.Label(label = "Fret Count:")
-        self.hbox0.pack_start(self.fretsLabel, True, True, 0)
+        self.settingsGrid.attach(self.fretsLabel, 0, 0, 1, 1)
 
         self.fretCount = Gtk.SpinButton()
         self.fretCount.set_adjustment(Gtk.Adjustment(upper=36, lower=8, step_increment=1, page_increment=4))
         self.fretCount.set_value(24)
-        self.hbox0.pack_start(self.fretCount, False, True, 0)
-
-        self.hbox1 = Gtk.Box(spacing = 6)
-        self.vboxSettings0.pack_start(self.hbox1, True, True, 0)
+        self.settingsGrid.attach(self.fretCount, 1, 0, 1, 1)
 
         self.perpLabel = Gtk.Label(label = "Perpendicular Fret:")
-        self.hbox1.pack_start(self.perpLabel, True, True, 0)
+        self.settingsGrid.attach(self.perpLabel, 0, 1, 1, 1)
 
         self.perpFret = Gtk.SpinButton()
         self.perpFret.set_adjustment(Gtk.Adjustment(upper=12, lower=1, step_increment=0.1, page_increment=1))
         self.perpFret.set_value(8)
         self.perpFret.set_digits(1)
-        self.hbox1.pack_start(self.perpFret, False, True, 0)
-
-        self.vboxSettings1 = Gtk.VBox(spacing = 0)
-        self.hboxSettings.pack_start(self.vboxSettings1, True, True, 0)
-
-        self.hbox2 = Gtk.Box(spacing = 6)
-        self.vboxSettings1.pack_start(self.hbox2, True, True, 0)
+        self.settingsGrid.attach(self.perpFret, 1, 1, 1, 1)
 
         self.nutLabel = Gtk.Label(label = "Nut Width:")
-        self.hbox2.pack_start(self.nutLabel, True, True, 0)
+        self.settingsGrid.attach(self.nutLabel, 2, 0, 1, 1)
 
         self.nut = Gtk.SpinButton()
         self.nut.set_adjustment(Gtk.Adjustment(upper=100, lower=20, step_increment=0.1, page_increment=2))
         self.nut.set_value(43)
         self.nut.set_digits(1)
-        self.hbox2.pack_start(self.nut, False, True, 0)
-
-        self.hbox3 = Gtk.Box(spacing = 6)
-        self.vboxSettings1.pack_start(self.hbox3, True, True, 0)
+        self.settingsGrid.attach(self.nut, 3, 0, 1, 1)
 
         self.bridgeLabel = Gtk.Label(label = "Bridge Spacing:")
-        self.hbox3.pack_start(self.bridgeLabel, True, True, 0)
+        self.settingsGrid.attach(self.bridgeLabel, 2, 1, 1, 1)
 
         self.bridge = Gtk.SpinButton()
         self.bridge.set_adjustment(Gtk.Adjustment(upper=100, lower=20, step_increment=0.1, page_increment=2))
         self.bridge.set_value(56)
         self.bridge.set_digits(1)
-        self.hbox3.pack_start(self.bridge, False, True, 0)
-
-        self.vboxSettings2 = Gtk.VBox(spacing = 0)
-        self.hboxSettings.pack_start(self.vboxSettings2, True, True, 0)
-
-        self.hbox4 = Gtk.Box(spacing = 6)
-        self.vboxSettings2.pack_start(self.hbox4, True, True, 0)
+        self.settingsGrid.attach(self.bridge, 3, 1, 1, 1)
 
         self.borderLabel = Gtk.Label(label = "Border:")
-        self.hbox4.pack_start(self.borderLabel, True, True, 0)
+        self.settingsGrid.attach(self.borderLabel, 4, 0, 1, 1)
 
         self.border = Gtk.SpinButton()
         self.border.set_adjustment(Gtk.Adjustment(upper=20, lower=0, step_increment=1, page_increment=5))
         self.border.set_value(10)
-        self.hbox4.pack_start(self.border, False, True, 0)
-
-        self.hbox5 = Gtk.Box(spacing = 6)
-        self.vboxSettings2.pack_start(self.hbox5, True, True, 0)
+        self.settingsGrid.attach(self.border, 5, 0, 1, 1)
 
         self.outputLabel = Gtk.Label(label = "Output File:")
-        self.hbox5.pack_start(self.outputLabel, True, True, 0)
+        self.settingsGrid.attach(self.outputLabel, 4, 1, 1, 1)
 
         self.output = Gtk.Entry()
         self.output.set_text("output.svg")
-        self.hbox5.pack_start(self.output, False, True, 0)
+        self.settingsGrid.attach(self.output, 5, 1, 1, 1)
 
         self.hboxButtons = Gtk.Box(spacing=6)
         self.vbox.pack_start(self.hboxButtons, False, True, 0)
@@ -204,7 +177,7 @@ class GFretBoard(Gtk.Window):
         cmd.append("-b")
         cmd.append(str(self.bridge.get_value()))
         cmd.append("-p")
-        cmd.append(str(int(self.perpFret.get_value())))
+        cmd.append(str(self.perpFret.get_value()))
         cmd.append("-B")
         cmd.append(str(self.border.get_value()))
         cmd.append("-c")

@@ -14,7 +14,7 @@ ifeq ($(INSTALL_GUI),true)
   install-strip: install-gui
 endif
 
-$(PROGNAME): main.rs
+$(PROGNAME): main.rs fretboard.rs run.rs Cargo.toml
 	cargo build --release
 
 install: $(BINDIR)/$(PROGNAME)

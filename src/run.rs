@@ -96,7 +96,7 @@ impl Specs {
         } else {
             format!("Scale: {:.2}mm |", self.scale)
         };
-        line = format!("{} PerpendicularFret: {} |", line, self.pfret);
+        line = format!("{} PerpendicularFret: {:.1} |", line, self.pfret);
         line = format!("{} NutWidth: {:.2}mm |", line, self.nut);
         line = format!("{} BridgeSpacing: {:.2}mm", line, self.bridge - 6.0);
         svg::node::element::Text::new()
@@ -120,7 +120,7 @@ impl Specs {
         Path::new()
             .set("fill", "none")
             .set("stroke", "blue")
-            .set("stroke-dasharray", "4.0,8.0")
+            .set("stroke-dasharray", "4.0, 8.0")
             .set("stroke-dashoffset", "0")
             .set("stroke-width", 1)
             .set("id", "Centerline")
