@@ -384,6 +384,8 @@ Author: Nathan Fisher
                 <property name="can-focus">True</property>
                 <property name="tooltip-text" translatable="yes">The name of the output file</property>
                 <property name="text" translatable="yes">output.svg</property>
+                <property name="primary-icon-stock">gtk-open</property>
+                <property name="primary-icon-tooltip-text" translatable="yes">Select file location</property>
               </object>
               <packing>
                 <property name="left-attach">5</property>
@@ -426,6 +428,8 @@ Author: Nathan Fisher
                 <property name="can-focus">True</property>
                 <property name="tooltip-text" translatable="yes">The external program to open the saved svg image with.</property>
                 <property name="text" translatable="yes">inkscape</property>
+                <property name="primary-icon-stock">gtk-execute</property>
+                <property name="primary-icon-tooltip-text" translatable="yes">Select program</property>
               </object>
               <packing>
                 <property name="expand">False</property>
