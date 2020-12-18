@@ -1,39 +1,39 @@
 include config.mk
+PROGNAME       = gfret
 INSTALLDIRS    = $(BINDIR)
 VPATH         += src
 VPATH         += target/release
-VPATH       += gui/src
-VPATH       += gui/data
+VPATH         += data
+SRCS          += Cargo.toml
+SRCS          += backend.rs
+SRCS          += cli.yaml
+SRCS          += fretboard.rs
+SRCS          += gfret_ui.glade
+SRCS          += gui.rs
+SRCS          += main.rs
+INSTALLDIRS   += $(XDGDIR)
+INSTALLDIRS   += $(ICONDIR)
+INSTALL_OBJS  += $(BINDIR)/$(PROGNAME)
+INSTALL_OBJS  += $(XDGDIR)/$(PROGNAME).desktop
+INSTALL_OBJS  += $(ICONDIR)/$(PROGNAME).svg
 
 all: $(PROGNAME)
 
-ifeq ($(INSTALL_GUI),true)
-  INSTALLDIRS += $(XDGDIR)
-  INSTALLDIRS += $(ICONDIR)
-  install: install-gui
-  install-strip: install-gui
-endif
-
-$(PROGNAME): main.rs fretboard.rs run.rs Cargo.toml
+$(PROGNAME): $(SRCS)
 	cargo build --release
 
-install: $(BINDIR)/$(PROGNAME)
+install: $(INSTALL_OBJS)
 
-install-strip: $(BINDIR)/$(PROGNAME)
+install-strip: $(INSTALL_OBJS)
 	strip -s $<
-
-install-gui: $(BINDIR)/$(PROGNAME) $(BINDIR)/$(GUIPROG) $(XDGDIR)/$(GUIPROG).desktop $(ICONDIR)/$(GUIPROG).svg
 
 $(BINDIR)/$(PROGNAME): $(PROGNAME) | $(BINDIR)
 	install -m0755 $< $@
 
-$(BINDIR)/$(GUIPROG): $(GUIPROG).py | $(BINDIR)
-	install -m0755 $< $@
-
-$(XDGDIR)/$(GUIPROG).desktop: $(GUIPROG).desktop | $(XDGDIR)
+$(XDGDIR)/$(PROGNAME).desktop: $(PROGNAME).desktop | $(XDGDIR)
 	install -m644 $< $@
 
-$(ICONDIR)/$(GUIPROG).svg: icon.svg | $(ICONDIR)
+$(ICONDIR)/$(PROGNAME).svg: $(PROGNAME).svg | $(ICONDIR)
 	install -m644 $< $@
 
 $(INSTALLDIRS):
