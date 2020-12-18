@@ -51,7 +51,7 @@ impl Widgets {
         let bytes = glib::Bytes::from_owned(image.into_bytes());
         let stream = gio::MemoryInputStream::from_bytes(&bytes);
         let pixbuf = Pixbuf::from_stream_at_scale::<MemoryInputStream, Cancellable>(
-            &stream, width, -1, false, None,
+            &stream, width, -1, true, None,
         );
         self.image_preview.set_from_pixbuf(Some(&pixbuf.unwrap()));
     }
@@ -171,9 +171,17 @@ pub fn run_gui() {
         widgets20.draw_preview(window_size.0);
     });
 
-    let save_button: gtk::Button = builder.get_object("saveButton").unwrap();
     let widgets21 = widgets0.clone();
-    save_button.connect_clicked(move |_| widgets21.get_specs().run());
+    let window10 = window0.clone();
+    let window11 = window0.clone();
+    window10.connect_check_resize(move |_| {
+        let window_size = window11.get_size();
+        widgets21.draw_preview(window_size.0);
+    });
+
+    let save_button: gtk::Button = builder.get_object("saveButton").unwrap();
+    let widgets22 = widgets0.clone();
+    save_button.connect_clicked(move |_| widgets22.get_specs().run());
 
     let close_button: gtk::Button = builder.get_object("closeButton").unwrap();
     close_button.connect_clicked(|_| gtk::main_quit());
