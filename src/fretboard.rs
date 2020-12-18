@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::run::Factors;
+use crate::backend::Factors;
 use crate::Specs;
 use std::f64;
 use svg::node::element::path::Data;

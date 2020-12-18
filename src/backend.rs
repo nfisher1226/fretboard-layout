@@ -167,7 +167,9 @@ impl Specs {
         }
         frets
     }
-    fn create_document(&self, factors: &Factors, fretboard: &[Lengths]) -> svg::Document {
+    pub fn create_document(&self) -> svg::Document {
+        let lengths: Vec<Lengths> = self.get_all_lengths();
+        let factors = &self.get_factors();
         let width = (self.border * 2.0) + self.scale;
         let widthmm = format!("{}mm", width);
         let height = (self.border * 2.0) + self.bridge;
@@ -180,14 +182,12 @@ impl Specs {
             .add(self.create_description())
             .add(self.print_data())
             .add(self.draw_centerline())
-            .add(self.draw_fretboard(&fretboard, &factors))
+            .add(self.draw_fretboard(&lengths, &factors))
             .add(self.draw_bridge(&factors))
-            .add(self.draw_frets(&fretboard, &factors))
+            .add(self.draw_frets(&lengths, &factors))
     }
     pub fn run(&self) {
-        let lengths: Vec<Lengths> = self.get_all_lengths();
-        let factors = &self.get_factors();
-        let document = self.create_document(factors, &lengths);
+        let document = self.create_document();
         if self.output == "-" {
             println!("{}", document);
         } else {
