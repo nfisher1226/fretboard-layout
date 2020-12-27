@@ -1,16 +1,16 @@
 #![warn(clippy::all, clippy::pedantic)]
-use clap::{App, load_yaml};
-extern crate gtk;
-extern crate gio;
+use clap::{crate_version, load_yaml, App};
 extern crate gdk_pixbuf;
+extern crate gio;
+extern crate gtk;
+mod backend;
 mod fretboard;
 mod gui;
-mod backend;
 use backend::Specs;
 
 fn main() {
     let yaml = load_yaml!("cli.yaml");
-    let matches = App::from(yaml).get_matches();
+    let matches = App::from(yaml).version(crate_version!()).get_matches();
 
     match matches.subcommand() {
         Some(("cli", cli_matches)) => {

@@ -1,5 +1,4 @@
 name: gfret
-version: 0.2.0
 author: The JeanG3nie <jeang3nie@hitchhiker-linux.org>
 about: Generates layout dimensions for a stringed instrument fretboard.
 subcommands:

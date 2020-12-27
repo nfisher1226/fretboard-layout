@@ -3,14 +3,19 @@ extern crate gdk_pixbuf;
 extern crate gio;
 extern crate gtk;
 use crate::gdk_pixbuf::Pixbuf;
+use crate::gio::AppInfoExt;
 use crate::gio::Cancellable;
 use crate::gio::MemoryInputStream;
 use crate::gtk::prelude::*;
 use crate::gtk::{
-    ButtonExt, EntryExt, Inhibit, RangeExt, SpinButtonExt, ToggleButtonExt, WidgetExt,
+    DialogExt, EntryExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
+    SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
 };
 use crate::Specs;
 
+use gtk::ResponseType::Accept;
+use std::path::PathBuf;
+use std::process::Command;
 use std::rc::Rc;
 
 struct Widgets {
@@ -24,13 +29,13 @@ struct Widgets {
     nut_width: gtk::SpinButton,
     bridge_spacing: gtk::SpinButton,
     border: gtk::SpinButton,
-    output: gtk::Entry,
-    checkbox_extern: gtk::CheckButton,
-    external: gtk::Entry,
+    external_program: gtk::AppChooserButton,
+    saved: gtk::CheckButton,
+    filename: gtk::Entry,
 }
 
 impl Widgets {
-    fn get_specs(&self) -> Specs {
+    fn get_specs(&self, filename: &str) -> Specs {
         Specs {
             scale: self.scale.get_value(),
             count: self.fret_count.get_value() as u32,
@@ -39,15 +44,15 @@ impl Widgets {
             nut: self.nut_width.get_value(),
             bridge: self.bridge_spacing.get_value(),
             pfret: self.perpendicular_fret.get_value(),
-            output: self.output.get_text().to_string(),
+            output: filename.to_string(),
             border: self.border.get_value(),
-            external: self.checkbox_extern.get_active(),
-            cmd: self.external.get_text().to_string(),
+            external: false,
+            cmd: self.get_cmd(),
         }
     }
 
     fn draw_preview(&self, width: i32) {
-        let image = self.get_specs().create_document().to_string();
+        let image = self.get_specs("-").create_document().to_string();
         let bytes = glib::Bytes::from_owned(image.into_bytes());
         let stream = gio::MemoryInputStream::from_bytes(&bytes);
         let pixbuf = Pixbuf::from_stream_at_scale::<MemoryInputStream, Cancellable>(
@@ -63,8 +68,54 @@ impl Widgets {
         self.perpendicular_fret.set_sensitive(value);
     }
 
-    fn toggle_extern(&self) {
-        self.external.set_sensitive(self.checkbox_extern.get_active());
+    fn get_cmd(&self) -> String {
+        let cmd = self.external_program.get_app_info();
+        let cmd = match cmd {
+            Some(c) => c.get_commandline(),
+            _ => Some(PathBuf::from("xdg-open")),
+        };
+        match cmd {
+            Some(c) => c
+                .into_os_string()
+                .into_string()
+                .unwrap()
+                .split_whitespace()
+                .next()
+                .unwrap_or("")
+                .to_string(),
+            _ => "xdg-open".to_string(),
+        }
+    }
+
+    fn open_external(&self, specs: &Specs) {
+        let cmd = self.get_cmd();
+        Command::new(cmd).args(&[&specs.output]).spawn().unwrap();
+    }
+
+    fn get_output(&self) -> Option<String> {
+        let currentfile = self.filename.get_text();
+        let dialog = gtk::FileChooserDialog::with_buttons::<Window>(
+            Some("Save As"),
+            Some(&Window::new(WindowType::Popup)),
+            FileChooserAction::Save,
+            &[
+                ("_Cancel", ResponseType::Cancel),
+                ("_Ok", ResponseType::Accept),
+            ],
+        );
+        dialog.set_current_name(currentfile.to_string());
+        dialog.set_do_overwrite_confirmation(true);
+        let res = dialog.run();
+        let filename: Option<String> = if res == Accept {
+            match dialog.get_filename().unwrap().to_str() {
+                Some(c) => Some(c.to_string()),
+                _ => Some(currentfile.to_string()),
+            }
+        } else {
+            None
+        };
+        dialog.close();
+        filename
     }
 }
 
@@ -73,24 +124,24 @@ pub fn run_gui() {
         println!("Failed to initialize GTK.");
         return;
     }
-    let glade_src = include_str!("gfret_ui.glade");
+    let glade_src = include_str!("ui.glade");
     let builder = gtk::Builder::from_string(glade_src);
     let window: gtk::Window = builder.get_object("mainWindow").unwrap();
 
     let widgets = Rc::new(Widgets {
-        image_preview: builder.get_object("imagePreview").unwrap(),
-        scale: builder.get_object("scaleCourse").unwrap(),
-        checkbox_multi: builder.get_object("checkBoxMulti").unwrap(),
-        scale_multi_course: builder.get_object("scaleMultiCourse").unwrap(),
-        scale_multi_fine: builder.get_object("scaleMultiFine").unwrap(),
-        fret_count: builder.get_object("fretCount").unwrap(),
-        perpendicular_fret: builder.get_object("perpendicularFret").unwrap(),
-        nut_width: builder.get_object("nutWidth").unwrap(),
-        bridge_spacing: builder.get_object("bridgeSpacing").unwrap(),
+        image_preview: builder.get_object("image_preview").unwrap(),
+        scale: builder.get_object("scale_course").unwrap(),
+        checkbox_multi: builder.get_object("check_box_multi").unwrap(),
+        scale_multi_course: builder.get_object("scale_multi_course").unwrap(),
+        scale_multi_fine: builder.get_object("scale_multi_fine").unwrap(),
+        fret_count: builder.get_object("fret_count").unwrap(),
+        perpendicular_fret: builder.get_object("perpendicular_fret").unwrap(),
+        nut_width: builder.get_object("nut_width").unwrap(),
+        bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
         border: builder.get_object("border").unwrap(),
-        output: builder.get_object("output").unwrap(),
-        checkbox_extern: builder.get_object("checkBoxExtern").unwrap(),
-        external: builder.get_object("external").unwrap(),
+        external_program: builder.get_object("external_program").unwrap(),
+        saved: builder.get_object("saved").unwrap(),
+        filename: builder.get_object("filename").unwrap(),
     });
 
     let window0 = Rc::new(window);
@@ -101,11 +152,9 @@ pub fn run_gui() {
 
     let widgets1 = widgets0.clone();
     let widgets2 = widgets0.clone();
-    widgets1.checkbox_multi.connect_toggled(move |_| widgets2.toggle_multi());
-
-    let widgets3 = widgets0.clone();
-    let widgets4 = widgets0.clone();
-    widgets3.checkbox_extern.connect_toggled(move |_| widgets4.toggle_extern());
+    widgets1
+        .checkbox_multi
+        .connect_toggled(move |_| widgets2.toggle_multi());
 
     let widgets5 = widgets0.clone();
     let widgets6 = widgets0.clone();
@@ -142,10 +191,12 @@ pub fn run_gui() {
     let widgets13 = widgets0.clone();
     let widgets14 = widgets0.clone();
     let window6 = window0.clone();
-    widgets13.perpendicular_fret.connect_value_changed(move |_| {
-        let window_size = window6.get_size();
-        widgets14.draw_preview(window_size.0);
-    });
+    widgets13
+        .perpendicular_fret
+        .connect_value_changed(move |_| {
+            let window_size = window6.get_size();
+            widgets14.draw_preview(window_size.0);
+        });
 
     let widgets15 = widgets0.clone();
     let widgets16 = widgets0.clone();
@@ -179,11 +230,27 @@ pub fn run_gui() {
         widgets21.draw_preview(window_size.0);
     });
 
-    let save_button: gtk::Button = builder.get_object("saveButton").unwrap();
+    let save_button: gtk::ToolButton = builder.get_object("save_button").unwrap();
     let widgets22 = widgets0.clone();
-    save_button.connect_clicked(move |_| widgets22.get_specs().run());
+    save_button.connect_clicked(move |_| {
+        let filename: String = if widgets22.saved.get_active() {
+            widgets22.filename.get_text().to_string()
+        } else {
+            match widgets22.get_output() {
+                Some(c) => {
+                    widgets22.saved.set_active(true);
+                    widgets22.filename.set_text(&c);
+                    c
+                },
+                _ => "".to_string(),
+            }
+        };
+        if widgets22.saved.get_active() {
+            widgets22.get_specs(&filename).run();
+        }
+    });
 
-    let close_button: gtk::Button = builder.get_object("closeButton").unwrap();
+    let close_button: gtk::ToolButton = builder.get_object("quit_button").unwrap();
     close_button.connect_clicked(|_| gtk::main_quit());
 
     let window20 = window0.clone();
@@ -191,7 +258,7 @@ pub fn run_gui() {
         gtk::main_quit();
         Inhibit(false)
     });
-    window0.show_all();
+    window0.show_now();
 
     gtk::main()
 }

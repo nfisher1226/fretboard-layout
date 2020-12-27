@@ -92,7 +92,10 @@ impl Specs {
     }
     fn print_data(&self) -> svg::node::element::Text {
         let mut line = if self.multi {
-            format!("ScaleBass: {:.2}mm | ScaleTreble: {:.2}mm |", self.scale, self.scale_treble)
+            format!(
+                "ScaleBass: {:.2}mm | ScaleTreble: {:.2}mm |",
+                self.scale, self.scale_treble
+            )
         } else {
             format!("Scale: {:.2}mm |", self.scale)
         };
