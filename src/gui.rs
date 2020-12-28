@@ -6,6 +6,7 @@ use crate::gdk_pixbuf::Pixbuf;
 use crate::gio::AppInfoExt;
 use crate::gio::Cancellable;
 use crate::gio::MemoryInputStream;
+use crate::glib::clone;
 use crate::gtk::prelude::*;
 use crate::gtk::{
     DialogExt, EntryExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
@@ -29,9 +30,14 @@ struct Widgets {
     nut_width: gtk::SpinButton,
     bridge_spacing: gtk::SpinButton,
     border: gtk::SpinButton,
+    external_button: gtk::ToolButton,
     external_program: gtk::AppChooserButton,
-    saved: gtk::CheckButton,
+    saved_once: gtk::CheckButton,
+    saved_current: gtk::CheckButton,
     filename: gtk::Entry,
+    save_button: gtk::ToolButton,
+    save_as_button: gtk::ToolButton,
+    quit_button: gtk::ToolButton,
 }
 
 impl Widgets {
@@ -59,6 +65,7 @@ impl Widgets {
             &stream, width, -1, true, None,
         );
         self.image_preview.set_from_pixbuf(Some(&pixbuf.unwrap()));
+        self.saved_current.set_active(false);
     }
 
     fn toggle_multi(&self) {
@@ -87,9 +94,18 @@ impl Widgets {
         }
     }
 
-    fn open_external(&self, specs: &Specs) {
-        let cmd = self.get_cmd();
-        Command::new(cmd).args(&[&specs.output]).spawn().unwrap();
+    fn open_external(&self) {
+        if ! self.saved_current.get_active() {
+            self.save_button.emit_clicked();
+        }
+        if self.saved_current.get_active() {
+            let cmd = self.get_cmd();
+            let filename = self.filename.get_text().to_string();
+            Command::new(cmd)
+                .args(&[&filename])
+                .spawn()
+                .unwrap();
+        }
     }
 
     fn get_output(&self) -> Option<String> {
@@ -117,6 +133,25 @@ impl Widgets {
         dialog.close();
         filename
     }
+    
+    fn save_file(&self) {
+        let filename: String = if self.saved_once.get_active() {
+            self.filename.get_text().to_string()
+        } else {
+            match self.get_output() {
+                Some(c) => {
+                    self.saved_once.set_active(true);
+                    self.filename.set_text(&c);
+                    c
+                },
+                _ => "".to_string(),
+            }
+        };
+        if self.saved_once.get_active() {
+            self.get_specs(&filename).run();
+            self.saved_current.set_active(true);
+        }
+    }
 }
 
 pub fn run_gui() {
@@ -139,122 +174,117 @@ pub fn run_gui() {
         nut_width: builder.get_object("nut_width").unwrap(),
         bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
         border: builder.get_object("border").unwrap(),
+        external_button: builder.get_object("external_button").unwrap(),
         external_program: builder.get_object("external_program").unwrap(),
-        saved: builder.get_object("saved").unwrap(),
+        saved_once: builder.get_object("saved_once").unwrap(),
+        saved_current: builder.get_object("saved_current").unwrap(),
         filename: builder.get_object("filename").unwrap(),
+        save_button: builder.get_object("save_button").unwrap(),
+        save_as_button: builder.get_object("save_as_button").unwrap(),
+        quit_button: builder.get_object("quit_button").unwrap(),
     });
 
     let window0 = Rc::new(window);
     let window1 = window0.clone();
     let window_size = window1.get_size();
-    let widgets0 = Rc::new(widgets);
-    widgets0.draw_preview(window_size.0);
+    let widgets = Rc::new(widgets);
+    widgets.draw_preview(window_size.0);
 
-    let widgets1 = widgets0.clone();
-    let widgets2 = widgets0.clone();
+    let widgets1 = widgets.clone();
+    let window2 = window0.clone();
     widgets1
         .checkbox_multi
-        .connect_toggled(move |_| widgets2.toggle_multi());
+        .connect_toggled(clone!(@weak widgets => move |_| {
+            widgets.toggle_multi();
+            let window_size = window2.get_size();
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets5 = widgets0.clone();
-    let widgets6 = widgets0.clone();
-    let window2 = window0.clone();
-    widgets5.scale.connect_value_changed(move |_| {
-        let window_size = window2.get_size();
-        widgets6.draw_preview(window_size.0);
-    });
-
-    let widgets7 = widgets0.clone();
-    let widgets8 = widgets0.clone();
+    let widgets2 = widgets.clone();
     let window3 = window0.clone();
-    widgets7.checkbox_multi.connect_toggled(move |_| {
-        let window_size = window3.get_size();
-        widgets8.draw_preview(window_size.0);
-    });
+    widgets2
+        .scale
+        .connect_value_changed(clone!(@weak widgets => move |_| {
+            let window_size = window3.get_size();
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets9 = widgets0.clone();
-    let widgets10 = widgets0.clone();
+    let widgets3 = widgets.clone();
     let window4 = window0.clone();
-    widgets9.scale_multi_course.connect_value_changed(move |_| {
-        let window_size = window4.get_size();
-        widgets10.draw_preview(window_size.0);
-    });
+    widgets3
+        .scale_multi_course
+        .connect_value_changed(clone!(@weak widgets => move |_| {
+            let window_size = window4.get_size();
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets11 = widgets0.clone();
-    let widgets12 = widgets0.clone();
+    let widgets4 = widgets.clone();
     let window5 = window0.clone();
-    widgets11.fret_count.connect_value_changed(move |_| {
-        let window_size = window5.get_size();
-        widgets12.draw_preview(window_size.0);
-    });
+    widgets4
+        .fret_count
+        .connect_value_changed(clone!(@weak widgets => move |_| {
+            let window_size = window5.get_size();
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets13 = widgets0.clone();
-    let widgets14 = widgets0.clone();
+    let widgets5 = widgets.clone();
     let window6 = window0.clone();
-    widgets13
+    widgets5
         .perpendicular_fret
-        .connect_value_changed(move |_| {
+        .connect_value_changed(clone!(@weak widgets => move |_| {
             let window_size = window6.get_size();
-            widgets14.draw_preview(window_size.0);
-        });
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets15 = widgets0.clone();
-    let widgets16 = widgets0.clone();
+    let widgets6 = widgets.clone();
     let window7 = window0.clone();
-    widgets15.nut_width.connect_value_changed(move |_| {
-        let window_size = window7.get_size();
-        widgets16.draw_preview(window_size.0);
-    });
+    widgets6
+        .nut_width
+        .connect_value_changed(clone!(@weak widgets => move |_| {
+            let window_size = window7.get_size();
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets17 = widgets0.clone();
-    let widgets18 = widgets0.clone();
+    let widgets7 = widgets.clone();
     let window8 = window0.clone();
-    widgets17.bridge_spacing.connect_value_changed(move |_| {
-        let window_size = window8.get_size();
-        widgets18.draw_preview(window_size.0);
-    });
+    widgets7
+        .bridge_spacing
+        .connect_value_changed(clone!(@weak widgets => move |_| {
+            let window_size = window8.get_size();
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets19 = widgets0.clone();
-    let widgets20 = widgets0.clone();
+    let widgets8 = widgets.clone();
     let window9 = window0.clone();
-    widgets19.border.connect_value_changed(move |_| {
-        let window_size = window9.get_size();
-        widgets20.draw_preview(window_size.0);
-    });
+    widgets8
+        .border
+        .connect_value_changed(clone!(@weak widgets => move |_| {
+            let window_size = window9.get_size();
+            widgets.draw_preview(window_size.0);
+    }));
 
-    let widgets21 = widgets0.clone();
+    let widgets9 = widgets.clone();
     let window10 = window0.clone();
+    window10.connect_check_resize(clone!(@weak window0 => move |_| {
+        let window_size = window0.get_size();
+        widgets9.draw_preview(window_size.0);
+    }));
+
+    let widgets10 = widgets.clone();
+    widgets10
+        .save_button
+        .connect_clicked(clone!(@weak widgets => move |_| widgets.save_file()));
+
+    let widgets11 = widgets.clone();
+    widgets11
+        .external_button
+        .connect_clicked(clone!(@weak widgets => move |_| widgets.open_external()));
+
+    let widgets12 = widgets.clone();
+    widgets12.quit_button.connect_clicked(|_| gtk::main_quit());
+
     let window11 = window0.clone();
-    window10.connect_check_resize(move |_| {
-        let window_size = window11.get_size();
-        widgets21.draw_preview(window_size.0);
-    });
-
-    let save_button: gtk::ToolButton = builder.get_object("save_button").unwrap();
-    let widgets22 = widgets0.clone();
-    save_button.connect_clicked(move |_| {
-        let filename: String = if widgets22.saved.get_active() {
-            widgets22.filename.get_text().to_string()
-        } else {
-            match widgets22.get_output() {
-                Some(c) => {
-                    widgets22.saved.set_active(true);
-                    widgets22.filename.set_text(&c);
-                    c
-                },
-                _ => "".to_string(),
-            }
-        };
-        if widgets22.saved.get_active() {
-            widgets22.get_specs(&filename).run();
-        }
-    });
-
-    let close_button: gtk::ToolButton = builder.get_object("quit_button").unwrap();
-    close_button.connect_clicked(|_| gtk::main_quit());
-
-    let window20 = window0.clone();
-    window20.connect_delete_event(|_, _| {
+    window11.connect_delete_event(|_, _| {
         gtk::main_quit();
         Inhibit(false)
     });

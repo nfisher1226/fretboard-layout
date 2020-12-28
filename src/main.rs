@@ -2,6 +2,7 @@
 use clap::{crate_version, load_yaml, App};
 extern crate gdk_pixbuf;
 extern crate gio;
+extern crate glib;
 extern crate gtk;
 mod backend;
 mod fretboard;

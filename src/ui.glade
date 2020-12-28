@@ -376,6 +376,20 @@ Author: Nathan Fisher
                     <property name="homogeneous">True</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkToolButton" id="external_button">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Open External</property>
+                    <property name="use-underline">True</property>
+                    <property name="stock-id">gtk-execute</property>
+                    <accelerator key="e" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -388,6 +402,26 @@ Author: Nathan Fisher
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
+                <child>
+                  <object class="GtkToolItem">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <child>
+                      <object class="GtkAppChooserButton" id="external_program">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">The external program to open</property>
+                        <property name="content-type">image/svg+xml</property>
+                        <property name="show-dialog-item">True</property>
+                        <property name="show-default-item">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
                 <child>
                   <object class="GtkToolItem">
                     <property name="visible">True</property>
@@ -473,39 +507,6 @@ Author: Nathan Fisher
                             <property name="top-attach">1</property>
                           </packing>
                         </child>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="open_external">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Open External</property>
-                    <property name="use-underline">True</property>
-                    <property name="stock-id">gtk-execute</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolItem">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <child>
-                      <object class="GtkAppChooserButton" id="external_program">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="tooltip-text" translatable="yes">The external program to open</property>
-                        <property name="content-type">image/svg+xml</property>
-                        <property name="show-dialog-item">True</property>
-                        <property name="show-default-item">True</property>
                       </object>
                     </child>
                   </object>
@@ -606,8 +607,7 @@ Author: Nathan Fisher
               </packing>
             </child>
             <child>
-              <object class="GtkCheckButton" id="saved">
-                <property name="label" translatable="yes">saved</property>
+              <object class="GtkCheckButton" id="saved_once">
                 <property name="can-focus">False</property>
                 <property name="receives-default">False</property>
                 <property name="draw-indicator">True</property>
@@ -619,13 +619,25 @@ Author: Nathan Fisher
               </packing>
             </child>
             <child>
+              <object class="GtkCheckButton" id="saved_current">
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="draw-indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkEntry" id="filename">
                 <property name="can-focus">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
           </object>
