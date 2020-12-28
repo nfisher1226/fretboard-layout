@@ -95,16 +95,13 @@ impl Widgets {
     }
 
     fn open_external(&self) {
-        if ! self.saved_current.get_active() {
+        if !self.saved_current.get_active() {
             self.save_button.emit_clicked();
         }
         if self.saved_current.get_active() {
             let cmd = self.get_cmd();
             let filename = self.filename.get_text().to_string();
-            Command::new(cmd)
-                .args(&[&filename])
-                .spawn()
-                .unwrap();
+            Command::new(cmd).args(&[&filename]).spawn().unwrap();
         }
     }
 
@@ -133,7 +130,7 @@ impl Widgets {
         dialog.close();
         filename
     }
-    
+
     fn save_file(&self) {
         let filename: String = if self.saved_once.get_active() {
             self.filename.get_text().to_string()
@@ -143,7 +140,7 @@ impl Widgets {
                     self.saved_once.set_active(true);
                     self.filename.set_text(&c);
                     c
-                },
+                }
                 _ => "".to_string(),
             }
         };
@@ -184,111 +181,98 @@ pub fn run_gui() {
         quit_button: builder.get_object("quit_button").unwrap(),
     });
 
-    let window0 = Rc::new(window);
-    let window1 = window0.clone();
-    let window_size = window1.get_size();
+    let window = Rc::new(window);
+    let window_size = window.clone().get_size();
     let widgets = Rc::new(widgets);
     widgets.draw_preview(window_size.0);
 
-    let widgets1 = widgets.clone();
-    let window2 = window0.clone();
-    widgets1
+    widgets
+        .clone()
         .checkbox_multi
-        .connect_toggled(clone!(@weak widgets => move |_| {
-            widgets.toggle_multi();
-            let window_size = window2.get_size();
-            widgets.draw_preview(window_size.0);
-    }));
+        .connect_toggled(clone!(@weak widgets, @weak window => move |_| {
+                widgets.toggle_multi();
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
 
-    let widgets2 = widgets.clone();
-    let window3 = window0.clone();
-    widgets2
+    widgets
+        .clone()
         .scale
-        .connect_value_changed(clone!(@weak widgets => move |_| {
-            let window_size = window3.get_size();
-            widgets.draw_preview(window_size.0);
-    }));
+        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
 
-    let widgets3 = widgets.clone();
-    let window4 = window0.clone();
-    widgets3
+    widgets
+        .clone()
         .scale_multi_course
-        .connect_value_changed(clone!(@weak widgets => move |_| {
-            let window_size = window4.get_size();
-            widgets.draw_preview(window_size.0);
-    }));
+        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
 
-    let widgets4 = widgets.clone();
-    let window5 = window0.clone();
-    widgets4
+    widgets
+        .clone()
         .fret_count
-        .connect_value_changed(clone!(@weak widgets => move |_| {
-            let window_size = window5.get_size();
-            widgets.draw_preview(window_size.0);
-    }));
+        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
 
-    let widgets5 = widgets.clone();
-    let window6 = window0.clone();
-    widgets5
+    widgets
+        .clone()
         .perpendicular_fret
-        .connect_value_changed(clone!(@weak widgets => move |_| {
-            let window_size = window6.get_size();
-            widgets.draw_preview(window_size.0);
-    }));
+        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
 
-    let widgets6 = widgets.clone();
-    let window7 = window0.clone();
-    widgets6
+    widgets
+        .clone()
         .nut_width
-        .connect_value_changed(clone!(@weak widgets => move |_| {
-            let window_size = window7.get_size();
-            widgets.draw_preview(window_size.0);
-    }));
+        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
 
-    let widgets7 = widgets.clone();
-    let window8 = window0.clone();
-    widgets7
+    widgets
+        .clone()
         .bridge_spacing
-        .connect_value_changed(clone!(@weak widgets => move |_| {
-            let window_size = window8.get_size();
-            widgets.draw_preview(window_size.0);
-    }));
+        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
 
-    let widgets8 = widgets.clone();
-    let window9 = window0.clone();
-    widgets8
+    widgets
+        .clone()
         .border
-        .connect_value_changed(clone!(@weak widgets => move |_| {
-            let window_size = window9.get_size();
-            widgets.draw_preview(window_size.0);
+        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
+                let window_size = window.get_size();
+                widgets.draw_preview(window_size.0);
+        }));
+
+    window.clone().connect_check_resize(clone!(@weak window, @weak widgets => move |_| {
+        let window_size = window.get_size();
+        widgets.draw_preview(window_size.0);
     }));
 
-    let widgets9 = widgets.clone();
-    let window10 = window0.clone();
-    window10.connect_check_resize(clone!(@weak window0 => move |_| {
-        let window_size = window0.get_size();
-        widgets9.draw_preview(window_size.0);
-    }));
-
-    let widgets10 = widgets.clone();
-    widgets10
+    widgets
+        .clone()
         .save_button
         .connect_clicked(clone!(@weak widgets => move |_| widgets.save_file()));
 
-    let widgets11 = widgets.clone();
-    widgets11
+    widgets
+        .clone()
         .external_button
         .connect_clicked(clone!(@weak widgets => move |_| widgets.open_external()));
 
-    let widgets12 = widgets.clone();
-    widgets12.quit_button.connect_clicked(|_| gtk::main_quit());
+    widgets.clone().quit_button.connect_clicked(|_| gtk::main_quit());
 
-    let window11 = window0.clone();
-    window11.connect_delete_event(|_, _| {
+    window.clone().connect_delete_event(|_, _| {
         gtk::main_quit();
         Inhibit(false)
     });
-    window0.show_now();
+    window.show_now();
 
     gtk::main()
 }
