@@ -79,7 +79,7 @@ impl Widgets {
         let cmd = self.external_program.get_app_info();
         let cmd = match cmd {
             Some(c) => c.get_commandline(),
-            _ => Some(PathBuf::from("xdg-open")),
+            None => Some(PathBuf::from("xdg-open")),
         };
         match cmd {
             Some(c) => c
@@ -90,7 +90,7 @@ impl Widgets {
                 .next()
                 .unwrap_or("")
                 .to_string(),
-            _ => "xdg-open".to_string(),
+            None => "xdg-open".to_string(),
         }
     }
 
@@ -122,7 +122,7 @@ impl Widgets {
         let filename: Option<String> = if res == Accept {
             match dialog.get_filename().unwrap().to_str() {
                 Some(c) => Some(c.to_string()),
-                _ => Some(currentfile.to_string()),
+                None => Some(currentfile.to_string()),
             }
         } else {
             None
@@ -141,7 +141,7 @@ impl Widgets {
                     self.filename.set_text(&c);
                     c
                 }
-                _ => "".to_string(),
+                None => "".to_string(),
             }
         };
         if self.saved_once.get_active() {
@@ -182,12 +182,11 @@ pub fn run_gui() {
     });
 
     let window = Rc::new(window);
-    let window_size = window.clone().get_size();
+    let window_size = window.get_size();
     let widgets = Rc::new(widgets);
     widgets.draw_preview(window_size.0);
 
     widgets
-        .clone()
         .checkbox_multi
         .connect_toggled(clone!(@weak widgets, @weak window => move |_| {
                 widgets.toggle_multi();
@@ -196,7 +195,6 @@ pub fn run_gui() {
         }));
 
     widgets
-        .clone()
         .scale
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
@@ -204,7 +202,6 @@ pub fn run_gui() {
         }));
 
     widgets
-        .clone()
         .scale_multi_course
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
@@ -212,7 +209,6 @@ pub fn run_gui() {
         }));
 
     widgets
-        .clone()
         .fret_count
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
@@ -220,7 +216,6 @@ pub fn run_gui() {
         }));
 
     widgets
-        .clone()
         .perpendicular_fret
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
@@ -228,7 +223,6 @@ pub fn run_gui() {
         }));
 
     widgets
-        .clone()
         .nut_width
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
@@ -236,7 +230,6 @@ pub fn run_gui() {
         }));
 
     widgets
-        .clone()
         .bridge_spacing
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
@@ -244,31 +237,28 @@ pub fn run_gui() {
         }));
 
     widgets
-        .clone()
         .border
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
         }));
 
-    window.clone().connect_check_resize(clone!(@weak window, @weak widgets => move |_| {
+    window.connect_check_resize(clone!(@weak window, @weak widgets => move |_| {
         let window_size = window.get_size();
         widgets.draw_preview(window_size.0);
     }));
 
     widgets
-        .clone()
         .save_button
         .connect_clicked(clone!(@weak widgets => move |_| widgets.save_file()));
 
     widgets
-        .clone()
         .external_button
         .connect_clicked(clone!(@weak widgets => move |_| widgets.open_external()));
 
-    widgets.clone().quit_button.connect_clicked(|_| gtk::main_quit());
+    widgets.quit_button.connect_clicked(|_| gtk::main_quit());
 
-    window.clone().connect_delete_event(|_, _| {
+    window.connect_delete_event(|_, _| {
         gtk::main_quit();
         Inhibit(false)
     });
