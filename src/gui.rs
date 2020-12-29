@@ -65,7 +65,6 @@ impl Widgets {
             &stream, width, -1, true, None,
         );
         self.image_preview.set_from_pixbuf(Some(&pixbuf.unwrap()));
-        self.saved_current.set_active(false);
     }
 
     fn toggle_multi(&self) {
@@ -153,6 +152,14 @@ impl Widgets {
             self.saved_current.set_active(true);
         }
     }
+
+    fn set_window_title(&self, window: Rc<gtk::Window>) {
+        if self.saved_current.get_active() {
+            window.set_title(&format!("Gfret - {}", self.filename.get_text()));
+        } else {
+            window.set_title(&format!("Gfret - {}*", self.filename.get_text()));
+        }
+    }
 }
 
 pub fn run_gui() {
@@ -196,6 +203,8 @@ pub fn run_gui() {
                 widgets.toggle_multi();
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     widgets
@@ -203,6 +212,8 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     widgets
@@ -210,6 +221,8 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     widgets
@@ -217,6 +230,8 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     widgets
@@ -224,6 +239,8 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     widgets
@@ -231,6 +248,8 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     widgets
@@ -238,6 +257,8 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     widgets
@@ -245,6 +266,8 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
+                widgets.saved_current.set_active(false);
+                widgets.set_window_title(window);
         }));
 
     window.connect_check_resize(clone!(@weak window, @weak widgets => move |_| {
@@ -256,7 +279,7 @@ pub fn run_gui() {
         .save_button
         .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
             widgets.save_file();
-            window.set_title(&format!("Gfret - {}", widgets.filename.get_text()));
+            widgets.set_window_title(window);
         }));
 
     widgets

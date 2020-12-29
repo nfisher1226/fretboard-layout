@@ -8,6 +8,7 @@ mod backend;
 mod fretboard;
 mod gui;
 use backend::Specs;
+use std::process;
 
 fn main() {
     let yaml = load_yaml!("cli.yaml");
@@ -15,26 +16,65 @@ fn main() {
 
     match matches.subcommand() {
         Some(("cli", cli_matches)) => {
-            let multi = cli_matches.occurrences_of("MULTI") > 0;
-            let scale_treble: f64 = if multi {
-                cli_matches.value_of_t("MULTI").unwrap()
-            } else {
-                cli_matches.value_of_t("SCALE").unwrap()
+            let scale: f64 = match cli_matches.value_of_t("SCALE") {
+                Ok(c) => c,
+                Err(e) => {
+                    eprintln!("{}", e);
+                    process::exit(1);
+                },
             };
-            let cmd = cli_matches.value_of("EXTERN").unwrap().to_string();
-            let bridge: f64 = cli_matches.value_of_t("BRIDGE").unwrap();
             let specs = Specs {
-                scale: cli_matches.value_of_t("SCALE").unwrap(),
-                count: cli_matches.value_of_t("COUNT").unwrap(),
-                multi,
-                scale_treble,
-                nut: cli_matches.value_of_t("NUT").unwrap(),
-                bridge: bridge + 6.0,
-                pfret: cli_matches.value_of_t("PERPENDICULAR").unwrap(),
+                scale,
+                count: match cli_matches.value_of_t("COUNT") {
+                    Ok(c) => c,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        process::exit(1);
+                    },
+                },
+                multi: cli_matches.occurrences_of("MULTI") > 0,
+                scale_treble: if cli_matches.occurrences_of("MULTI") > 0 {
+                    match cli_matches.value_of_t("MULTI") {
+                        Ok(c) => c,
+                        Err(e) => {
+                            eprintln!("{}", e);
+                            process::exit(1);
+                        },
+                    }
+                } else {
+                    scale
+                },
+                nut: match cli_matches.value_of_t("NUT") {
+                    Ok(c) => c,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        process::exit(1);
+                    },
+                },
+                bridge: match cli_matches.value_of_t::<f64>("BRIDGE") {
+                    Ok(c) => c + 6.0,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        process::exit(1);
+                    },
+                },
+                pfret: match cli_matches.value_of_t("PERPENDICULAR") {
+                    Ok(c) => c,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        process::exit(1);
+                    },
+                },
                 output: cli_matches.value_of("OUTPUT").unwrap().to_string(),
-                border: cli_matches.value_of_t("BORDER").unwrap(),
+                border: match cli_matches.value_of_t("BORDER") {
+                    Ok(c) => c,
+                    Err(e) => {
+                        eprintln!("{}", e);
+                        process::exit(1);
+                    },
+                },
                 external: cli_matches.occurrences_of("EXTERN") > 0,
-                cmd,
+                cmd: cli_matches.value_of("EXTERN").unwrap().to_string(),
             };
             specs.run();
         }

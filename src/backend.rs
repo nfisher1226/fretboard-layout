@@ -5,6 +5,7 @@ use std::process::Command;
 use svg::node::element::path::Data;
 use svg::node::element::{Description, Group, Path};
 use svg::Document;
+use std::process;
 
 pub struct Specs {
     pub scale: f64,
@@ -194,13 +195,20 @@ impl Specs {
         if self.output == "-" {
             println!("{}", document);
         } else {
-            svg::save(&self.output, &document).unwrap();
-            println!("Output saved as {}.", self.output);
+            match svg::save(&self.output, &document) {
+                Ok(_) => println!("Output saved as {}.", self.output),
+                Err(e) => {
+                    eprintln!("{}", e);
+                    process::exit(1);
+                }
+            };
             if self.external {
-                Command::new(&self.cmd)
+                match Command::new(&self.cmd)
                     .args(&[&self.output])
-                    .spawn()
-                    .unwrap();
+                    .spawn() {
+                        Ok(_) => (),
+                        Err(e) => eprintln!("{}", e),
+                }
             }
         }
     }
