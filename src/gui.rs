@@ -106,7 +106,11 @@ impl Widgets {
     }
 
     fn get_output(&self) -> Option<String> {
-        let currentfile = self.filename.get_text();
+        let currentfile = if self.saved_once.get_active() {
+            self.filename.get_text().to_string()
+        } else {
+            String::from("unitled.svg")
+        };
         let dialog = gtk::FileChooserDialog::with_buttons::<Window>(
             Some("Save As"),
             Some(&Window::new(WindowType::Popup)),
@@ -116,13 +120,13 @@ impl Widgets {
                 ("_Ok", ResponseType::Accept),
             ],
         );
-        dialog.set_current_name(currentfile.to_string());
+        dialog.set_current_name(&currentfile);
         dialog.set_do_overwrite_confirmation(true);
         let res = dialog.run();
         let filename: Option<String> = if res == Accept {
             match dialog.get_filename().unwrap().to_str() {
                 Some(c) => Some(c.to_string()),
-                None => Some(currentfile.to_string()),
+                None => Some(currentfile),
             }
         } else {
             None
@@ -250,7 +254,10 @@ pub fn run_gui() {
 
     widgets
         .save_button
-        .connect_clicked(clone!(@weak widgets => move |_| widgets.save_file()));
+        .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
+            widgets.save_file();
+            window.set_title(&format!("Gfret - {}", widgets.filename.get_text()));
+        }));
 
     widgets
         .external_button
