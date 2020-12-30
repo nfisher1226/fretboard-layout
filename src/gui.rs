@@ -2,6 +2,7 @@
 extern crate gdk_pixbuf;
 extern crate gio;
 extern crate gtk;
+use crate::crate_version;
 use crate::gdk_pixbuf::Pixbuf;
 use crate::gio::AppInfoExt;
 use crate::gio::Cancellable;
@@ -154,10 +155,12 @@ impl Widgets {
     }
 
     fn set_window_title(&self, window: Rc<gtk::Window>) {
-        if self.saved_current.get_active() {
-            window.set_title(&format!("Gfret - {}", self.filename.get_text()));
+        if ! self.saved_once.get_active() {
+            window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
+        } else if self.saved_current.get_active() {
+            window.set_title(&format!("Gfret - {} - {}", crate_version!(), self.filename.get_text().split("/").last().unwrap()));
         } else {
-            window.set_title(&format!("Gfret - {}*", self.filename.get_text()));
+            window.set_title(&format!("Gfret - {} - {}*", crate_version!(), self.filename.get_text().split("/").last().unwrap()));
         }
     }
 }
@@ -170,6 +173,7 @@ pub fn run_gui() {
     let glade_src = include_str!("ui.glade");
     let builder = gtk::Builder::from_string(glade_src);
     let window: gtk::Window = builder.get_object("mainWindow").unwrap();
+    window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
 
     let widgets = Rc::new(Widgets {
         image_preview: builder.get_object("image_preview").unwrap(),

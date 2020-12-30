@@ -32,11 +32,5 @@ approximation, as the nut is slanted.
 * -o, --output <file> - the name of the output file.
 * -e, --external <program> - open the output file in an external program
 ## Future Development
-Currently, when given incorrect input the program panics. There is a need for
-proper, more idiomatic error handling. This is higher priority.
-
 For the gui, it would be nice to save state and allow loading specs from and saving
-to templates. Lower priority.
-
-Gui needs feedback when saving. Plan to implement this by adjusting the window
-title with the filename, and an asterisk when the file is not saved.
+to templates.
