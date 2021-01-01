@@ -19,6 +19,7 @@ use gtk::ResponseType::Accept;
 use std::path::PathBuf;
 use std::process::Command;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 struct Widgets {
     image_preview: gtk::Image,
@@ -33,8 +34,8 @@ struct Widgets {
     border: gtk::SpinButton,
     external_button: gtk::ToolButton,
     external_program: gtk::AppChooserButton,
-    saved_once: gtk::CheckButton,
-    saved_current: gtk::CheckButton,
+    saved_once: Rc<RefCell<bool>>,
+    saved_current: Rc<RefCell<bool>>,
     filename: gtk::Entry,
     save_button: gtk::ToolButton,
     save_as_button: gtk::ToolButton,
@@ -95,10 +96,10 @@ impl Widgets {
     }
 
     fn open_external(&self) {
-        if !self.saved_current.get_active() {
+        if !*self.saved_current.borrow() {
             self.save_button.emit_clicked();
         }
-        if self.saved_current.get_active() {
+        if *self.saved_current.borrow() {
             let cmd = self.get_cmd();
             let filename = self.filename.get_text().to_string();
             Command::new(cmd).args(&[&filename]).spawn().unwrap();
@@ -106,7 +107,7 @@ impl Widgets {
     }
 
     fn get_output(&self) -> Option<String> {
-        let currentfile = if self.saved_once.get_active() {
+        let currentfile = if *self.saved_once.borrow() {
             self.filename.get_text().to_string()
         } else {
             String::from("unitled.svg")
@@ -136,28 +137,40 @@ impl Widgets {
     }
 
     fn save_file(&self) {
-        let filename: String = if self.saved_once.get_active() {
+        let filename: String = if *self.saved_once.borrow() {
             self.filename.get_text().to_string()
         } else {
             match self.get_output() {
                 Some(c) => {
-                    self.saved_once.set_active(true);
+                    self.saved_once.swap(&RefCell::new(true));
                     self.filename.set_text(&c);
                     c
                 }
                 None => "".to_string(),
             }
         };
-        if self.saved_once.get_active() {
+        if *self.saved_once.borrow() {
             self.get_specs(&filename).run();
-            self.saved_current.set_active(true);
+            self.saved_current.swap(&RefCell::new(true));
         }
     }
 
+    fn save_file_as(&self) {
+        match self.get_output() {
+            Some(c) => {
+                self.saved_once.swap(&RefCell::new(true));
+                self.filename.set_text(&c);
+                self.get_specs(&c).run();
+                self.saved_current.swap(&RefCell::new(true));
+            }
+            None => return,
+        };
+    }
+
     fn set_window_title(&self, window: Rc<gtk::Window>) {
-        if ! self.saved_once.get_active() {
+        if ! *self.saved_once.borrow() {
             window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
-        } else if self.saved_current.get_active() {
+        } else if *self.saved_current.borrow() {
             window.set_title(&format!("Gfret - {} - {}", crate_version!(), self.filename.get_text().split("/").last().unwrap()));
         } else {
             window.set_title(&format!("Gfret - {} - {}*", crate_version!(), self.filename.get_text().split("/").last().unwrap()));
@@ -188,8 +201,8 @@ pub fn run_gui() {
         border: builder.get_object("border").unwrap(),
         external_button: builder.get_object("external_button").unwrap(),
         external_program: builder.get_object("external_program").unwrap(),
-        saved_once: builder.get_object("saved_once").unwrap(),
-        saved_current: builder.get_object("saved_current").unwrap(),
+        saved_once: Rc::new(RefCell::new(false)),
+        saved_current: Rc::new(RefCell::new(false)),
         filename: builder.get_object("filename").unwrap(),
         save_button: builder.get_object("save_button").unwrap(),
         save_as_button: builder.get_object("save_as_button").unwrap(),
@@ -207,7 +220,7 @@ pub fn run_gui() {
                 widgets.toggle_multi();
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -216,7 +229,7 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -225,7 +238,7 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -234,7 +247,7 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -243,7 +256,7 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -252,7 +265,7 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -261,7 +274,7 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -270,7 +283,7 @@ pub fn run_gui() {
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
                 let window_size = window.get_size();
                 widgets.draw_preview(window_size.0);
-                widgets.saved_current.set_active(false);
+                widgets.saved_current.swap(&RefCell::new(false));
                 widgets.set_window_title(window);
         }));
 
@@ -283,6 +296,13 @@ pub fn run_gui() {
         .save_button
         .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
             widgets.save_file();
+            widgets.set_window_title(window);
+        }));
+
+    widgets
+        .save_as_button
+        .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
+            widgets.save_file_as();
             widgets.set_window_title(window);
         }));
 
