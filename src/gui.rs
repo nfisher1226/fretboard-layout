@@ -59,14 +59,19 @@ impl Widgets {
         }
     }
 
-    fn draw_preview(&self, width: i32) {
+    fn draw_preview(&self, window: Rc<gtk::Window>, swap: bool) {
         let image = self.get_specs("-").create_document().to_string();
         let bytes = glib::Bytes::from_owned(image.into_bytes());
         let stream = gio::MemoryInputStream::from_bytes(&bytes);
+        let window_size = window.get_size();
         let pixbuf = Pixbuf::from_stream_at_scale::<MemoryInputStream, Cancellable>(
-            &stream, width, -1, true, None,
+            &stream, window_size.0, -1, true, None,
         );
         self.image_preview.set_from_pixbuf(Some(&pixbuf.unwrap()));
+        if swap {
+            self.saved_current.swap(&RefCell::new(false));
+            self.set_window_title(window);
+        }
     }
 
     fn toggle_multi(&self) {
@@ -136,7 +141,7 @@ impl Widgets {
         filename
     }
 
-    fn save_file(&self) {
+    fn save_file(&self, window: Rc<gtk::Window>) {
         let filename: String = if *self.saved_once.borrow() {
             self.filename.get_text().to_string()
         } else {
@@ -152,16 +157,18 @@ impl Widgets {
         if *self.saved_once.borrow() {
             self.get_specs(&filename).run();
             self.saved_current.swap(&RefCell::new(true));
+            self.set_window_title(window);
         }
     }
 
-    fn save_file_as(&self) {
+    fn save_file_as(&self, window: Rc<gtk::Window>) {
         match self.get_output() {
             Some(c) => {
                 self.saved_once.swap(&RefCell::new(true));
                 self.filename.set_text(&c);
                 self.get_specs(&c).run();
                 self.saved_current.swap(&RefCell::new(true));
+                self.set_window_title(window);
             }
             None => return,
         };
@@ -210,100 +217,72 @@ pub fn run_gui() {
     });
 
     let window = Rc::new(window);
-    let window_size = window.get_size();
     let widgets = Rc::new(widgets);
-    widgets.draw_preview(window_size.0);
+    widgets.draw_preview(window.clone(), false);
 
     widgets
         .checkbox_multi
         .connect_toggled(clone!(@weak widgets, @weak window => move |_| {
-                widgets.toggle_multi();
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.toggle_multi();
+            widgets.draw_preview(window, true);
         }));
 
     widgets
         .scale
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.draw_preview(window, true);
         }));
 
     widgets
         .scale_multi_course
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.draw_preview(window, true);
         }));
 
     widgets
         .fret_count
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.draw_preview(window, true);
         }));
 
     widgets
         .perpendicular_fret
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.draw_preview(window, true);
         }));
 
     widgets
         .nut_width
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.draw_preview(window, true);
         }));
 
     widgets
         .bridge_spacing
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.draw_preview(window, true);
         }));
 
     widgets
         .border
         .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-                let window_size = window.get_size();
-                widgets.draw_preview(window_size.0);
-                widgets.saved_current.swap(&RefCell::new(false));
-                widgets.set_window_title(window);
+            widgets.draw_preview(window, true);
         }));
 
     window.connect_check_resize(clone!(@weak window, @weak widgets => move |_| {
-        let window_size = window.get_size();
-        widgets.draw_preview(window_size.0);
+        widgets.draw_preview(window, false);
     }));
 
     widgets
         .save_button
         .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
-            widgets.save_file();
-            widgets.set_window_title(window);
+            widgets.save_file(window);
         }));
 
     widgets
         .save_as_button
         .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
-            widgets.save_file_as();
-            widgets.set_window_title(window);
+            widgets.save_file_as(window);
         }));
 
     widgets
