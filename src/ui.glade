@@ -607,16 +607,6 @@ Author: Nathan Fisher
                 <property name="position">2</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkEntry" id="filename">
-                <property name="can-focus">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">5</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>

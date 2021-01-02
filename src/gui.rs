@@ -4,24 +4,20 @@ extern crate gio;
 extern crate gtk;
 use crate::crate_version;
 use crate::gdk_pixbuf::Pixbuf;
-use crate::gio::AppInfoExt;
-use crate::gio::Cancellable;
-use crate::gio::MemoryInputStream;
+use crate::gio::{AppInfoExt, Cancellable, MemoryInputStream};
 use crate::glib::clone;
-use crate::gtk::prelude::*;
 use crate::gtk::{
-    DialogExt, EntryExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
-    SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
+    prelude::*, DialogExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
+    ResponseType::Accept, SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
 };
 use crate::Specs;
 
-use gtk::ResponseType::Accept;
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::process::Command;
 use std::rc::Rc;
-use std::cell::RefCell;
 
-struct Widgets {
+struct Gui {
     image_preview: gtk::Image,
     scale: gtk::Scale,
     checkbox_multi: gtk::CheckButton,
@@ -36,13 +32,14 @@ struct Widgets {
     external_program: gtk::AppChooserButton,
     saved_once: Rc<RefCell<bool>>,
     saved_current: Rc<RefCell<bool>>,
-    filename: gtk::Entry,
+    filename: Rc<RefCell<String>>,
     save_button: gtk::ToolButton,
     save_as_button: gtk::ToolButton,
     quit_button: gtk::ToolButton,
+    window: gtk::Window,
 }
 
-impl Widgets {
+impl Gui {
     fn get_specs(&self, filename: &str) -> Specs {
         Specs {
             scale: self.scale.get_value(),
@@ -59,18 +56,22 @@ impl Widgets {
         }
     }
 
-    fn draw_preview(&self, window: Rc<gtk::Window>, swap: bool) {
+    fn draw_preview(&self, swap: bool) {
         let image = self.get_specs("-").create_document().to_string();
         let bytes = glib::Bytes::from_owned(image.into_bytes());
         let stream = gio::MemoryInputStream::from_bytes(&bytes);
-        let window_size = window.get_size();
+        let window_size = self.window.get_size();
         let pixbuf = Pixbuf::from_stream_at_scale::<MemoryInputStream, Cancellable>(
-            &stream, window_size.0, -1, true, None,
+            &stream,
+            window_size.0,
+            -1,
+            true,
+            None,
         );
         self.image_preview.set_from_pixbuf(Some(&pixbuf.unwrap()));
         if swap {
             self.saved_current.swap(&RefCell::new(false));
-            self.set_window_title(window);
+            self.set_window_title();
         }
     }
 
@@ -106,14 +107,14 @@ impl Widgets {
         }
         if *self.saved_current.borrow() {
             let cmd = self.get_cmd();
-            let filename = self.filename.get_text().to_string();
+            let filename = self.filename.borrow().to_string();
             Command::new(cmd).args(&[&filename]).spawn().unwrap();
         }
     }
 
     fn get_output(&self) -> Option<String> {
         let currentfile = if *self.saved_once.borrow() {
-            self.filename.get_text().to_string()
+            self.filename.borrow().to_string()
         } else {
             String::from("unitled.svg")
         };
@@ -141,14 +142,14 @@ impl Widgets {
         filename
     }
 
-    fn save_file(&self, window: Rc<gtk::Window>) {
+    fn save_file(&self) {
         let filename: String = if *self.saved_once.borrow() {
-            self.filename.get_text().to_string()
+            self.filename.borrow().to_string()
         } else {
             match self.get_output() {
                 Some(c) => {
                     self.saved_once.swap(&RefCell::new(true));
-                    self.filename.set_text(&c);
+                    self.filename.swap(&RefCell::new(c.to_string()));
                     c
                 }
                 None => "".to_string(),
@@ -157,30 +158,38 @@ impl Widgets {
         if *self.saved_once.borrow() {
             self.get_specs(&filename).run();
             self.saved_current.swap(&RefCell::new(true));
-            self.set_window_title(window);
+            self.set_window_title();
         }
     }
 
-    fn save_file_as(&self, window: Rc<gtk::Window>) {
+    fn save_file_as(&self) {
         match self.get_output() {
             Some(c) => {
                 self.saved_once.swap(&RefCell::new(true));
-                self.filename.set_text(&c);
+                self.filename.swap(&RefCell::new(c.to_string()));
                 self.get_specs(&c).run();
                 self.saved_current.swap(&RefCell::new(true));
-                self.set_window_title(window);
+                self.set_window_title();
             }
             None => return,
         };
     }
 
-    fn set_window_title(&self, window: Rc<gtk::Window>) {
-        if ! *self.saved_once.borrow() {
-            window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
+    fn set_window_title(&self) {
+        if !*self.saved_once.borrow() {
+            self.window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
         } else if *self.saved_current.borrow() {
-            window.set_title(&format!("Gfret - {} - {}", crate_version!(), self.filename.get_text().split("/").last().unwrap()));
+            self.window.set_title(&format!(
+                "Gfret - {} - {}",
+                crate_version!(),
+                self.filename.borrow().split("/").last().unwrap()
+            ));
         } else {
-            window.set_title(&format!("Gfret - {} - {}*", crate_version!(), self.filename.get_text().split("/").last().unwrap()));
+            self.window.set_title(&format!(
+                "Gfret - {} - {}*",
+                crate_version!(),
+                self.filename.borrow().split("/").last().unwrap()
+            ));
         }
     }
 }
@@ -192,10 +201,8 @@ pub fn run_gui() {
     }
     let glade_src = include_str!("ui.glade");
     let builder = gtk::Builder::from_string(glade_src);
-    let window: gtk::Window = builder.get_object("mainWindow").unwrap();
-    window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
 
-    let widgets = Rc::new(Widgets {
+    let gui = Rc::new(Gui {
         image_preview: builder.get_object("image_preview").unwrap(),
         scale: builder.get_object("scale_course").unwrap(),
         checkbox_multi: builder.get_object("check_box_multi").unwrap(),
@@ -210,92 +217,93 @@ pub fn run_gui() {
         external_program: builder.get_object("external_program").unwrap(),
         saved_once: Rc::new(RefCell::new(false)),
         saved_current: Rc::new(RefCell::new(false)),
-        filename: builder.get_object("filename").unwrap(),
+        filename: Rc::new(RefCell::new("".to_string())),
         save_button: builder.get_object("save_button").unwrap(),
         save_as_button: builder.get_object("save_as_button").unwrap(),
         quit_button: builder.get_object("quit_button").unwrap(),
+        window: builder.get_object("mainWindow").unwrap(),
     });
 
-    let window = Rc::new(window);
-    let widgets = Rc::new(widgets);
-    widgets.draw_preview(window.clone(), false);
+    gui.window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
+    let gui = Rc::new(gui);
+    gui.draw_preview(false);
 
-    widgets
+    gui
         .checkbox_multi
-        .connect_toggled(clone!(@weak widgets, @weak window => move |_| {
-            widgets.toggle_multi();
-            widgets.draw_preview(window, true);
+        .connect_toggled(clone!(@weak gui => move |_| {
+            gui.toggle_multi();
+            gui.draw_preview(true);
         }));
 
-    widgets
+    gui
         .scale
-        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-            widgets.draw_preview(window, true);
+        .connect_value_changed(clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
         }));
 
-    widgets
-        .scale_multi_course
-        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-            widgets.draw_preview(window, true);
-        }));
+    gui.scale_multi_course.connect_value_changed(
+        clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
+        }),
+    );
 
-    widgets
+    gui
         .fret_count
-        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-            widgets.draw_preview(window, true);
+        .connect_value_changed(clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
         }));
 
-    widgets
-        .perpendicular_fret
-        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-            widgets.draw_preview(window, true);
-        }));
+    gui.perpendicular_fret.connect_value_changed(
+        clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
+        }),
+    );
 
-    widgets
+    gui
         .nut_width
-        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-            widgets.draw_preview(window, true);
+        .connect_value_changed(clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
         }));
 
-    widgets
+    gui
         .bridge_spacing
-        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-            widgets.draw_preview(window, true);
+        .connect_value_changed(clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
         }));
 
-    widgets
+    gui
         .border
-        .connect_value_changed(clone!(@weak widgets, @weak window => move |_| {
-            widgets.draw_preview(window, true);
+        .connect_value_changed(clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
         }));
 
-    window.connect_check_resize(clone!(@weak window, @weak widgets => move |_| {
-        widgets.draw_preview(window, false);
+    gui.window.connect_check_resize(clone!(@weak gui => move |_| {
+        gui.draw_preview(false);
     }));
 
-    widgets
+    gui
         .save_button
-        .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
-            widgets.save_file(window);
+        .connect_clicked(clone!(@weak gui => move |_| {
+            gui.save_file();
         }));
 
-    widgets
+    gui
         .save_as_button
-        .connect_clicked(clone!(@weak widgets, @weak window => move |_| {
-            widgets.save_file_as(window);
+        .connect_clicked(clone!(@weak gui => move |_| {
+            gui.save_file_as();
         }));
 
-    widgets
+    gui
         .external_button
-        .connect_clicked(clone!(@weak widgets => move |_| widgets.open_external()));
+        .connect_clicked(clone!(@weak gui => move |_| gui.open_external()));
 
-    widgets.quit_button.connect_clicked(|_| gtk::main_quit());
+    gui.quit_button.connect_clicked(|_| gtk::main_quit());
 
-    window.connect_delete_event(|_, _| {
+    gui.window.connect_delete_event(|_, _| {
         gtk::main_quit();
         Inhibit(false)
     });
-    window.show_now();
+    gui.window.show_now();
 
     gtk::main()
 }

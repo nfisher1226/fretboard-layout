@@ -1,12 +1,12 @@
 #![warn(clippy::all, clippy::pedantic)]
-use clap::ArgMatches;
 use crate::fretboard::Lengths;
+use clap::ArgMatches;
 use rug::ops::Pow;
+use std::process;
 use std::process::Command;
 use svg::node::element::path::Data;
 use svg::node::element::{Description, Group, Path};
 use svg::Document;
-use std::process;
 
 pub struct Specs {
     pub scale: f64,
@@ -204,11 +204,9 @@ impl Specs {
                 }
             };
             if self.external {
-                match Command::new(&self.cmd)
-                    .args(&[&self.output])
-                    .spawn() {
-                        Ok(_) => (),
-                        Err(e) => eprintln!("{}", e),
+                match Command::new(&self.cmd).args(&[&self.output]).spawn() {
+                    Ok(_) => (),
+                    Err(e) => eprintln!("{}", e),
                 }
             }
         }
@@ -223,7 +221,7 @@ pub fn run(matches: ArgMatches) {
                 Err(e) => {
                     eprintln!("{}", e);
                     process::exit(1);
-                },
+                }
             };
             let specs = Specs {
                 scale,
@@ -232,7 +230,7 @@ pub fn run(matches: ArgMatches) {
                     Err(e) => {
                         eprintln!("{}", e);
                         process::exit(1);
-                    },
+                    }
                 },
                 multi: cli_matches.occurrences_of("MULTI") > 0,
                 scale_treble: if cli_matches.occurrences_of("MULTI") > 0 {
@@ -241,7 +239,7 @@ pub fn run(matches: ArgMatches) {
                         Err(e) => {
                             eprintln!("{}", e);
                             process::exit(1);
-                        },
+                        }
                     }
                 } else {
                     scale
@@ -251,21 +249,21 @@ pub fn run(matches: ArgMatches) {
                     Err(e) => {
                         eprintln!("{}", e);
                         process::exit(1);
-                    },
+                    }
                 },
                 bridge: match cli_matches.value_of_t::<f64>("BRIDGE") {
                     Ok(c) => c + 6.0,
                     Err(e) => {
                         eprintln!("{}", e);
                         process::exit(1);
-                    },
+                    }
                 },
                 pfret: match cli_matches.value_of_t("PERPENDICULAR") {
                     Ok(c) => c,
                     Err(e) => {
                         eprintln!("{}", e);
                         process::exit(1);
-                    },
+                    }
                 },
                 output: cli_matches.value_of("OUTPUT").unwrap().to_string(),
                 border: match cli_matches.value_of_t("BORDER") {
@@ -273,7 +271,7 @@ pub fn run(matches: ArgMatches) {
                     Err(e) => {
                         eprintln!("{}", e);
                         process::exit(1);
-                    },
+                    }
                 },
                 external: cli_matches.occurrences_of("EXTERN") > 0,
                 cmd: cli_matches.value_of("EXTERN").unwrap().to_string(),
