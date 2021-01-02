@@ -4,8 +4,7 @@ use clap::ArgMatches;
 use rug::ops::Pow;
 use std::process;
 use std::process::Command;
-use svg::node::element::path::Data;
-use svg::node::element::{Description, Group, Path};
+use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
 pub struct Specs {
@@ -213,7 +212,7 @@ impl Specs {
     }
 }
 
-pub fn run(matches: ArgMatches) {
+pub fn run(matches: &ArgMatches) {
     match matches.subcommand() {
         Some(("cli", cli_matches)) => {
             let scale: f64 = match cli_matches.value_of_t("SCALE") {
@@ -278,6 +277,6 @@ pub fn run(matches: ArgMatches) {
             };
             specs.run();
         }
-        _ => crate::gui::run_gui(),
+        _ => crate::gui::run_ui(),
     }
 }

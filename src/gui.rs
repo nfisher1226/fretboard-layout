@@ -40,10 +40,11 @@ struct Gui {
 }
 
 impl Gui {
+    #[allow(clippy::cast_sign_loss)]
     fn get_specs(&self, filename: &str) -> Specs {
         Specs {
             scale: self.scale.get_value(),
-            count: self.fret_count.get_value() as u32,
+            count: self.fret_count.get_value_as_int() as u32,
             multi: self.checkbox_multi.get_active(),
             scale_treble: self.scale_multi_course.get_value(),
             nut: self.nut_width.get_value(),
@@ -152,7 +153,7 @@ impl Gui {
                     self.filename.swap(&RefCell::new(c.to_string()));
                     c
                 }
-                None => "".to_string(),
+                None => return,
             }
         };
         if *self.saved_once.borrow() {
@@ -163,38 +164,36 @@ impl Gui {
     }
 
     fn save_file_as(&self) {
-        match self.get_output() {
-            Some(c) => {
-                self.saved_once.swap(&RefCell::new(true));
-                self.filename.swap(&RefCell::new(c.to_string()));
-                self.get_specs(&c).run();
-                self.saved_current.swap(&RefCell::new(true));
-                self.set_window_title();
-            }
-            None => return,
+        if let Some(c) = self.get_output() {
+            self.saved_once.swap(&RefCell::new(true));
+            self.filename.swap(&RefCell::new(c.to_string()));
+            self.get_specs(&c).run();
+            self.saved_current.swap(&RefCell::new(true));
+            self.set_window_title();
         };
     }
 
     fn set_window_title(&self) {
         if !*self.saved_once.borrow() {
-            self.window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
+            self.window
+                .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
         } else if *self.saved_current.borrow() {
             self.window.set_title(&format!(
                 "Gfret - {} - {}",
                 crate_version!(),
-                self.filename.borrow().split("/").last().unwrap()
+                self.filename.borrow().split('/').last().unwrap()
             ));
         } else {
             self.window.set_title(&format!(
                 "Gfret - {} - {}*",
                 crate_version!(),
-                self.filename.borrow().split("/").last().unwrap()
+                self.filename.borrow().split('/').last().unwrap()
             ));
         }
     }
 }
 
-pub fn run_gui() {
+pub fn run_ui() {
     if gtk::init().is_err() {
         println!("Failed to initialize GTK.");
         return;
@@ -224,77 +223,68 @@ pub fn run_gui() {
         window: builder.get_object("mainWindow").unwrap(),
     });
 
-    gui.window.set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
+    gui.window
+        .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
     let gui = Rc::new(gui);
     gui.draw_preview(false);
 
-    gui
-        .checkbox_multi
+    gui.checkbox_multi
         .connect_toggled(clone!(@weak gui => move |_| {
             gui.toggle_multi();
             gui.draw_preview(true);
         }));
 
-    gui
-        .scale
+    gui.scale
         .connect_value_changed(clone!(@weak gui => move |_| {
             gui.draw_preview(true);
         }));
 
-    gui.scale_multi_course.connect_value_changed(
-        clone!(@weak gui => move |_| {
-            gui.draw_preview(true);
-        }),
-    );
-
-    gui
-        .fret_count
+    gui.scale_multi_course
         .connect_value_changed(clone!(@weak gui => move |_| {
             gui.draw_preview(true);
         }));
 
-    gui.perpendicular_fret.connect_value_changed(
-        clone!(@weak gui => move |_| {
-            gui.draw_preview(true);
-        }),
-    );
-
-    gui
-        .nut_width
+    gui.fret_count
         .connect_value_changed(clone!(@weak gui => move |_| {
             gui.draw_preview(true);
         }));
 
-    gui
-        .bridge_spacing
+    gui.perpendicular_fret
         .connect_value_changed(clone!(@weak gui => move |_| {
             gui.draw_preview(true);
         }));
 
-    gui
-        .border
+    gui.nut_width
         .connect_value_changed(clone!(@weak gui => move |_| {
             gui.draw_preview(true);
         }));
 
-    gui.window.connect_check_resize(clone!(@weak gui => move |_| {
-        gui.draw_preview(false);
-    }));
+    gui.bridge_spacing
+        .connect_value_changed(clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
+        }));
 
-    gui
-        .save_button
+    gui.border
+        .connect_value_changed(clone!(@weak gui => move |_| {
+            gui.draw_preview(true);
+        }));
+
+    gui.window
+        .connect_check_resize(clone!(@weak gui => move |_| {
+            gui.draw_preview(false);
+        }));
+
+    gui.save_button
         .connect_clicked(clone!(@weak gui => move |_| {
             gui.save_file();
         }));
 
-    gui
-        .save_as_button
+    gui.save_as_button
         .connect_clicked(clone!(@weak gui => move |_| {
             gui.save_file_as();
         }));
 
-    gui
-        .external_button
+    gui.external_button
         .connect_clicked(clone!(@weak gui => move |_| gui.open_external()));
 
     gui.quit_button.connect_clicked(|_| gtk::main_quit());

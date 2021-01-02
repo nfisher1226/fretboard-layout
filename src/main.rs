@@ -12,5 +12,5 @@ use backend::Specs;
 fn main() {
     let yaml = load_yaml!("cli.yaml");
     let matches = App::from(yaml).version(crate_version!()).get_matches();
-    backend::run(matches);
+    backend::run(&matches);
 }

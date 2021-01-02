@@ -2,8 +2,7 @@
 use crate::backend::Factors;
 use crate::Specs;
 use std::f64;
-use svg::node::element::path::Data;
-use svg::node::element::Path;
+use svg::node::element::{path::Data, Path};
 
 pub struct Lengths {
     pub length_bass: f64,
