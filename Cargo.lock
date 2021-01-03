@@ -297,6 +297,7 @@ name = "gfret"
 version = "0.2.0"
 dependencies = [
  "clap",
+ "gdk",
  "gdk-pixbuf",
  "gio",
  "glib",

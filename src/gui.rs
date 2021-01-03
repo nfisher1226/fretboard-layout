@@ -1,8 +1,10 @@
 #![warn(clippy::all, clippy::pedantic)]
+extern crate gdk;
 extern crate gdk_pixbuf;
 extern crate gio;
 extern crate gtk;
 use crate::crate_version;
+use crate::gdk::ModifierType;
 use crate::gdk_pixbuf::Pixbuf;
 use crate::gio::{AppInfoExt, Cancellable, MemoryInputStream};
 use crate::glib::clone;
@@ -34,7 +36,6 @@ struct Gui {
     saved_current: Rc<RefCell<bool>>,
     filename: Rc<RefCell<String>>,
     save_button: gtk::ToolButton,
-    save_as_button: gtk::ToolButton,
     quit_button: gtk::ToolButton,
     window: gtk::Window,
 }
@@ -218,7 +219,6 @@ pub fn run_ui() {
         saved_current: Rc::new(RefCell::new(false)),
         filename: Rc::new(RefCell::new("".to_string())),
         save_button: builder.get_object("save_button").unwrap(),
-        save_as_button: builder.get_object("save_as_button").unwrap(),
         quit_button: builder.get_object("quit_button").unwrap(),
         window: builder.get_object("mainWindow").unwrap(),
     });
@@ -274,14 +274,33 @@ pub fn run_ui() {
             gui.draw_preview(false);
         }));
 
+    let gui1 = gui.clone();
+    gui.window.connect_key_press_event(move |_, gdk| {
+        let key = gdk.get_keycode().unwrap();
+        if gdk.get_state().contains(ModifierType::CONTROL_MASK) {
+            match key {
+                24 => gtk::main_quit(),
+                26 => gui1.open_external(),
+                58 => {
+                    gui1.checkbox_multi
+                        .set_active(!gui1.checkbox_multi.get_active());
+                }
+                39 => {
+                    if gdk.get_state().contains(ModifierType::SHIFT_MASK) {
+                        gui1.save_file_as();
+                    } else {
+                        gui1.save_file();
+                    }
+                }
+                _ => {}
+            }
+        }
+        Inhibit(false)
+    });
+
     gui.save_button
         .connect_clicked(clone!(@weak gui => move |_| {
             gui.save_file();
-        }));
-
-    gui.save_as_button
-        .connect_clicked(clone!(@weak gui => move |_| {
-            gui.save_file_as();
         }));
 
     gui.external_button

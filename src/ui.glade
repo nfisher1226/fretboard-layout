@@ -192,7 +192,6 @@ Author: Nathan Fisher
                 <property name="receives-default">False</property>
                 <property name="tooltip-text" translatable="yes">If checked, create a multiscale fretboard layout.</property>
                 <property name="draw-indicator">True</property>
-                <accelerator key="m" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -265,22 +264,6 @@ Author: Nathan Fisher
                     <property name="label" translatable="yes">Save</property>
                     <property name="use-underline">True</property>
                     <property name="stock-id">gtk-save</property>
-                    <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="save_as_button">
-                    <property name="can-focus">False</property>
-                    <property name="visible-horizontal">False</property>
-                    <property name="visible-vertical">False</property>
-                    <property name="label" translatable="yes">Save As</property>
-                    <property name="use-underline">True</property>
-                    <property name="stock-id">gtk-save-as</property>
-                    <accelerator key="s" signal="clicked" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -384,7 +367,6 @@ Author: Nathan Fisher
                     <property name="label" translatable="yes">Open External</property>
                     <property name="use-underline">True</property>
                     <property name="stock-id">gtk-execute</property>
-                    <accelerator key="e" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -593,7 +575,6 @@ Author: Nathan Fisher
                     <property name="label" translatable="yes">Quit</property>
                     <property name="use-underline">True</property>
                     <property name="stock-id">gtk-quit</property>
-                    <accelerator key="q" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
