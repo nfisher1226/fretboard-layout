@@ -192,6 +192,27 @@ impl Gui {
             ));
         }
     }
+
+    fn process_keypress(&self, key: u16, ctrl: bool, shift: bool) {
+        if ctrl {
+            match key {
+                24 => gtk::main_quit(),
+                26 => self.open_external(),
+                58 => {
+                    self.checkbox_multi
+                        .set_active(!self.checkbox_multi.get_active());
+                }
+                39 => {
+                    if shift {
+                        self.save_file_as();
+                    } else {
+                        self.save_file();
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
 }
 
 pub fn run_ui() {
@@ -277,24 +298,9 @@ pub fn run_ui() {
     let gui1 = gui.clone();
     gui.window.connect_key_press_event(move |_, gdk| {
         let key = gdk.get_keycode().unwrap();
-        if gdk.get_state().contains(ModifierType::CONTROL_MASK) {
-            match key {
-                24 => gtk::main_quit(),
-                26 => gui1.open_external(),
-                58 => {
-                    gui1.checkbox_multi
-                        .set_active(!gui1.checkbox_multi.get_active());
-                }
-                39 => {
-                    if gdk.get_state().contains(ModifierType::SHIFT_MASK) {
-                        gui1.save_file_as();
-                    } else {
-                        gui1.save_file();
-                    }
-                }
-                _ => {}
-            }
-        }
+        let ctrl = gdk.get_state().contains(ModifierType::CONTROL_MASK);
+        let shift = gdk.get_state().contains(ModifierType::SHIFT_MASK);
+        gui1.process_keypress(key, ctrl, shift);
         Inhibit(false)
     });
 
