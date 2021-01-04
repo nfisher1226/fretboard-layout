@@ -26,6 +26,7 @@ struct Gui {
     scale_multi_course: gtk::Scale,
     scale_multi_fine: gtk::SpinButton,
     fret_count: gtk::SpinButton,
+    pfret_label: gtk::Label,
     perpendicular_fret: gtk::SpinButton,
     nut_width: gtk::SpinButton,
     bridge_spacing: gtk::SpinButton,
@@ -81,7 +82,13 @@ impl Gui {
         let value = self.checkbox_multi.get_active();
         self.scale_multi_course.set_sensitive(value);
         self.scale_multi_fine.set_sensitive(value);
-        self.perpendicular_fret.set_sensitive(value);
+        if value {
+            self.perpendicular_fret.show();
+            self.pfret_label.show();
+        } else {
+            self.perpendicular_fret.hide();
+            self.pfret_label.hide();
+        }
     }
 
     fn get_cmd(&self) -> String {
@@ -231,6 +238,7 @@ pub fn run_ui() {
         scale_multi_fine: builder.get_object("scale_multi_fine").unwrap(),
         fret_count: builder.get_object("fret_count").unwrap(),
         perpendicular_fret: builder.get_object("perpendicular_fret").unwrap(),
+        pfret_label: builder.get_object("pfret_label").unwrap(),
         nut_width: builder.get_object("nut_width").unwrap(),
         bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
         border: builder.get_object("border").unwrap(),
