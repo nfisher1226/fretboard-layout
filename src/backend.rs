@@ -94,13 +94,12 @@ impl Specs {
     fn print_data(&self) -> svg::node::element::Text {
         let mut line = if self.multi {
             format!(
-                "ScaleBass: {:.2}mm | ScaleTreble: {:.2}mm |",
-                self.scale, self.scale_treble
+                "ScaleBass: {:.2}mm | ScaleTreble: {:.2}mm | PerpendicularFret: {:.1} |",
+                self.scale, self.scale_treble, self.pfret
             )
         } else {
             format!("Scale: {:.2}mm |", self.scale)
         };
-        line = format!("{} PerpendicularFret: {:.1} |", line, self.pfret);
         line = format!("{} NutWidth: {:.2}mm |", line, self.nut);
         line = format!("{} BridgeSpacing: {:.2}mm", line, self.bridge - 6.0);
         svg::node::element::Text::new()

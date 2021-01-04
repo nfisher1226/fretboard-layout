@@ -49,7 +49,7 @@ impl Gui {
             multi: self.checkbox_multi.get_active(),
             scale_treble: self.scale_multi_course.get_value(),
             nut: self.nut_width.get_value(),
-            bridge: self.bridge_spacing.get_value(),
+            bridge: self.bridge_spacing.get_value() + 6.0,
             pfret: self.perpendicular_fret.get_value(),
             output: filename.to_string(),
             border: self.border.get_value(),
