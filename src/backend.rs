@@ -39,6 +39,7 @@ impl Specs {
             length_treble,
         }
     }
+
     fn get_fret_lengths(&self, fret: u32) -> Lengths {
         let factor = 2.0_f64.pow(f64::from(fret) / 12.0);
         let length_bass = self.scale / factor;
@@ -52,6 +53,7 @@ impl Specs {
             length_treble,
         }
     }
+
     pub fn get_all_lengths(&self) -> Vec<Lengths> {
         let mut fretboard: Vec<Lengths> = Vec::new();
         let nut = self.get_nut();
@@ -62,6 +64,7 @@ impl Specs {
         }
         fretboard
     }
+
     fn get_factors(&self) -> Factors {
         let height = (self.bridge - self.nut) / 2.0;
         let y_ratio = height / self.scale;
@@ -82,6 +85,7 @@ impl Specs {
             treble_offset,
         }
     }
+
     fn create_description(&self) -> svg::node::element::Description {
         Description::new()
             .set("Scale", self.scale)
@@ -91,6 +95,7 @@ impl Specs {
             .set("BridgeSpacing", self.bridge - 6.0)
             .set("NutWidth", self.nut)
     }
+
     fn print_data(&self) -> svg::node::element::Text {
         let mut line = if self.multi {
             format!(
@@ -111,6 +116,7 @@ impl Specs {
             .set("id", "Specifications")
             .add(svg::node::Text::new(line))
     }
+
     fn draw_centerline(&self) -> svg::node::element::Path {
         let start_x = self.border;
         let start_y = (self.bridge / 2.0) + self.border;
@@ -129,6 +135,7 @@ impl Specs {
             .set("id", "Centerline")
             .set("d", data)
     }
+
     fn draw_bridge(&self, factors: &Factors) -> svg::node::element::Path {
         let start_x = self.border;
         let start_y = self.border;
@@ -145,6 +152,7 @@ impl Specs {
             .set("id", "Bridge")
             .set("d", data)
     }
+
     fn draw_fretboard(&self, fretboard: &[Lengths], factors: &Factors) -> svg::node::element::Path {
         let nut = fretboard[0_usize].get_fret_line(&factors, &self);
         let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self);
@@ -162,6 +170,7 @@ impl Specs {
             .set("id", "Fretboard")
             .set("d", data)
     }
+
     fn draw_frets(&self, fretboard: &[Lengths], factors: &Factors) -> svg::node::element::Group {
         let mut frets = Group::new().set("id", "Frets");
         for fret in 0..=self.count {
@@ -170,6 +179,7 @@ impl Specs {
         }
         frets
     }
+
     pub fn create_document(&self) -> svg::Document {
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors();
@@ -189,6 +199,7 @@ impl Specs {
             .add(self.draw_bridge(&factors))
             .add(self.draw_frets(&lengths, &factors))
     }
+
     pub fn run(&self) {
         let document = self.create_document();
         if self.output == "-" {

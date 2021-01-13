@@ -42,6 +42,33 @@ struct Gui {
 }
 
 impl Gui {
+    fn new() -> Rc<Gui> {
+        let glade_src = include_str!("ui.glade");
+        let builder = gtk::Builder::from_string(glade_src);
+
+        Rc::new(Gui {
+            image_preview: builder.get_object("image_preview").unwrap(),
+            scale: builder.get_object("scale_course").unwrap(),
+            checkbox_multi: builder.get_object("check_box_multi").unwrap(),
+            scale_multi_course: builder.get_object("scale_multi_course").unwrap(),
+            scale_multi_fine: builder.get_object("scale_multi_fine").unwrap(),
+            fret_count: builder.get_object("fret_count").unwrap(),
+            perpendicular_fret: builder.get_object("perpendicular_fret").unwrap(),
+            pfret_label: builder.get_object("pfret_label").unwrap(),
+            nut_width: builder.get_object("nut_width").unwrap(),
+            bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
+            border: builder.get_object("border").unwrap(),
+            external_button: builder.get_object("external_button").unwrap(),
+            external_program: builder.get_object("external_program").unwrap(),
+            saved_once: Rc::new(RefCell::new(false)),
+            saved_current: Rc::new(RefCell::new(false)),
+            filename: Rc::new(RefCell::new("".to_string())),
+            save_button: builder.get_object("save_button").unwrap(),
+            quit_button: builder.get_object("quit_button").unwrap(),
+            window: builder.get_object("mainWindow").unwrap(),
+        })
+    }
+
     #[allow(clippy::cast_sign_loss)]
     fn get_specs(&self, filename: &str) -> Specs {
         Specs {
@@ -203,13 +230,13 @@ impl Gui {
     fn process_keypress(&self, key: u16, ctrl: bool, shift: bool) {
         if ctrl {
             match key {
-                24 => gtk::main_quit(),
-                26 => self.open_external(),
-                58 => {
+                24 => gtk::main_quit(),        // q
+                26 => self.open_external(),    // e
+                58 => {                        // m
                     self.checkbox_multi
                         .set_active(!self.checkbox_multi.get_active());
                 }
-                39 => {
+                39 => {                        // s
                     if shift {
                         self.save_file_as();
                     } else {
@@ -227,30 +254,8 @@ pub fn run_ui() {
         println!("Failed to initialize GTK.");
         return;
     }
-    let glade_src = include_str!("ui.glade");
-    let builder = gtk::Builder::from_string(glade_src);
 
-    let gui = Rc::new(Gui {
-        image_preview: builder.get_object("image_preview").unwrap(),
-        scale: builder.get_object("scale_course").unwrap(),
-        checkbox_multi: builder.get_object("check_box_multi").unwrap(),
-        scale_multi_course: builder.get_object("scale_multi_course").unwrap(),
-        scale_multi_fine: builder.get_object("scale_multi_fine").unwrap(),
-        fret_count: builder.get_object("fret_count").unwrap(),
-        perpendicular_fret: builder.get_object("perpendicular_fret").unwrap(),
-        pfret_label: builder.get_object("pfret_label").unwrap(),
-        nut_width: builder.get_object("nut_width").unwrap(),
-        bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
-        border: builder.get_object("border").unwrap(),
-        external_button: builder.get_object("external_button").unwrap(),
-        external_program: builder.get_object("external_program").unwrap(),
-        saved_once: Rc::new(RefCell::new(false)),
-        saved_current: Rc::new(RefCell::new(false)),
-        filename: Rc::new(RefCell::new("".to_string())),
-        save_button: builder.get_object("save_button").unwrap(),
-        quit_button: builder.get_object("quit_button").unwrap(),
-        window: builder.get_object("mainWindow").unwrap(),
-    });
+    let gui = Gui::new();
 
     gui.window
         .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
