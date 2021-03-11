@@ -19,6 +19,8 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::rc::Rc;
 
+/// The Gui struct keeps track of our widgets as a group to provide access to
+/// the data which they represent for multiple functions.
 struct Gui {
     image_preview: gtk::Image,
     scale: gtk::Scale,
@@ -69,6 +71,8 @@ impl Gui {
         })
     }
 
+    /// Takes the data represented by our Gtk widgets and outputs a Specs struct
+    /// which will be used by the backend to render the svg image.
     #[allow(clippy::cast_sign_loss)]
     fn get_specs(&self, filename: &str) -> Specs {
         Specs {
@@ -86,6 +90,8 @@ impl Gui {
         }
     }
 
+    /// Performs a full render of the svg image without saving to disk, and
+    /// refreshes the image preview with the new data.
     fn draw_preview(&self, swap: bool) {
         let image = self.get_specs("-").create_document().to_string();
         let bytes = glib::Bytes::from_owned(image.into_bytes());
@@ -105,6 +111,8 @@ impl Gui {
         }
     }
 
+    /// Toggles certain gui elements on and off when we switch from
+    /// single scale to multiscale and back again.
     fn toggle_multi(&self) {
         let value = self.checkbox_multi.get_active();
         self.scale_multi_course.set_sensitive(value);
@@ -118,6 +126,8 @@ impl Gui {
         }
     }
 
+    /// Returns a string representing the command to open the selected external
+    /// program.
     fn get_cmd(&self) -> String {
         let cmd = self.external_program.get_app_info();
         let cmd = match cmd {
@@ -137,6 +147,7 @@ impl Gui {
         }
     }
 
+    /// Saves the file and opens it with an external program.
     fn open_external(&self) {
         if !*self.saved_current.borrow() {
             self.save_button.emit_clicked();
@@ -148,6 +159,7 @@ impl Gui {
         }
     }
 
+    /// Opens a Gtk FileChooserDialog and sets the path to the output file.
     fn get_output(&self) -> Option<String> {
         let currentfile = if *self.saved_once.borrow() {
             self.filename.borrow().to_string()
@@ -178,6 +190,9 @@ impl Gui {
         filename
     }
 
+    /// Determines if the file has been saved once. If it has, then it is saved
+    /// again to the same path. If not, calls self.get_output() to allow the
+    /// user to select a path to save to.
     fn save_file(&self) {
         let filename: String = if *self.saved_once.borrow() {
             self.filename.borrow().to_string()
@@ -198,6 +213,7 @@ impl Gui {
         }
     }
 
+    /// Saves file under a new name whether it has already been saved or not.
     fn save_file_as(&self) {
         if let Some(c) = self.get_output() {
             self.saved_once.swap(&RefCell::new(true));
@@ -208,6 +224,7 @@ impl Gui {
         };
     }
 
+    /// Updates the title of the program window with the name of the output file.
     fn set_window_title(&self) {
         if !*self.saved_once.borrow() {
             self.window

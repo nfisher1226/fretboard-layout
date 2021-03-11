@@ -4,6 +4,7 @@ use crate::Specs;
 use std::f64;
 use svg::node::element::{path::Data, Path};
 
+/// Distance from bridge to fret along each side of the fretboard.
 pub struct Lengths {
     pub length_bass: f64,
     pub length_treble: f64,
@@ -35,6 +36,7 @@ impl Lengths {
 }
 
 impl Line {
+    /// Returns an svg Path node representing a single fret
     pub fn draw_fret(&self, fret: u32) -> svg::node::element::Path {
         let id = if fret == 0 {
             "Nut".to_string()

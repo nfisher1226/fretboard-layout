@@ -7,20 +7,38 @@ use std::process::Command;
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
+/// This struct contains the user data used to create the svg output file
 pub struct Specs {
+    /// Scale length. For multiscale designs this is the bass side scale length.
     pub scale: f64,
+    /// Number of frets to render
     pub count: u32,
+    /// True if the design is multiscale
     pub multi: bool,
+    /// The scale length for the treble side. Ignored for single scale designs.
     pub scale_treble: f64,
+    /// The width of the fretboard at the nut.
     pub nut: f64,
+    /// The string spacing at the bridge. Note that this is not the physical
+    /// width of the bridge, but the distance perpendicular to the centerline
+    /// between the outer two strings.
     pub bridge: f64,
+    /// The fret that is perpendicular to the centerline.
     pub pfret: f64,
+    /// An output file, '-' for stdout.
     pub output: String,
+    /// A border around the rendered image.
     pub border: f64,
+    /// Whether to open the rendered image in an external program.
     pub external: bool,
+    /// The external program to open.
     pub cmd: String,
 }
 
+/// This struct contains multiplication factors used to convert the raw lengths
+/// from bridge to fret into x,y coordinates. It also contains an offset distance
+/// used to correctly orient the two scales in a multiscale design so that the
+/// desired fret is perpendicular to the centerline.
 pub struct Factors {
     pub x_ratio: f64,
     pub y_ratio: f64,
@@ -28,6 +46,7 @@ pub struct Factors {
 }
 
 impl Specs {
+    /// Returns the distance from bridge to nut on both sides of the fretboard
     fn get_nut(&self) -> Lengths {
         let length_treble = if self.multi {
             self.scale_treble
@@ -40,6 +59,8 @@ impl Specs {
         }
     }
 
+    /// Returns the length from bridge to fret for a given fret number, along
+    /// both bass and treble sides of the board.
     fn get_fret_lengths(&self, fret: u32) -> Lengths {
         let factor = 2.0_f64.pow(f64::from(fret) / 12.0);
         let length_bass = self.scale / factor;
@@ -54,6 +75,8 @@ impl Specs {
         }
     }
 
+    /// Returns a vector containing the lengths from bridge to fret for all of
+    /// the frets to be rendered.
     pub fn get_all_lengths(&self) -> Vec<Lengths> {
         let mut fretboard: Vec<Lengths> = Vec::new();
         let nut = self.get_nut();
@@ -65,6 +88,9 @@ impl Specs {
         fretboard
     }
 
+    /// Uses trigonometry to place the fret ends, based on visualizing their
+    /// locations as a triangle where the hypotenuse is the string, and the
+    /// opposite is the distance from the bridge parallel to the centerline.
     fn get_factors(&self) -> Factors {
         let height = (self.bridge - self.nut) / 2.0;
         let y_ratio = height / self.scale;
@@ -86,6 +112,7 @@ impl Specs {
         }
     }
 
+    /// Embeds a text description into the svg
     fn create_description(&self) -> svg::node::element::Description {
         Description::new()
             .set("Scale", self.scale)
@@ -96,6 +123,7 @@ impl Specs {
             .set("NutWidth", self.nut)
     }
 
+    /// Prints the specs used in the rendered image
     fn print_data(&self) -> svg::node::element::Text {
         let mut line = if self.multi {
             format!(
@@ -117,6 +145,7 @@ impl Specs {
             .add(svg::node::Text::new(line))
     }
 
+    /// Adds the centerline to the svg data
     fn draw_centerline(&self) -> svg::node::element::Path {
         let start_x = self.border;
         let start_y = (self.bridge / 2.0) + self.border;
@@ -136,6 +165,7 @@ impl Specs {
             .set("d", data)
     }
 
+    /// adds the bridge as a line between the outer strings
     fn draw_bridge(&self, factors: &Factors) -> svg::node::element::Path {
         let start_x = self.border;
         let start_y = self.border;
@@ -153,6 +183,7 @@ impl Specs {
             .set("d", data)
     }
 
+    /// Draws the outline of the fretboard
     fn draw_fretboard(&self, fretboard: &[Lengths], factors: &Factors) -> svg::node::element::Path {
         let nut = fretboard[0_usize].get_fret_line(&factors, &self);
         let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self);
@@ -171,6 +202,7 @@ impl Specs {
             .set("d", data)
     }
 
+    /// Iterates through each fret, returning a group of svg Paths
     fn draw_frets(&self, fretboard: &[Lengths], factors: &Factors) -> svg::node::element::Group {
         let mut frets = Group::new().set("id", "Frets");
         for fret in 0..=self.count {
@@ -180,6 +212,7 @@ impl Specs {
         frets
     }
 
+    /// Returns the complete svg Document
     pub fn create_document(&self) -> svg::Document {
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors();
