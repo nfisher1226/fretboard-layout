@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::crate_version;
+use clap::crate_version;
 use gdk::ModifierType;
 use gdk_pixbuf::Pixbuf;
 use gio::{AppInfoExt, Cancellable, MemoryInputStream};
@@ -9,6 +9,7 @@ use gtk::{
     ResponseType::Accept, SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
 };
 use crate::Specs;
+use crate::template::Template;
 
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -17,18 +18,18 @@ use std::rc::Rc;
 
 /// The Gui struct keeps track of our widgets as a group to provide access to
 /// the data which they represent for multiple functions.
-struct Gui {
+pub struct Gui {
     image_preview: gtk::Image,
-    scale: gtk::Scale,
-    checkbox_multi: gtk::CheckButton,
-    scale_multi_course: gtk::Scale,
+    pub scale: gtk::Scale,
+    pub checkbox_multi: gtk::CheckButton,
+    pub scale_multi_course: gtk::Scale,
     scale_multi_fine: gtk::SpinButton,
-    fret_count: gtk::SpinButton,
+    pub fret_count: gtk::SpinButton,
     pfret_label: gtk::Label,
-    perpendicular_fret: gtk::SpinButton,
-    nut_width: gtk::SpinButton,
-    bridge_spacing: gtk::SpinButton,
-    border: gtk::SpinButton,
+    pub perpendicular_fret: gtk::SpinButton,
+    pub nut_width: gtk::SpinButton,
+    pub bridge_spacing: gtk::SpinButton,
+    pub border: gtk::SpinButton,
     external_button: gtk::ToolButton,
     external_program: gtk::AppChooserButton,
     saved_once: RefCell<bool>,
@@ -65,6 +66,25 @@ impl Gui {
             quit_button: builder.get_object("quit_button").unwrap(),
             window: builder.get_object("mainWindow").unwrap(),
         })
+    }
+
+    pub fn load_template(&self, template: Template) {
+        self.scale.set_value(template.scale);
+        self.fret_count.set_value(template.count.into());
+        if let Some(scale_treble) = template.scale_treble {
+            self.checkbox_multi.set_active(true);
+            self.scale_multi_course.set_value(scale_treble);
+        } else {
+            self.checkbox_multi.set_active(false);
+        }
+        self.nut_width.set_value(template.nut);
+        self.bridge_spacing.set_value(template.bridge);
+        if let Some(pfret) = template.pfret {
+            self.perpendicular_fret.set_value(pfret);
+        }
+        if let Some(border) = template.border {
+            self.border.set_value(border);
+        }
     }
 
     /// Takes the data represented by our Gtk widgets and outputs a Specs struct

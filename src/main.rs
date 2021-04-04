@@ -10,6 +10,9 @@ mod backend;
 mod fretboard;
 /// The Gtk user interface to gfret.
 mod gui;
+/// Persistent templates
+mod template;
+
 use backend::Specs;
 
 fn main() {
