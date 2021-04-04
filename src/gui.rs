@@ -1,14 +1,10 @@
 #![warn(clippy::all, clippy::pedantic)]
-extern crate gdk;
-extern crate gdk_pixbuf;
-extern crate gio;
-extern crate gtk;
 use crate::crate_version;
-use crate::gdk::ModifierType;
-use crate::gdk_pixbuf::Pixbuf;
-use crate::gio::{AppInfoExt, Cancellable, MemoryInputStream};
-use crate::glib::clone;
-use crate::gtk::{
+use gdk::ModifierType;
+use gdk_pixbuf::Pixbuf;
+use gio::{AppInfoExt, Cancellable, MemoryInputStream};
+use glib::clone;
+use gtk::{
     prelude::*, DialogExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
     ResponseType::Accept, SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
 };

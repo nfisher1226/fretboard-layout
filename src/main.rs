@@ -4,11 +4,6 @@
 //! templates for instruments ranging from a piccolo mandolin to an upright bass.
 //! Multiscale designs are also supported.
 use clap::{crate_version, load_yaml, App};
-extern crate gdk;
-extern crate gdk_pixbuf;
-extern crate gio;
-extern crate glib;
-extern crate gtk;
 /// Processes the data provided by the gui into a fully rendered svg image.
 mod backend;
 /// Used by the backend to calculate point locations and lines.

@@ -51,9 +51,9 @@ checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
 name = "az"
-version = "1.0.0"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e9bcd47d94aa4eb8c076b50fc61a75020789394ffb9bd74a180b3379130f6569"
+checksum = "822d7d63e0c0260a050f6b1f0d316f5c79b9eab830aca526ed904e1011bd64ca"
 
 [[package]]
 name = "bitflags"
@@ -303,6 +303,7 @@ dependencies = [
  "glib",
  "gtk",
  "rug",
+ "serde",
  "svg",
 ]
 
@@ -655,9 +656,9 @@ dependencies = [
 
 [[package]]
 name = "rug"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e538d00da450a8e48aac7e6322e67b2dc86ec71a1feeac0e3954c4f07f01bc45"
+checksum = "32f75e07492c4d17d12f226d17e689fdb698db7a1e875fca0fac15626283bf24"
 dependencies = [
  "az",
  "gmp-mpfr-sys",
@@ -669,6 +670,20 @@ name = "serde"
 version = "1.0.118"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06c64263859d87aa2eb554587e2d23183398d617427327cf2b3d0ed8c69e4800"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.118"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c84d3526699cd55261af4b941e4e725444df67aa4f9e6a3564f18030d12672df"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "slab"
