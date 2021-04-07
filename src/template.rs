@@ -13,11 +13,11 @@ use std::{env, process};
 pub struct Template {
     pub scale: f64,
     pub count: u32,
+    pub multi: bool,
     pub scale_treble: Option<f64>,
     pub nut: f64,
     pub bridge: f64,
     pub pfret: Option<f64>,
-    pub border: Option<f64>,
 }
 
 impl Template {

@@ -8,6 +8,7 @@ use gtk::{
     prelude::*, DialogExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
     ResponseType::Accept, SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
 };
+use crate::CONFIGDIR;
 use crate::Specs;
 use crate::template::Template;
 
@@ -72,19 +73,15 @@ impl Gui {
     pub fn load_template(&self, template: Template) {
         self.scale.set_value(template.scale);
         self.fret_count.set_value(template.count.into());
+        self.checkbox_multi.set_active(template.multi);
+        self.toggle_multi();
         if let Some(scale_treble) = template.scale_treble {
-            self.checkbox_multi.set_active(true);
             self.scale_multi_course.set_value(scale_treble);
-        } else {
-            self.checkbox_multi.set_active(false);
         }
         self.nut_width.set_value(template.nut);
         self.bridge_spacing.set_value(template.bridge);
         if let Some(pfret) = template.pfret {
             self.perpendicular_fret.set_value(pfret);
-        }
-        if let Some(border) = template.border {
-            self.border.set_value(border);
         }
     }
 
@@ -93,11 +90,11 @@ impl Gui {
         Template {
             scale: self.scale.get_value(),
             count: self.fret_count.get_value_as_int() as u32,
+            multi: self.checkbox_multi.get_active(),
             scale_treble: Some(self.scale_multi_course.get_value()),
             nut: self.nut_width.get_value(),
             bridge: self.bridge_spacing.get_value(),
             pfret: Some(self.perpendicular_fret.get_value()),
-            border: Some(self.border.get_value()),
         }
     }
 
@@ -316,6 +313,14 @@ pub fn run_ui() {
     }
 
     let gui = Gui::new();
+
+    let mut statefile = CONFIGDIR.clone();
+    statefile.push("state.toml");
+    if statefile.exists() {
+        if let Some(template) = Template::load_from_file(statefile) {
+            gui.load_template(template);
+        }
+    }
 
     gui.window
         .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
