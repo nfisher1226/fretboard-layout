@@ -13,7 +13,6 @@ use std::{env, process};
 pub struct Template {
     pub scale: f64,
     pub count: u32,
-    pub multi: bool,
     pub scale_treble: Option<f64>,
     pub nut: f64,
     pub bridge: f64,
@@ -45,7 +44,7 @@ impl Template {
         Some(template)
     }
     /// Saves Template struct as a .toml file
-    fn save_to_file(&self, file: &PathBuf) {
+    pub fn save_to_file(&self, file: &PathBuf) {
         let toml_string = toml::to_string(&self).expect("Could not encode TOML value");
         let mut file = file.clone();
         file.set_extension("toml");

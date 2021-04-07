@@ -73,11 +73,13 @@ impl Gui {
     pub fn load_template(&self, template: Template) {
         self.scale.set_value(template.scale);
         self.fret_count.set_value(template.count.into());
-        self.checkbox_multi.set_active(template.multi);
-        self.toggle_multi();
         if let Some(scale_treble) = template.scale_treble {
             self.scale_multi_course.set_value(scale_treble);
+            self.checkbox_multi.set_active(true);
+        } else {
+            self.checkbox_multi.set_active(false);
         }
+        self.toggle_multi();
         self.nut_width.set_value(template.nut);
         self.bridge_spacing.set_value(template.bridge);
         if let Some(pfret) = template.pfret {
@@ -90,8 +92,13 @@ impl Gui {
         Template {
             scale: self.scale.get_value(),
             count: self.fret_count.get_value_as_int() as u32,
-            multi: self.checkbox_multi.get_active(),
-            scale_treble: Some(self.scale_multi_course.get_value()),
+            scale_treble: {
+                if self.checkbox_multi.get_active() {
+                    Some(self.scale_multi_course.get_value())
+                } else {
+                    None
+                }
+            },
             nut: self.nut_width.get_value(),
             bridge: self.bridge_spacing.get_value(),
             pfret: Some(self.perpendicular_fret.get_value()),
@@ -240,6 +247,7 @@ impl Gui {
         };
         if *self.saved_once.borrow() {
             self.get_specs(&filename).run();
+            self.save_template(&filename);
             self.saved_current.swap(&RefCell::new(true));
             self.set_window_title();
         }
@@ -251,9 +259,15 @@ impl Gui {
             self.saved_once.swap(&RefCell::new(true));
             self.filename.swap(&RefCell::new(c.to_string()));
             self.get_specs(&c).run();
+            self.save_template(&c);
             self.saved_current.swap(&RefCell::new(true));
             self.set_window_title();
         };
+    }
+
+    fn save_template(&self, file: &str) {
+        let data: Template = self.template_from_gui();
+        data.save_to_file(&PathBuf::from(file));
     }
 
     /// Updates the title of the program window with the name of the output file.
