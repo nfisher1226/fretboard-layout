@@ -302,6 +302,7 @@ dependencies = [
  "gio",
  "glib",
  "gtk",
+ "lazy_static",
  "rug",
  "serde",
  "svg",

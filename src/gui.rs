@@ -68,6 +68,7 @@ impl Gui {
         })
     }
 
+    /// Sets widget state to match temmplate
     pub fn load_template(&self, template: Template) {
         self.scale.set_value(template.scale);
         self.fret_count.set_value(template.count.into());
@@ -84,6 +85,19 @@ impl Gui {
         }
         if let Some(border) = template.border {
             self.border.set_value(border);
+        }
+    }
+
+    /// Populates an instance of Template from the gui
+    fn template_from_gui(&self) -> Template {
+        Template {
+            scale: self.scale.get_value(),
+            count: self.fret_count.get_value_as_int() as u32,
+            scale_treble: Some(self.scale_multi_course.get_value()),
+            nut: self.nut_width.get_value(),
+            bridge: self.bridge_spacing.get_value(),
+            pfret: Some(self.perpendicular_fret.get_value()),
+            border: Some(self.border.get_value()),
         }
     }
 
@@ -195,9 +209,14 @@ impl Gui {
         dialog.set_do_overwrite_confirmation(true);
         let res = dialog.run();
         let filename: Option<String> = if res == Accept {
-            match dialog.get_filename().unwrap().to_str() {
-                Some(c) => Some(c.to_string()),
-                None => Some(currentfile),
+            if let Some(mut name) = dialog.get_filename() {
+                name.set_extension("svg");
+                match name.to_str() {
+                    Some(c) => Some(c.to_string()),
+                    None => Some(currentfile),
+                }
+            } else {
+                None
             }
         } else {
             None
@@ -263,7 +282,10 @@ impl Gui {
     fn process_keypress(&self, key: u16, ctrl: bool, shift: bool) {
         if ctrl {
             match key {
-                24 => gtk::main_quit(),        // q
+                24 => {                        // q
+                    self.cleanup();
+                    gtk::main_quit();
+                },
                 26 => self.open_external(),    // e
                 58 => {                        // m
                     self.checkbox_multi
@@ -279,6 +301,11 @@ impl Gui {
                 _ => {}
             }
         }
+    }
+
+    fn cleanup(&self) {
+        let data: Template = self.template_from_gui();
+        data.save_statefile();
     }
 }
 
@@ -358,7 +385,11 @@ pub fn run_ui() {
     gui.external_button
         .connect_clicked(clone!(@weak gui => move |_| gui.open_external()));
 
-    gui.quit_button.connect_clicked(|_| gtk::main_quit());
+    gui.quit_button
+        .connect_clicked(clone!(@weak gui => move |_| {
+            gui.cleanup();
+            gtk::main_quit();
+        }));
 
     gui.window.connect_delete_event(|_, _| {
         gtk::main_quit();

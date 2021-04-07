@@ -233,6 +233,7 @@ impl Specs {
             .add(self.draw_frets(&lengths, &factors))
     }
 
+    /// Gets the document and saves output
     pub fn run(&self) {
         let document = self.create_document();
         if self.output == "-" {
