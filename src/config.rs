@@ -23,6 +23,10 @@ pub fn get_config_dir() -> PathBuf {
     };
     let progname = env!("CARGO_PKG_NAME");
     configdir.push(progname);
+    if !configdir.exists() {
+        fs::create_dir(&configdir.to_str().unwrap()).unwrap_or_else(|e|
+            eprintln!("{}", e));
+    }
     configdir
 }
 

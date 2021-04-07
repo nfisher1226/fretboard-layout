@@ -7,6 +7,7 @@ use clap::{crate_version, load_yaml, App};
 use std::path::PathBuf;
 /// Processes the data provided by the gui into a fully rendered svg image.
 mod backend;
+/// Saved configuration data
 mod config;
 /// Used by the backend to calculate point locations and lines.
 mod fretboard;
