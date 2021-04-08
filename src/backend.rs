@@ -321,6 +321,13 @@ pub fn run(matches: &ArgMatches) {
             };
             specs.run();
         }
-        _ => crate::gui::run_ui(),
+        _ => {
+            let template = if matches.occurrences_of("TEMPLATE") > 0 {
+                matches.value_of("TEMPLATE")
+            } else {
+                None
+            };
+            crate::gui::run_ui(template);
+        },
     }
 }

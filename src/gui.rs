@@ -320,7 +320,7 @@ impl Gui {
     }
 }
 
-pub fn run_ui() {
+pub fn run_ui(template: Option<&str>) {
     if gtk::init().is_err() {
         println!("Failed to initialize GTK.");
         return;
@@ -328,13 +328,25 @@ pub fn run_ui() {
 
     let gui = Gui::new();
 
-    let mut statefile = CONFIGDIR.clone();
-    statefile.push("state.toml");
-    if statefile.exists() {
-        if let Some(template) = Template::load_from_file(statefile) {
-            gui.load_template(template);
-        }
-    }
+    match template {
+        Some(t) => {
+            let path = PathBuf::from(t);
+            if path.exists() {
+                if let Some(template) = Template::load_from_file(path) {
+                    gui.load_template(template);
+                }
+            }
+        },
+        None => {
+            let mut statefile = CONFIGDIR.clone();
+            statefile.push("state.toml");
+            if statefile.exists() {
+                if let Some(template) = Template::load_from_file(statefile) {
+                    gui.load_template(template);
+                }
+            }
+        },
+    };
 
     gui.window
         .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));

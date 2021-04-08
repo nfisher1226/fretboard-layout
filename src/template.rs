@@ -1,13 +1,10 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::CONFIGDIR;
-use crate::gui::Gui;
 use serde::{ Deserialize, Serialize };
 use toml;
-use xdg_basedir::*;
 
 use std::fs;
 use std::path::PathBuf;
-use std::{env, process};
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Template {
