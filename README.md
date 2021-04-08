@@ -33,4 +33,4 @@ approximation, as the nut is slanted.
 * -e, --external <program> - open the output file in an external program
 ## Future Development
 For the gui, it would be nice to save state and allow loading specs from and saving
-to templates.
+to templates. **partial implementation 4/7/21**
