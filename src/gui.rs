@@ -265,6 +265,45 @@ impl Gui {
         };
     }
 
+    fn open_template(&self) {
+        let dialog = gtk::FileChooserDialog::with_buttons::<Window>(
+            Some("Open Template"),
+            Some(&Window::new(WindowType::Popup)),
+            FileChooserAction::Open,
+            &[
+                ("_Cancel", ResponseType::Cancel),
+                ("_Ok", ResponseType::Accept),
+            ],
+        );
+        let filter = gtk::FileFilter::new();
+        filter.add_pattern("*.toml");
+        filter.set_name(Some("toml files"));
+        dialog.add_filter(&filter);
+        let res = dialog.run();
+        let filename: Option<String> = if res == Accept {
+            if let Some(name) = dialog.get_filename() {
+                match name.to_str() {
+                    Some(c) => Some(c.to_string()),
+                    None => None,
+                }
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        dialog.close();
+        match filename {
+            Some(t) => {
+                if let Some(template) = Template::load_from_file(PathBuf::from(t)) {
+                    self.load_template(template);
+                }
+            },
+            None => println!("Nothing selected"),
+        };
+    }
+
+    /// Saves a template (toml format) to the specified location
     fn save_template(&self, file: &str) {
         let data: Template = self.template_from_gui();
         data.save_to_file(&PathBuf::from(file));
@@ -298,6 +337,7 @@ impl Gui {
                     gtk::main_quit();
                 },
                 26 => self.open_external(),    // e
+                32 => self.open_template(),    // o
                 58 => {                        // m
                     self.checkbox_multi
                         .set_active(!self.checkbox_multi.get_active());
