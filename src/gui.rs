@@ -31,13 +31,15 @@ pub struct Gui {
     pub nut_width: gtk::SpinButton,
     pub bridge_spacing: gtk::SpinButton,
     pub border: gtk::SpinButton,
-    external_button: gtk::ToolButton,
     external_program: gtk::AppChooserButton,
     saved_once: RefCell<bool>,
     saved_current: RefCell<bool>,
     filename: RefCell<String>,
-    save_button: gtk::ToolButton,
-    quit_button: gtk::ToolButton,
+    open_template: gtk::MenuItem,
+    save_file: gtk::MenuItem,
+    save_as: gtk::MenuItem,
+    open_external: gtk::MenuItem,
+    quit: gtk::MenuItem,
     window: gtk::Window,
 }
 
@@ -58,13 +60,15 @@ impl Gui {
             nut_width: builder.get_object("nut_width").unwrap(),
             bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
             border: builder.get_object("border").unwrap(),
-            external_button: builder.get_object("external_button").unwrap(),
             external_program: builder.get_object("external_program").unwrap(),
             saved_once: RefCell::new(false),
             saved_current: RefCell::new(false),
             filename: RefCell::new(String::from("")),
-            save_button: builder.get_object("save_button").unwrap(),
-            quit_button: builder.get_object("quit_button").unwrap(),
+            open_template: builder.get_object("open_template").unwrap(),
+            save_file: builder.get_object("save_file").unwrap(),
+            save_as: builder.get_object("save_as").unwrap(),
+            open_external: builder.get_object("open_external").unwrap(),
+            quit: builder.get_object("quit").unwrap(),
             window: builder.get_object("mainWindow").unwrap(),
         })
     }
@@ -184,7 +188,7 @@ impl Gui {
     /// Saves the file and opens it with an external program.
     fn open_external(&self) {
         if !*self.saved_current.borrow() {
-            self.save_button.emit_clicked();
+            self.save_file();
         }
         if *self.saved_current.borrow() {
             let cmd = self.get_cmd();
@@ -387,6 +391,19 @@ pub fn run_ui(template: Option<&str>) {
             }
         },
     };
+    let provider = gtk::CssProvider::new();
+    provider
+        .load_from_data(format!(
+            "spinbutton button {{ min-height: 0; min-width: 0; padding: 1px; }}")
+        .as_bytes())
+        .expect("Failed to load CSS");
+
+    gtk::StyleContext::add_provider_for_screen(
+        &gdk::Screen::get_default().expect("Error initializing gtk css provider."),
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
+
 
     gui.window
         .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
@@ -448,16 +465,28 @@ pub fn run_ui(template: Option<&str>) {
         Inhibit(false)
     });
 
-    gui.save_button
-        .connect_clicked(clone!(@weak gui => move |_| {
+    gui.save_file
+        .connect_activate(clone!(@weak gui => move |_| {
             gui.save_file();
         }));
 
-    gui.external_button
-        .connect_clicked(clone!(@weak gui => move |_| gui.open_external()));
+    gui.save_as
+        .connect_activate(clone!(@weak gui => move |_| {
+            gui.save_file_as();
+        }));
 
-    gui.quit_button
-        .connect_clicked(clone!(@weak gui => move |_| {
+    gui.open_template
+        .connect_activate(clone!(@weak gui => move |_| {
+            gui.open_template();
+        }));
+
+    gui.open_external
+        .connect_activate(clone!(@weak gui => move |_| {
+            gui.open_external();
+        }));
+
+    gui.quit
+        .connect_activate(clone!(@weak gui => move |_| {
             gui.cleanup();
             gtk::main_quit();
         }));

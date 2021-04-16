@@ -54,6 +54,94 @@ Author: Nathan Fisher
     <property name="step-increment">1</property>
     <property name="page-increment">3</property>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="stock">gtk-open</property>
+  </object>
+  <object class="GtkMenu" id="app_menu">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="open_template">
+        <property name="label" translatable="yes">Open Template</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="tooltip-text" translatable="yes">Open a Gfret toml template</property>
+        <property name="image">image1</property>
+        <property name="use-stock">False</property>
+        <property name="always-show-image">True</property>
+        <accelerator key="o" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="save_file">
+        <property name="label">gtk-save</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="tooltip-text" translatable="yes">Save File</property>
+        <property name="use-underline">True</property>
+        <property name="use-stock">True</property>
+        <property name="always-show-image">True</property>
+        <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="save_as">
+        <property name="label">gtk-save-as</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="tooltip-text" translatable="yes">Save file as ...</property>
+        <property name="use-underline">True</property>
+        <property name="use-stock">True</property>
+        <accelerator key="s" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="open_external">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="tooltip-text" translatable="yes">Open in an external editor</property>
+        <property name="label" translatable="yes">Open Externally</property>
+        <property name="use-underline">True</property>
+        <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="sep2">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="preferences">
+        <property name="label">gtk-preferences</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="tooltip-text" translatable="yes">Open preferences dialog</property>
+        <property name="use-underline">True</property>
+        <property name="use-stock">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="sep1">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="quit">
+        <property name="label">gtk-quit</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="tooltip-text" translatable="yes">Exit Gfret</property>
+        <property name="use-underline">True</property>
+        <property name="use-stock">True</property>
+        <property name="always-show-image">True</property>
+        <accelerator key="q" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkAdjustment" id="nutWidthAdjustment">
     <property name="lower">20</property>
     <property name="upper">100</property>
@@ -250,26 +338,57 @@ Author: Nathan Fisher
             <property name="can-focus">False</property>
             <property name="halign">center</property>
             <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes"> </property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkMenuButton" id="app_menu_button">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
+                    <property name="receives-default">True</property>
+                    <property name="popup">app_menu</property>
+                    <property name="direction">up</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="stock">gtk-justify-fill</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkToolbar">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">start</property>
                 <property name="show-arrow">False</property>
-                <child>
-                  <object class="GtkToolButton" id="save_button">
-                    <property name="name">save_button</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Save File</property>
-                    <property name="label" translatable="yes">Save</property>
-                    <property name="use-underline">True</property>
-                    <property name="stock-id">gtk-save</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
                 <child>
                   <object class="GtkSeparatorToolItem">
                     <property name="visible">True</property>
@@ -293,17 +412,6 @@ Author: Nathan Fisher
                         <property name="hexpand">True</property>
                         <property name="row-spacing">1</property>
                         <property name="column-spacing">1</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">Nut Width:</property>
-                          </object>
-                          <packing>
-                            <property name="left-attach">0</property>
-                            <property name="top-attach">0</property>
-                          </packing>
-                        </child>
                         <child>
                           <object class="GtkSpinButton" id="nut_width">
                             <property name="name">nut_width</property>
@@ -352,6 +460,17 @@ Author: Nathan Fisher
                             <property name="top-attach">1</property>
                           </packing>
                         </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="label" translatable="yes">Nut Width:</property>
+                          </object>
+                          <packing>
+                            <property name="left-attach">0</property>
+                            <property name="top-attach">0</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -364,7 +483,7 @@ Author: Nathan Fisher
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -468,18 +587,6 @@ Author: Nathan Fisher
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkToolButton" id="external_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="use-underline">True</property>
-                    <property name="stock-id">gtk-execute</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkToolItem">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
@@ -569,43 +676,6 @@ Author: Nathan Fisher
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToolbar">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="halign">start</property>
-                <property name="show-arrow">False</property>
-                <child>
-                  <object class="GtkSeparatorToolItem">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="quit_button">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="tooltip-text" translatable="yes">Quit program</property>
-                    <property name="label" translatable="yes">Quit</property>
-                    <property name="use-underline">True</property>
-                    <property name="stock-id">gtk-quit</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
             </child>
