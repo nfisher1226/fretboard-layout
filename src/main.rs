@@ -7,23 +7,23 @@ use clap::{crate_version, load_yaml, App};
 use std::path::PathBuf;
 /// Processes the data provided by the gui into a fully rendered svg image.
 mod backend;
-/// Saved configuration data
-mod config;
 /// Used by the backend to calculate point locations and lines.
 mod fretboard;
 /// The Gtk user interface to gfret.
 mod gui;
 /// Persistent templates
 mod template;
+/// Preferences Dialog and configuration data
+mod prefs;
 
 use backend::Specs;
-use config::Config;
+use prefs::Config;
 
 #[macro_use]
 extern crate lazy_static;
 
 lazy_static! {
-    static ref CONFIGDIR: PathBuf = config::get_config_dir();
+    static ref CONFIGDIR: PathBuf = Config::get_config_dir();
 }
 
 fn main() {

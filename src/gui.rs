@@ -9,6 +9,7 @@ use gtk::{
     ResponseType::Accept, SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
 };
 use crate::CONFIGDIR;
+use crate::prefs;
 use crate::Specs;
 use crate::template::Template;
 
@@ -39,6 +40,7 @@ pub struct Gui {
     save_file: gtk::MenuItem,
     save_as: gtk::MenuItem,
     open_external: gtk::MenuItem,
+    preferences: gtk::MenuItem,
     quit: gtk::MenuItem,
     window: gtk::Window,
 }
@@ -68,6 +70,7 @@ impl Gui {
             save_file: builder.get_object("save_file").unwrap(),
             save_as: builder.get_object("save_as").unwrap(),
             open_external: builder.get_object("open_external").unwrap(),
+            preferences: builder.get_object("preferences").unwrap(),
             quit: builder.get_object("quit").unwrap(),
             window: builder.get_object("mainWindow").unwrap(),
         })
@@ -202,7 +205,7 @@ impl Gui {
         let currentfile = if *self.saved_once.borrow() {
             self.filename.borrow().to_string()
         } else {
-            String::from("unitled.svg")
+            String::from("untitled.svg")
         };
         let dialog = gtk::FileChooserDialog::with_buttons::<Window>(
             Some("Save As"),
@@ -485,6 +488,10 @@ pub fn run_ui(template: Option<&str>) {
             gui.open_external();
         }));
 
+    gui.preferences
+        .connect_activate( |_| {
+            prefs::run();
+        });
     gui.quit
         .connect_activate(clone!(@weak gui => move |_| {
             gui.cleanup();
