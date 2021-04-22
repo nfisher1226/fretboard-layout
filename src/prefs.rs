@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::CONFIGDIR;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::str::FromStr;
 use std::{env, fs, process};
@@ -75,7 +75,9 @@ impl PrefWidgets {
         }
     }
 
-    fn get_color_string(&self, button: &gtk::ColorButton) -> String {
+    #[allow(clippy::cast_sign_loss)]
+    #[allow(clippy::cast_possible_truncation)]
+    fn get_color_string(button: &gtk::ColorButton) -> String {
         let color = button.get_rgba();
         format!(
             "rgba({},{},{},{})",
@@ -94,9 +96,9 @@ impl PrefWidgets {
             },
             border: self.border.get_value(),
             line_weight: self.line_weight.get_value(),
-            fretline_color: self.get_color_string(&self.fretline_color),
+            fretline_color: PrefWidgets::get_color_string(&self.fretline_color),
             draw_centerline: self.draw_centerline.get_active(),
-            centerline_color: self.get_color_string(&self.centerline_color),
+            centerline_color: PrefWidgets::get_color_string(&self.centerline_color),
             print_specs: self.print_specs.get_active(),
             font: {
                 match self.font_chooser.get_font() {
@@ -104,7 +106,7 @@ impl PrefWidgets {
                     None => None,
                 }
             },
-            background_color: self.get_color_string(&self.background_color),
+            background_color: PrefWidgets::get_color_string(&self.background_color),
         }
     }
 
@@ -197,7 +199,7 @@ impl Config {
     }
 
     /// Saves Template struct as a .toml file
-    pub fn save_to_file(&self, file: &PathBuf) {
+    pub fn save_to_file(&self, file: &Path) {
         let toml_string = toml::to_string(&self).expect("Could not encode TOML value");
         fs::write(file, toml_string).expect("Could not write to file!");
     }
@@ -209,7 +211,7 @@ pub fn run() {
     prefs
         .external_program
         .connect_changed(clone!(@weak prefs => move |_| {
-            if let Some(_) = prefs.external_program.get_app_info() {
+            if prefs.external_program.get_app_info().is_some() {
                 prefs.save_prefs();
             }
         }));
@@ -253,7 +255,7 @@ pub fn run() {
     prefs
         .font_chooser
         .connect_font_set(clone!(@weak prefs => move |_| {
-            if let Some(_) = prefs.font_chooser.get_font() {
+            if prefs.font_chooser.get_font().is_some() {
                 prefs.save_prefs();
             }
         }));

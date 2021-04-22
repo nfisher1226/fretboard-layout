@@ -1,6 +1,6 @@
 [package]
 name = "gfret"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2018"
 

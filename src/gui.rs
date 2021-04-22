@@ -75,7 +75,7 @@ impl Gui {
     }
 
     /// Sets widget state to match temmplate
-    pub fn load_template(&self, template: Template) {
+    pub fn load_template(&self, template: &Template) {
         self.scale.set_value(template.scale);
         self.fret_count.set_value(template.count.into());
         if let Some(scale_treble) = template.scale_treble {
@@ -93,6 +93,7 @@ impl Gui {
     }
 
     /// Populates an instance of Template from the gui
+    #[allow(clippy::cast_sign_loss)]
     fn template_from_gui(&self) -> Template {
         Template {
             scale: self.scale.get_value(),
@@ -197,7 +198,7 @@ impl Gui {
         }
     }
 
-    /// Opens a Gtk FileChooserDialog and sets the path to the output file.
+    /// Opens a`gtk::FileChooserDialog` and sets the path to the output file.
     fn get_output(&self) -> Option<String> {
         let currentfile = if *self.saved_once.borrow() {
             self.filename.borrow().to_string()
@@ -217,15 +218,13 @@ impl Gui {
         dialog.set_do_overwrite_confirmation(true);
         let res = dialog.run();
         let filename: Option<String> = if res == Accept {
-            if let Some(mut name) = dialog.get_filename() {
+            dialog.get_filename().and_then(|mut name| {
                 name.set_extension("svg");
                 match name.to_str() {
                     Some(c) => Some(c.to_string()),
                     None => Some(currentfile),
                 }
-            } else {
-                None
-            }
+            })
         } else {
             None
         };
@@ -234,7 +233,7 @@ impl Gui {
     }
 
     /// Determines if the file has been saved once. If it has, then it is saved
-    /// again to the same path. If not, calls self.get_output() to allow the
+    /// again to the same path. If not, calls `self.get_output()` to allow the
     /// user to select a path to save to.
     fn save_file(&self) {
         let filename: String = if *self.saved_once.borrow() {
@@ -285,14 +284,11 @@ impl Gui {
         dialog.add_filter(&filter);
         let res = dialog.run();
         let filename: Option<String> = if res == Accept {
-            if let Some(name) = dialog.get_filename() {
-                match name.to_str() {
+            dialog
+                .get_filename().and_then(|name| match name.to_str() {
                     Some(c) => Some(c.to_string()),
                     None => None,
-                }
-            } else {
-                None
-            }
+                })
         } else {
             None
         };
@@ -300,7 +296,7 @@ impl Gui {
         match filename {
             Some(t) => {
                 if let Some(template) = Template::load_from_file(PathBuf::from(t)) {
-                    self.load_template(template);
+                    self.load_template(&template);
                 }
             }
             None => println!("Nothing selected"),
@@ -342,7 +338,6 @@ impl Gui {
                     gtk::main_quit();
                 }
                 26 => self.open_external(), // e
-                32 => self.open_template(), // o
                 58 => {
                     // m
                     self.checkbox_multi
@@ -365,6 +360,22 @@ impl Gui {
         let data: Template = self.template_from_gui();
         data.save_statefile();
     }
+
+    fn init_css() {
+        let provider = gtk::CssProvider::new();
+        provider
+            .load_from_data(
+                format!("spinbutton button {{ min-height: 0; min-width: 0; padding: 1px; }}")
+                    .as_bytes(),
+            )
+            .expect("Failed to load CSS");
+
+        gtk::StyleContext::add_provider_for_screen(
+            &gdk::Screen::get_default().expect("Error initializing gtk css provider."),
+            &provider,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
+    }
 }
 
 pub fn run_ui(template: Option<&str>) {
@@ -373,44 +384,28 @@ pub fn run_ui(template: Option<&str>) {
         return;
     }
 
-    let gui = Gui::new();
+    let gui = Rc::new(Gui::new());
 
-    match template {
-        Some(t) => {
-            let path = PathBuf::from(t);
-            if path.exists() {
-                if let Some(template) = Template::load_from_file(path) {
-                    gui.load_template(template);
-                }
+    if let Some(t) = template {
+        let path = PathBuf::from(t);
+        if path.exists() {
+            if let Some(template) = Template::load_from_file(path) {
+                gui.load_template(&template);
             }
         }
-        None => {
-            let mut statefile = CONFIGDIR.clone();
-            statefile.push("state.toml");
-            if statefile.exists() {
-                if let Some(template) = Template::load_from_file(statefile) {
-                    gui.load_template(template);
-                }
+    } else {
+        let mut statefile = CONFIGDIR.clone();
+        statefile.push("state.toml");
+        if statefile.exists() {
+            if let Some(template) = Template::load_from_file(statefile) {
+                gui.load_template(&template);
             }
         }
-    };
-    let provider = gtk::CssProvider::new();
-    provider
-        .load_from_data(
-            format!("spinbutton button {{ min-height: 0; min-width: 0; padding: 1px; }}")
-                .as_bytes(),
-        )
-        .expect("Failed to load CSS");
-
-    gtk::StyleContext::add_provider_for_screen(
-        &gdk::Screen::get_default().expect("Error initializing gtk css provider."),
-        &provider,
-        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-    );
+    }
+    Gui::init_css();
 
     gui.window
         .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
-    let gui = Rc::new(gui);
     gui.draw_preview(false);
 
     gui.checkbox_multi
@@ -485,6 +480,7 @@ pub fn run_ui(template: Option<&str>) {
     gui.preferences.connect_activate(|_| {
         prefs::run();
     });
+
     gui.quit.connect_activate(clone!(@weak gui => move |_| {
         gui.cleanup();
         gtk::main_quit();
@@ -494,7 +490,7 @@ pub fn run_ui(template: Option<&str>) {
         gtk::main_quit();
         Inhibit(false)
     });
-    gui.window.show_now();
 
+    gui.window.show_now();
     gtk::main()
 }

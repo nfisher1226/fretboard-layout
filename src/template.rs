@@ -1,10 +1,9 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::CONFIGDIR;
 use serde::{Deserialize, Serialize};
-use toml;
 
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Template {
@@ -41,9 +40,9 @@ impl Template {
         Some(template)
     }
     /// Saves Template struct as a .toml file
-    pub fn save_to_file(&self, file: &PathBuf) {
+    pub fn save_to_file(&self, file: &Path) {
         let toml_string = toml::to_string(&self).expect("Could not encode TOML value");
-        let mut file = file.clone();
+        let mut file = file.to_path_buf();
         file.set_extension("toml");
         fs::write(file, toml_string).expect("Could not write to file!");
     }
