@@ -13,7 +13,7 @@ use std::{env, fs, process};
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Config {
-    pub external_program: Option<PathBuf>,
+    pub external_program: String,
     pub border: f64,
     pub line_weight: f64,
     pub fretline_color: String,
@@ -26,7 +26,8 @@ pub struct Config {
 
 struct PrefWidgets {
     prefs_window: gtk::Dialog,
-    external_program: gtk::AppChooserButton,
+    external_program: gtk::Entry,
+    external_button: gtk::Button,
     border: gtk::SpinButton,
     line_weight: gtk::SpinButton,
     fretline_color: gtk::ColorButton,
@@ -48,6 +49,9 @@ impl PrefWidgets {
             external_program: builder
                 .get_object("external_program")
                 .expect("Error getting 'external_program'"),
+            external_button: builder
+                .get_object("external_button")
+                .expect("Error getting 'external_button'"),
             border: builder
                 .get_object("border")
                 .expect("Error getting 'border'"),
@@ -90,10 +94,7 @@ impl PrefWidgets {
 
     fn config_from_widgets(&self) -> Config {
         Config {
-            external_program: match self.external_program.get_app_info() {
-                Some(c) => c.get_commandline(),
-                None => None,
-            },
+            external_program: String::from(self.external_program.get_text()),
             border: self.border.get_value(),
             line_weight: self.line_weight.get_value(),
             fretline_color: PrefWidgets::get_color_string(&self.fretline_color),
@@ -121,6 +122,7 @@ impl PrefWidgets {
             if let Ok(color) = gdk::RGBA::from_str(&config.background_color) {
                 self.background_color.set_rgba(&color);
             }
+            self.external_program.set_text(&config.external_program);
             self.border.set_value(config.border);
             self.line_weight.set_value(config.line_weight);
             self.draw_centerline.set_active(config.draw_centerline);
@@ -141,7 +143,7 @@ impl PrefWidgets {
 impl Config {
     pub fn new() -> Config {
         Config {
-            external_program: Some(PathBuf::from("xdg-open")),
+            external_program: String::from("xdg-open"),
             border: 10.0,
             line_weight: 1.0,
             fretline_color: String::from("black"),
@@ -211,9 +213,7 @@ pub fn run() {
     prefs
         .external_program
         .connect_changed(clone!(@weak prefs => move |_| {
-            if prefs.external_program.get_app_info().is_some() {
-                prefs.save_prefs();
-            }
+            prefs.save_prefs();
         }));
 
     prefs
