@@ -1,29 +1,27 @@
 #![warn(clippy::all, clippy::pedantic)]
 use gio::AppInfoExt;
 use glib::clone;
-use gtk;
 use gtk::prelude::*;
-use serde::{ Deserialize, Serialize };
-use xdg_basedir::*;
+use serde::{Deserialize, Serialize};
 
 use crate::CONFIGDIR;
 
-use std::{env, fs, process};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::str::FromStr;
+use std::{env, fs, process};
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Config {
-    external_program: Option<PathBuf>,
-    border: f64,
-    line_weight: f64,
-    fretline_color: String,
-    draw_centerline: bool,
-    centerline_color: String,
-    print_specs: bool,
-    font: Option<String>,
-    background_color: String,
+    pub external_program: Option<PathBuf>,
+    pub border: f64,
+    pub line_weight: f64,
+    pub fretline_color: String,
+    pub draw_centerline: bool,
+    pub centerline_color: String,
+    pub print_specs: bool,
+    pub font: Option<String>,
+    pub background_color: String,
 }
 
 struct PrefWidgets {
@@ -44,22 +42,43 @@ impl PrefWidgets {
         let glade_src = include_str!("prefs.glade");
         let builder = gtk::Builder::from_string(glade_src);
         PrefWidgets {
-            prefs_window: builder.get_object("prefs_window").expect("Error getting 'prefs_window'"),
-            external_program: builder.get_object("external_program").expect("Error getting 'external_program'"),
-            border: builder.get_object("border").expect("Error getting 'border'"),
-            line_weight: builder.get_object("line_weight").expect("Error getting 'line_weight'"),
-            fretline_color: builder.get_object("fretline_color").expect("Error getting 'fretline_color'"),
-            draw_centerline: builder.get_object("draw_centerline").expect("Error getting 'draw_centerline'"),
-            centerline_color: builder.get_object("centerline_color").expect("Error getting 'centerline_color'"),
-            print_specs: builder.get_object("print_specs").expect("Error getting 'print_specs'"),
-            font_chooser: builder.get_object("font_chooser").expect("Error getting 'font_chooser'"),
-            background_color: builder.get_object("background_color").expect("Error getting 'background_color'"),
+            prefs_window: builder
+                .get_object("prefs_window")
+                .expect("Error getting 'prefs_window'"),
+            external_program: builder
+                .get_object("external_program")
+                .expect("Error getting 'external_program'"),
+            border: builder
+                .get_object("border")
+                .expect("Error getting 'border'"),
+            line_weight: builder
+                .get_object("line_weight")
+                .expect("Error getting 'line_weight'"),
+            fretline_color: builder
+                .get_object("fretline_color")
+                .expect("Error getting 'fretline_color'"),
+            draw_centerline: builder
+                .get_object("draw_centerline")
+                .expect("Error getting 'draw_centerline'"),
+            centerline_color: builder
+                .get_object("centerline_color")
+                .expect("Error getting 'centerline_color'"),
+            print_specs: builder
+                .get_object("print_specs")
+                .expect("Error getting 'print_specs'"),
+            font_chooser: builder
+                .get_object("font_chooser")
+                .expect("Error getting 'font_chooser'"),
+            background_color: builder
+                .get_object("background_color")
+                .expect("Error getting 'background_color'"),
         }
     }
 
     fn get_color_string(&self, button: &gtk::ColorButton) -> String {
         let color = button.get_rgba();
-        format!("rgba({},{},{},{})",
+        format!(
+            "rgba({},{},{},{})",
             (color.red * 255.0) as u8,
             (color.green * 255.0) as u8,
             (color.blue * 255.0) as u8,
@@ -118,8 +137,22 @@ impl PrefWidgets {
 }
 
 impl Config {
+    pub fn new() -> Config {
+        Config {
+            external_program: Some(PathBuf::from("xdg-open")),
+            border: 10.0,
+            line_weight: 1.0,
+            fretline_color: String::from("black"),
+            draw_centerline: true,
+            centerline_color: String::from("blue"),
+            print_specs: true,
+            font: Some(String::from("Sans Regular 12")),
+            background_color: String::from("rgba(0,0,0,0)"),
+        }
+    }
+
     pub fn get_config_dir() -> PathBuf {
-        let mut configdir: PathBuf = match get_config_home() {
+        let mut configdir: PathBuf = match xdg_basedir::get_config_home() {
             Ok(c) => c,
             Err(e) => {
                 eprintln!("{}", e);
@@ -129,8 +162,7 @@ impl Config {
         let progname = env!("CARGO_PKG_NAME");
         configdir.push(progname);
         if !configdir.exists() {
-            fs::create_dir(&configdir.to_str().unwrap()).unwrap_or_else(|e|
-                eprintln!("{}", e));
+            fs::create_dir(&configdir.to_str().unwrap()).unwrap_or_else(|e| eprintln!("{}", e));
         }
         configdir
     }
@@ -141,7 +173,7 @@ impl Config {
         file
     }
 
-    fn from_file() -> Option<Config> {
+    pub fn from_file() -> Option<Config> {
         let config_file = Config::get_config_file();
         let config_file = if config_file.exists() {
             match fs::read_to_string(config_file) {
@@ -158,7 +190,7 @@ impl Config {
             Ok(c) => c,
             Err(e) => {
                 eprintln!("{}", e);
-                return None
+                return None;
             }
         };
         Some(config)
@@ -174,55 +206,60 @@ impl Config {
 pub fn run() {
     let prefs = Rc::new(PrefWidgets::new());
     prefs.load_config();
-    prefs.external_program
+    prefs
+        .external_program
         .connect_changed(clone!(@weak prefs => move |_| {
             if let Some(_) = prefs.external_program.get_app_info() {
                 prefs.save_prefs();
             }
         }));
 
-    prefs.border
+    prefs
+        .border
         .connect_value_changed(clone!(@weak prefs => move |_| {
             prefs.save_prefs();
         }));
 
-    prefs.line_weight
+    prefs
+        .line_weight
         .connect_value_changed(clone!(@weak prefs => move |_| {
             prefs.save_prefs();
         }));
 
-    prefs.fretline_color
+    prefs
+        .fretline_color
         .connect_color_set(clone!(@weak prefs => move |_| {
             prefs.save_prefs();
         }));
 
     let prefs_clone = prefs.clone();
-    prefs.draw_centerline
-        .connect_state_set( move |_,_| {
-            prefs_clone.save_prefs();
-            gtk::Inhibit(false)
-        });
+    prefs.draw_centerline.connect_state_set(move |_, _| {
+        prefs_clone.save_prefs();
+        gtk::Inhibit(false)
+    });
 
-    prefs.centerline_color
+    prefs
+        .centerline_color
         .connect_color_set(clone!(@weak prefs => move |_| {
             prefs.save_prefs();
         }));
 
     let prefs_clone = prefs.clone();
-    prefs.print_specs
-        .connect_state_set( move |_,_| {
-            prefs_clone.save_prefs();
-            gtk::Inhibit(false)
-        });
+    prefs.print_specs.connect_state_set(move |_, _| {
+        prefs_clone.save_prefs();
+        gtk::Inhibit(false)
+    });
 
-    prefs.font_chooser
+    prefs
+        .font_chooser
         .connect_font_set(clone!(@weak prefs => move |_| {
             if let Some(_) = prefs.font_chooser.get_font() {
                 prefs.save_prefs();
             }
         }));
 
-    prefs.background_color
+    prefs
+        .background_color
         .connect_color_set(clone!(@weak prefs => move |_| {
             prefs.save_prefs();
         }));

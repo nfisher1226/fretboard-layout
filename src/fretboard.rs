@@ -1,5 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::backend::Factors;
+use crate::prefs::Config;
 use crate::Specs;
 use std::f64;
 use svg::node::element::{path::Data, Path};
@@ -18,26 +19,26 @@ pub struct Line {
 }
 
 impl Lengths {
-    fn get_point_bass(&self, factors: &Factors, specs: &Specs) -> Point {
-        let x = (factors.x_ratio * self.length_bass) + specs.border;
-        let y = (factors.y_ratio * self.length_bass) + specs.border;
+    fn get_point_bass(&self, factors: &Factors, config: &Config) -> Point {
+        let x = (factors.x_ratio * self.length_bass) + config.border;
+        let y = (factors.y_ratio * self.length_bass) + config.border;
         Point(x, y)
     }
-    fn get_point_treble(&self, factors: &Factors, specs: &Specs) -> Point {
-        let x = factors.treble_offset + (factors.x_ratio * self.length_treble) + specs.border;
-        let y = specs.bridge - (factors.y_ratio * self.length_treble) + specs.border;
+    fn get_point_treble(&self, factors: &Factors, specs: &Specs, config: &Config) -> Point {
+        let x = factors.treble_offset + (factors.x_ratio * self.length_treble) + config.border;
+        let y = specs.bridge - (factors.y_ratio * self.length_treble) + config.border;
         Point(x, y)
     }
-    pub fn get_fret_line(&self, factors: &Factors, specs: &Specs) -> Line {
-        let start = self.get_point_bass(&factors, &specs);
-        let end = self.get_point_treble(&factors, &specs);
+    pub fn get_fret_line(&self, factors: &Factors, specs: &Specs, config: &Config) -> Line {
+        let start = self.get_point_bass(&factors, &config);
+        let end = self.get_point_treble(&factors, &specs, &config);
         Line { start, end }
     }
 }
 
 impl Line {
     /// Returns an svg Path node representing a single fret
-    pub fn draw_fret(&self, fret: u32) -> svg::node::element::Path {
+    pub fn draw_fret(&self, fret: u32, config: &Config) -> svg::node::element::Path {
         let id = if fret == 0 {
             "Nut".to_string()
         } else {
@@ -49,7 +50,8 @@ impl Line {
             .close();
         Path::new()
             .set("fill", "none")
-            .set("stroke", "black")
+            .set("stroke", config.fretline_color.as_str())
+            .set("stroke-width", config.line_weight)
             .set("id", id)
             .set("d", data)
     }

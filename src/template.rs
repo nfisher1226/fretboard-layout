@@ -1,6 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::CONFIGDIR;
-use serde::{ Deserialize, Serialize };
+use serde::{Deserialize, Serialize};
 use toml;
 
 use std::fs;
@@ -35,7 +35,7 @@ impl Template {
             Ok(c) => c,
             Err(e) => {
                 eprintln!("{}", e);
-                return None
+                return None;
             }
         };
         Some(template)

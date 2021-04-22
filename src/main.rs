@@ -11,10 +11,10 @@ mod backend;
 mod fretboard;
 /// The Gtk user interface to gfret.
 mod gui;
-/// Persistent templates
-mod template;
 /// Preferences Dialog and configuration data
 mod prefs;
+/// Persistent templates
+mod template;
 
 use backend::Specs;
 use prefs::Config;

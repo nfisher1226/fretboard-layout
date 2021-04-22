@@ -1,6 +1,8 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::fretboard::Lengths;
+use crate::prefs::Config;
 use clap::ArgMatches;
+use pango::FontDescription;
 use rug::ops::Pow;
 use std::process;
 use std::process::Command;
@@ -27,8 +29,6 @@ pub struct Specs {
     pub pfret: f64,
     /// An output file, '-' for stdout.
     pub output: String,
-    /// A border around the rendered image.
-    pub border: f64,
     /// Whether to open the rendered image in an external program.
     pub external: bool,
     /// The external program to open.
@@ -124,7 +124,7 @@ impl Specs {
     }
 
     /// Prints the specs used in the rendered image
-    fn print_data(&self) -> svg::node::element::Text {
+    fn print_data(&self, config: &Config) -> svg::node::element::Text {
         let mut line = if self.multi {
             format!(
                 "ScaleBass: {:.2}mm | ScaleTreble: {:.2}mm | PerpendicularFret: {:.1} |",
@@ -133,44 +133,54 @@ impl Specs {
         } else {
             format!("Scale: {:.2}mm |", self.scale)
         };
+        let font_string = match &config.font {
+            Some(font) => font.to_string(),
+            None => String::from("Sans Regular 12"),
+        };
+        let font = FontDescription::from_string(&font_string);
+        let font_family = match font.get_family() {
+            Some(fam) => fam.to_string(),
+            None => String::from("sans-serif"),
+        };
+        let font_weight = font.get_style().to_string();
         line = format!("{} NutWidth: {:.2}mm |", line, self.nut);
         line = format!("{} BridgeSpacing: {:.2}mm", line, self.bridge - 6.0);
         svg::node::element::Text::new()
-            .set("x", self.border)
-            .set("y", (self.border * 1.7) + self.bridge)
-            .set("font-family", "sans-serif")
-            .set("font-weight", "normal")
+            .set("x", config.border)
+            .set("y", (config.border * 1.7) + self.bridge)
+            .set("font-family", font_family)
+            .set("font-weight", font_weight)
             .set("font-size", "5px")
             .set("id", "Specifications")
             .add(svg::node::Text::new(line))
     }
 
     /// Adds the centerline to the svg data
-    fn draw_centerline(&self) -> svg::node::element::Path {
-        let start_x = self.border;
-        let start_y = (self.bridge / 2.0) + self.border;
-        let end_x = self.border + self.scale;
-        let end_y = (self.bridge / 2.0) + self.border;
+    fn draw_centerline(&self, config: &Config) -> svg::node::element::Path {
+        let start_x = config.border;
+        let start_y = (self.bridge / 2.0) + config.border;
+        let end_x = config.border + self.scale;
+        let end_y = (self.bridge / 2.0) + config.border;
         let data = Data::new()
             .move_to((start_x, start_y))
             .line_to((end_x, end_y))
             .close();
         Path::new()
             .set("fill", "none")
-            .set("stroke", "blue")
+            .set("stroke", config.centerline_color.as_str())
             .set("stroke-dasharray", "4.0, 8.0")
             .set("stroke-dashoffset", "0")
-            .set("stroke-width", 1)
+            .set("stroke-width", config.line_weight)
             .set("id", "Centerline")
             .set("d", data)
     }
 
     /// adds the bridge as a line between the outer strings
-    fn draw_bridge(&self, factors: &Factors) -> svg::node::element::Path {
-        let start_x = self.border;
-        let start_y = self.border;
-        let end_x = self.border + factors.treble_offset;
-        let end_y = self.border + self.bridge;
+    fn draw_bridge(&self, factors: &Factors, config: &Config) -> svg::node::element::Path {
+        let start_x = config.border;
+        let start_y = config.border;
+        let end_x = config.border + factors.treble_offset;
+        let end_y = config.border + self.bridge;
         let data = Data::new()
             .move_to((start_x, start_y))
             .line_to((end_x, end_y))
@@ -178,15 +188,20 @@ impl Specs {
         Path::new()
             .set("fill", "none")
             .set("stroke", "black")
-            .set("stroke-width", 1)
+            .set("stroke-width", config.line_weight)
             .set("id", "Bridge")
             .set("d", data)
     }
 
     /// Draws the outline of the fretboard
-    fn draw_fretboard(&self, fretboard: &[Lengths], factors: &Factors) -> svg::node::element::Path {
-        let nut = fretboard[0_usize].get_fret_line(&factors, &self);
-        let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self);
+    fn draw_fretboard(
+        &self,
+        fretboard: &[Lengths],
+        factors: &Factors,
+        config: &Config,
+    ) -> svg::node::element::Path {
+        let nut = fretboard[0_usize].get_fret_line(&factors, &self, &config);
+        let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self, &config);
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
             .line_to((nut.end.0, nut.end.1))
@@ -197,40 +212,62 @@ impl Specs {
         Path::new()
             .set("fill", "none")
             .set("stroke", "grey")
-            .set("stroke-width", 1)
+            .set("stroke-width", config.line_weight)
             .set("id", "Fretboard")
             .set("d", data)
     }
 
     /// Iterates through each fret, returning a group of svg Paths
-    fn draw_frets(&self, fretboard: &[Lengths], factors: &Factors) -> svg::node::element::Group {
+    fn draw_frets(
+        &self,
+        fretboard: &[Lengths],
+        factors: &Factors,
+        config: &Config,
+    ) -> svg::node::element::Group {
         let mut frets = Group::new().set("id", "Frets");
         for fret in 0..=self.count {
-            let line = fretboard[fret as usize].get_fret_line(&factors, &self);
-            frets = frets.add(line.draw_fret(fret));
+            let line = fretboard[fret as usize].get_fret_line(&factors, &self, &config);
+            frets = frets.add(line.draw_fret(fret, &config));
         }
         frets
     }
 
     /// Returns the complete svg Document
     pub fn create_document(&self) -> svg::Document {
+        let config = match Config::from_file() {
+            Some(c) => c,
+            None => Config::new(),
+        };
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors();
-        let width = (self.border * 2.0) + self.scale;
+        let width = (config.border * 2.0) + self.scale;
         let widthmm = format!("{}mm", width);
-        let height = (self.border * 2.0) + self.bridge;
+        let height = (config.border * 2.0) + self.bridge;
         let heightmm = format!("{}mm", height);
-        Document::new()
+        let document = Document::new()
             .set("width", widthmm)
             .set("height", heightmm)
             .set("preserveAspectRatio", "xMidYMid meet")
             .set("viewBox", (0, 0, width, height))
+            .set("pagecolor", config.background_color.as_str())
             .add(self.create_description())
-            .add(self.print_data())
-            .add(self.draw_centerline())
-            .add(self.draw_fretboard(&lengths, &factors))
-            .add(self.draw_bridge(&factors))
-            .add(self.draw_frets(&lengths, &factors))
+            .add(self.draw_fretboard(&lengths, &factors, &config))
+            .add(self.draw_bridge(&factors, &config))
+            .add(self.draw_frets(&lengths, &factors, &config));
+        if config.print_specs {
+            if config.draw_centerline {
+                document
+                    .clone()
+                    .add(self.print_data(&config))
+                    .add(self.draw_centerline(&config))
+            } else {
+                document.clone().add(self.print_data(&config))
+            }
+        } else if config.draw_centerline {
+            document.clone().add(self.draw_centerline(&config))
+        } else {
+            document
+        }
     }
 
     /// Gets the document and saves output
@@ -309,13 +346,6 @@ pub fn run(matches: &ArgMatches) {
                     }
                 },
                 output: cli_matches.value_of("OUTPUT").unwrap().to_string(),
-                border: match cli_matches.value_of_t("BORDER") {
-                    Ok(c) => c,
-                    Err(e) => {
-                        eprintln!("{}", e);
-                        process::exit(1);
-                    }
-                },
                 external: cli_matches.occurrences_of("EXTERN") > 0,
                 cmd: cli_matches.value_of("EXTERN").unwrap().to_string(),
             };
@@ -328,6 +358,6 @@ pub fn run(matches: &ArgMatches) {
                 None
             };
             crate::gui::run_ui(template);
-        },
+        }
     }
 }

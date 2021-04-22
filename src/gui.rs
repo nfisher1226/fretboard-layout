@@ -1,4 +1,8 @@
 #![warn(clippy::all, clippy::pedantic)]
+use crate::prefs;
+use crate::template::Template;
+use crate::Specs;
+use crate::CONFIGDIR;
 use clap::crate_version;
 use gdk::ModifierType;
 use gdk_pixbuf::Pixbuf;
@@ -8,10 +12,6 @@ use gtk::{
     prelude::*, DialogExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
     ResponseType::Accept, SpinButtonExt, ToggleButtonExt, WidgetExt, Window, WindowType,
 };
-use crate::CONFIGDIR;
-use crate::prefs;
-use crate::Specs;
-use crate::template::Template;
 
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -31,7 +31,6 @@ pub struct Gui {
     pub perpendicular_fret: gtk::SpinButton,
     pub nut_width: gtk::SpinButton,
     pub bridge_spacing: gtk::SpinButton,
-    pub border: gtk::SpinButton,
     external_program: gtk::AppChooserButton,
     saved_once: RefCell<bool>,
     saved_current: RefCell<bool>,
@@ -61,7 +60,6 @@ impl Gui {
             pfret_label: builder.get_object("pfret_label").unwrap(),
             nut_width: builder.get_object("nut_width").unwrap(),
             bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
-            border: builder.get_object("border").unwrap(),
             external_program: builder.get_object("external_program").unwrap(),
             saved_once: RefCell::new(false),
             saved_current: RefCell::new(false),
@@ -125,7 +123,6 @@ impl Gui {
             bridge: self.bridge_spacing.get_value() + 6.0,
             pfret: self.perpendicular_fret.get_value(),
             output: filename.to_string(),
-            border: self.border.get_value(),
             external: false,
             cmd: self.get_cmd(),
         }
@@ -305,7 +302,7 @@ impl Gui {
                 if let Some(template) = Template::load_from_file(PathBuf::from(t)) {
                     self.load_template(template);
                 }
-            },
+            }
             None => println!("Nothing selected"),
         };
     }
@@ -339,17 +336,20 @@ impl Gui {
     fn process_keypress(&self, key: u16, ctrl: bool, shift: bool) {
         if ctrl {
             match key {
-                24 => {                        // q
+                24 => {
+                    // q
                     self.cleanup();
                     gtk::main_quit();
-                },
-                26 => self.open_external(),    // e
-                32 => self.open_template(),    // o
-                58 => {                        // m
+                }
+                26 => self.open_external(), // e
+                32 => self.open_template(), // o
+                58 => {
+                    // m
                     self.checkbox_multi
                         .set_active(!self.checkbox_multi.get_active());
                 }
-                39 => {                        // s
+                39 => {
+                    // s
                     if shift {
                         self.save_file_as();
                     } else {
@@ -383,7 +383,7 @@ pub fn run_ui(template: Option<&str>) {
                     gui.load_template(template);
                 }
             }
-        },
+        }
         None => {
             let mut statefile = CONFIGDIR.clone();
             statefile.push("state.toml");
@@ -392,13 +392,14 @@ pub fn run_ui(template: Option<&str>) {
                     gui.load_template(template);
                 }
             }
-        },
+        }
     };
     let provider = gtk::CssProvider::new();
     provider
-        .load_from_data(format!(
-            "spinbutton button {{ min-height: 0; min-width: 0; padding: 1px; }}")
-        .as_bytes())
+        .load_from_data(
+            format!("spinbutton button {{ min-height: 0; min-width: 0; padding: 1px; }}")
+                .as_bytes(),
+        )
         .expect("Failed to load CSS");
 
     gtk::StyleContext::add_provider_for_screen(
@@ -406,7 +407,6 @@ pub fn run_ui(template: Option<&str>) {
         &provider,
         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
-
 
     gui.window
         .set_title(&format!("Gfret - {} - <unsaved>", crate_version!()));
@@ -449,11 +449,6 @@ pub fn run_ui(template: Option<&str>) {
             gui.draw_preview(true);
         }));
 
-    gui.border
-        .connect_value_changed(clone!(@weak gui => move |_| {
-            gui.draw_preview(true);
-        }));
-
     gui.window
         .connect_check_resize(clone!(@weak gui => move |_| {
             gui.draw_preview(false);
@@ -473,10 +468,9 @@ pub fn run_ui(template: Option<&str>) {
             gui.save_file();
         }));
 
-    gui.save_as
-        .connect_activate(clone!(@weak gui => move |_| {
-            gui.save_file_as();
-        }));
+    gui.save_as.connect_activate(clone!(@weak gui => move |_| {
+        gui.save_file_as();
+    }));
 
     gui.open_template
         .connect_activate(clone!(@weak gui => move |_| {
@@ -488,15 +482,13 @@ pub fn run_ui(template: Option<&str>) {
             gui.open_external();
         }));
 
-    gui.preferences
-        .connect_activate( |_| {
-            prefs::run();
-        });
-    gui.quit
-        .connect_activate(clone!(@weak gui => move |_| {
-            gui.cleanup();
-            gtk::main_quit();
-        }));
+    gui.preferences.connect_activate(|_| {
+        prefs::run();
+    });
+    gui.quit.connect_activate(clone!(@weak gui => move |_| {
+        gui.cleanup();
+        gtk::main_quit();
+    }));
 
     gui.window.connect_delete_event(|_, _| {
         gtk::main_quit();

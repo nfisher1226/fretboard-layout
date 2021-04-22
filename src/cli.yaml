@@ -50,12 +50,6 @@ subcommands:
                 long: output
                 default_value: output.svg
                 takes_value: true
-            - BORDER:
-                about: Image border in mm
-                short: B
-                long: border
-                default_value: "10"
-                takes_value: true
             - EXTERN:
                 about: Open output file in external program
                 short: e
