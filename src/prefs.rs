@@ -1,5 +1,4 @@
 #![warn(clippy::all, clippy::pedantic)]
-use gio::AppInfoExt;
 use glib::clone;
 use gtk::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -214,6 +213,15 @@ pub fn run() {
         .external_program
         .connect_changed(clone!(@weak prefs => move |_| {
             prefs.save_prefs();
+        }));
+
+    prefs
+        .external_button
+        .connect_clicked(clone!(@weak prefs => move |_| {
+            let command = crate::appchooser::run();
+            if command.is_some() {
+                prefs.external_program.set_text(&command.unwrap());
+            }
         }));
 
     prefs
