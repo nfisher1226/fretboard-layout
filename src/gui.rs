@@ -3,10 +3,11 @@ use crate::prefs;
 use crate::template::Template;
 use crate::Specs;
 use crate::CONFIGDIR;
+use prefs::Config;
 use clap::crate_version;
 use gdk::ModifierType;
 use gdk_pixbuf::Pixbuf;
-use gio::{AppInfoExt, Cancellable, MemoryInputStream};
+use gio::{Cancellable, MemoryInputStream};
 use glib::clone;
 use gtk::{
     prelude::*, DialogExt, FileChooserAction, FileChooserExt, Inhibit, RangeExt, ResponseType,
@@ -31,7 +32,6 @@ pub struct Gui {
     pub perpendicular_fret: gtk::SpinButton,
     pub nut_width: gtk::SpinButton,
     pub bridge_spacing: gtk::SpinButton,
-    external_program: gtk::AppChooserButton,
     saved_once: RefCell<bool>,
     saved_current: RefCell<bool>,
     filename: RefCell<String>,
@@ -60,7 +60,6 @@ impl Gui {
             pfret_label: builder.get_object("pfret_label").unwrap(),
             nut_width: builder.get_object("nut_width").unwrap(),
             bridge_spacing: builder.get_object("bridge_spacing").unwrap(),
-            external_program: builder.get_object("external_program").unwrap(),
             saved_once: RefCell::new(false),
             saved_current: RefCell::new(false),
             filename: RefCell::new(String::from("")),
@@ -125,7 +124,7 @@ impl Gui {
             pfret: self.perpendicular_fret.get_value(),
             output: filename.to_string(),
             external: false,
-            cmd: self.get_cmd(),
+            cmd: String::from(""),
         }
     }
 
@@ -165,34 +164,17 @@ impl Gui {
         }
     }
 
-    /// Returns a string representing the command to open the selected external
-    /// program.
-    fn get_cmd(&self) -> String {
-        let cmd = self.external_program.get_app_info();
-        let cmd = match cmd {
-            Some(c) => c.get_commandline(),
-            None => Some(PathBuf::from("xdg-open")),
-        };
-        match cmd {
-            Some(c) => c
-                .into_os_string()
-                .into_string()
-                .unwrap()
-                .split_whitespace()
-                .next()
-                .unwrap_or("")
-                .to_string(),
-            None => "xdg-open".to_string(),
-        }
-    }
-
     /// Saves the file and opens it with an external program.
     fn open_external(&self) {
         if !*self.saved_current.borrow() {
             self.save_file();
         }
         if *self.saved_current.borrow() {
-            let cmd = self.get_cmd();
+            let cmd = if let Some(config) = Config::from_file() {
+                config.external_program
+            } else {
+                String::from("xdg-open")
+            };
             let filename = self.filename.borrow().to_string();
             Command::new(cmd).args(&[&filename]).spawn().unwrap();
         }
@@ -337,7 +319,6 @@ impl Gui {
                     self.cleanup();
                     gtk::main_quit();
                 }
-                26 => self.open_external(), // e
                 58 => {
                     // m
                     self.checkbox_multi
@@ -486,7 +467,9 @@ pub fn run_ui(template: Option<&str>) {
         gtk::main_quit();
     }));
 
-    gui.window.connect_delete_event(|_, _| {
+    let clone = gui.clone();
+    gui.window.connect_delete_event(move |_, _| {
+        clone.cleanup();
         gtk::main_quit();
         Inhibit(false)
     });

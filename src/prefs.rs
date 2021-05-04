@@ -87,7 +87,7 @@ impl PrefWidgets {
             (color.red * 255.0) as u8,
             (color.green * 255.0) as u8,
             (color.blue * 255.0) as u8,
-            (color.alpha * 255.0) as u8
+            color.alpha
         )
     }
 

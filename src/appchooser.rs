@@ -6,7 +6,7 @@ pub fn run() -> Option<String> {
     let dialog = gtk::AppChooserDialog::new_for_content_type::<gtk::Window>(
         None,
         gtk::DialogFlags::empty(),
-        "image/svg",
+        "image/svg+xml",
     );
     let chooser = dialog.get_widget();
     let chooser = chooser.downcast::<gtk::AppChooser>().unwrap();
