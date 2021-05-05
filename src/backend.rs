@@ -210,9 +210,8 @@ impl Specs {
             .line_to((nut.start.0, nut.start.1))
             .close();
         Path::new()
-            .set("fill", "none")
-            .set("stroke", "grey")
-            .set("stroke-width", config.line_weight)
+            .set("fill", config.fretboard_color.clone())
+            .set("stroke", "none")
             .set("id", "Fretboard")
             .set("d", data)
     }
@@ -249,7 +248,6 @@ impl Specs {
             .set("height", heightmm)
             .set("preserveAspectRatio", "xMidYMid meet")
             .set("viewBox", (0, 0, width, height))
-            .set("pagecolor", config.background_color.as_str())
             .add(self.create_description())
             .add(self.draw_fretboard(&lengths, &factors, &config))
             .add(self.draw_bridge(&factors, &config))

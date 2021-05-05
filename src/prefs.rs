@@ -16,11 +16,11 @@ pub struct Config {
     pub border: f64,
     pub line_weight: f64,
     pub fretline_color: String,
+    pub fretboard_color: String,
     pub draw_centerline: bool,
     pub centerline_color: String,
     pub print_specs: bool,
     pub font: Option<String>,
-    pub background_color: String,
 }
 
 struct PrefWidgets {
@@ -30,11 +30,11 @@ struct PrefWidgets {
     border: gtk::SpinButton,
     line_weight: gtk::SpinButton,
     fretline_color: gtk::ColorButton,
+    fretboard_color: gtk::ColorButton,
     draw_centerline: gtk::Switch,
     centerline_color: gtk::ColorButton,
     print_specs: gtk::Switch,
     font_chooser: gtk::FontButton,
-    background_color: gtk::ColorButton,
 }
 
 impl PrefWidgets {
@@ -60,6 +60,9 @@ impl PrefWidgets {
             fretline_color: builder
                 .get_object("fretline_color")
                 .expect("Error getting 'fretline_color'"),
+            fretboard_color: builder
+                .get_object("fretboard_color")
+                .expect("Error getting 'fretboard_color'"),
             draw_centerline: builder
                 .get_object("draw_centerline")
                 .expect("Error getting 'draw_centerline'"),
@@ -72,9 +75,6 @@ impl PrefWidgets {
             font_chooser: builder
                 .get_object("font_chooser")
                 .expect("Error getting 'font_chooser'"),
-            background_color: builder
-                .get_object("background_color")
-                .expect("Error getting 'background_color'"),
         }
     }
 
@@ -97,6 +97,7 @@ impl PrefWidgets {
             border: self.border.get_value(),
             line_weight: self.line_weight.get_value(),
             fretline_color: PrefWidgets::get_color_string(&self.fretline_color),
+            fretboard_color: PrefWidgets::get_color_string(&self.fretboard_color),
             draw_centerline: self.draw_centerline.get_active(),
             centerline_color: PrefWidgets::get_color_string(&self.centerline_color),
             print_specs: self.print_specs.get_active(),
@@ -106,7 +107,6 @@ impl PrefWidgets {
                     None => None,
                 }
             },
-            background_color: PrefWidgets::get_color_string(&self.background_color),
         }
     }
 
@@ -118,8 +118,8 @@ impl PrefWidgets {
             if let Ok(color) = gdk::RGBA::from_str(&config.centerline_color) {
                 self.centerline_color.set_rgba(&color);
             }
-            if let Ok(color) = gdk::RGBA::from_str(&config.background_color) {
-                self.background_color.set_rgba(&color);
+            if let Ok(color) = gdk::RGBA::from_str(&config.fretboard_color) {
+                self.fretboard_color.set_rgba(&color);
             }
             self.external_program.set_text(&config.external_program);
             self.border.set_value(config.border);
@@ -146,11 +146,11 @@ impl Config {
             border: 10.0,
             line_weight: 1.0,
             fretline_color: String::from("black"),
+            fretboard_color: String::from("rgba(36,31,49,1)"),
             draw_centerline: true,
             centerline_color: String::from("blue"),
             print_specs: true,
             font: Some(String::from("Sans Regular 12")),
-            background_color: String::from("rgba(0,0,0,0)"),
         }
     }
 
@@ -242,6 +242,12 @@ pub fn run() {
             prefs.save_prefs();
         }));
 
+    prefs
+        .fretboard_color
+        .connect_color_set(clone!(@weak prefs => move |_| {
+            prefs.save_prefs();
+        }));
+
     let prefs_clone = prefs.clone();
     prefs.draw_centerline.connect_state_set(move |_, _| {
         prefs_clone.save_prefs();
@@ -266,12 +272,6 @@ pub fn run() {
             if prefs.font_chooser.get_font().is_some() {
                 prefs.save_prefs();
             }
-        }));
-
-    prefs
-        .background_color
-        .connect_color_set(clone!(@weak prefs => move |_| {
-            prefs.save_prefs();
         }));
 
     prefs.prefs_window.run();
