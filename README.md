@@ -28,9 +28,8 @@ nut. Therefore, this number is padded by 6mm to give approximately 3mm overhang
 of the fretboard in relation to the two outer strings.
 * -n, --nut <width> - the width of the nut. On multiscale designs this will be an
 approximation, as the nut is slanted.
-* -B, --border <width> - the border to be placed around the completed image.
 * -o, --output <file> - the name of the output file.
 * -e, --external <program> - open the output file in an external program
 ## Future Development
 For the gui, it would be nice to save state and allow loading specs from and saving
-to templates. **partial implementation 4/7/21**
+to templates. **partial implementation 4/7/21** **completed 5/5/21**
