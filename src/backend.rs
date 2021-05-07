@@ -6,6 +6,7 @@ use pango::FontDescription;
 use rug::ops::Pow;
 use std::process;
 use std::process::Command;
+use std::str::FromStr;
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
@@ -43,6 +44,11 @@ pub struct Factors {
     pub x_ratio: f64,
     pub y_ratio: f64,
     pub treble_offset: f64,
+}
+
+pub struct HexColor {
+    pub color: String,
+    pub alpha: f64,
 }
 
 impl Specs {
@@ -161,13 +167,22 @@ impl Specs {
         let start_y = (self.bridge / 2.0) + config.border;
         let end_x = config.border + self.scale;
         let end_y = (self.bridge / 2.0) + config.border;
+        let hex = if let Ok(color) = gdk::RGBA::from_str(&config.centerline_color) {
+            HexColor::from_rgba(color)
+        } else {
+            HexColor {
+                color: String::from("#0000ff"),
+                alpha: 1.0,
+            }
+        };
         let data = Data::new()
             .move_to((start_x, start_y))
             .line_to((end_x, end_y))
             .close();
         Path::new()
             .set("fill", "none")
-            .set("stroke", config.centerline_color.as_str())
+            .set("stroke", hex.color.as_str())
+            .set("stroke-opacity", hex.alpha)
             .set("stroke-dasharray", "4.0, 8.0")
             .set("stroke-dashoffset", "0")
             .set("stroke-width", config.line_weight)
@@ -202,6 +217,14 @@ impl Specs {
     ) -> svg::node::element::Path {
         let nut = fretboard[0_usize].get_fret_line(&factors, &self, &config);
         let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self, &config);
+        let hex = if let Ok(color) = gdk::RGBA::from_str(&config.fretboard_color) {
+            HexColor::from_rgba(color)
+        } else {
+            HexColor {
+                color: String::from("#343434"),
+                alpha: 1.0,
+            }
+        };
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
             .line_to((nut.end.0, nut.end.1))
@@ -210,7 +233,8 @@ impl Specs {
             .line_to((nut.start.0, nut.start.1))
             .close();
         Path::new()
-            .set("fill", config.fretboard_color.clone())
+            .set("fill", hex.color)
+            .set("fill-opacity", hex.alpha)
             .set("stroke", "none")
             .set("id", "Fretboard")
             .set("d", data)
@@ -355,3 +379,17 @@ pub fn run(matches: &ArgMatches) {
         crate::gui::run_ui(template);
     }
 }
+
+impl HexColor {
+    pub fn from_rgba(color: gdk::RGBA) -> HexColor {
+        HexColor {
+            color: format!("#{:02x}{:02x}{:02x}",
+                (color.red * 255.0) as u8,
+                (color.green * 255.0) as u8,
+                (color.blue * 255.0) as u8,
+            ),
+            alpha: color.alpha,
+        }
+    }
+}
+

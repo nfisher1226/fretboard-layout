@@ -1,8 +1,9 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::backend::Factors;
+use crate::backend::{Factors, HexColor};
 use crate::prefs::Config;
 use crate::Specs;
 use std::f64;
+use std::str::FromStr;
 use svg::node::element::{path::Data, Path};
 
 /// Distance from bridge to fret along each side of the fretboard.
@@ -44,13 +45,22 @@ impl Line {
         } else {
             format!("Fret {}", fret)
         };
+        let hex = if let Ok(color) = gdk::RGBA::from_str(&config.fretline_color) {
+            HexColor::from_rgba(color)
+        } else {
+            HexColor {
+                color: String::from("#ffffff"),
+                alpha: 1.0,
+            }
+        };
         let data = Data::new()
             .move_to((self.start.0, self.start.1))
             .line_to((self.end.0, self.end.1))
             .close();
         Path::new()
             .set("fill", "none")
-            .set("stroke", config.fretline_color.as_str())
+            .set("stroke", hex.color)
+            .set("stroke-opacity", hex.alpha)
             .set("stroke-width", config.line_weight)
             .set("id", id)
             .set("d", data)
