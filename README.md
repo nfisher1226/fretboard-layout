@@ -42,7 +42,7 @@ border = 5.0
 line_weight = 0.5000000000000001
 # The color of the fret lines in RGBA format
 fretline_color = "rgba(255,255,255,1)"
-The background fill color of the fretboard, in RGBA format
+# The background fill color of the fretboard, in RGBA format
 fretboard_color = "rgba(0,0,0,1)"
 # Whether or not to draw the dashed centerline <bool>
 draw_centerline = true
