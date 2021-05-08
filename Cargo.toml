@@ -1,13 +1,12 @@
 [package]
 name = "gfret"
-version = "0.5.1"
+version = "1.0.0"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "3.0.0-beta.2", features = ["yaml"] }
 gdk = "0.13"
 gdk-pixbuf = "0.9"
 gio = "0.9"
@@ -15,14 +14,21 @@ glib = "0.10"
 gtk = "0.9"
 lazy_static = "1.4"
 pango = "0.9"
-serde = { version = "1.0", features = ["derive"] }
 svg = "0.9"
 toml = "0.5"
 xdg-basedir = "1.0"
 
+[dependencies.clap]
+version = "3.0.0-beta.2"
+features = ["yaml"]
+
 [dependencies.rug]
 version = "1.12"
 features = ["float"]
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
 
 [profile.release]
 panic = 'abort'

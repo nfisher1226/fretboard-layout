@@ -296,7 +296,7 @@ dependencies = [
 
 [[package]]
 name = "gfret"
-version = "0.5.1"
+version = "1.0.0"
 dependencies = [
  "clap",
  "gdk",

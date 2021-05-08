@@ -343,10 +343,15 @@ impl Gui {
     }
 
     fn init_css() {
+        let config = match Config::from_file() {
+            Some(c) => c,
+            None => Config::new(),
+        };
         let provider = gtk::CssProvider::new();
         provider
             .load_from_data(
-                format!("spinbutton button {{ min-height: 0; min-width: 0; padding: 1px; }}")
+                format!("spinbutton button {{ min-height: 0; min-width: 0; padding: 1px; }}
+                    viewport {{ background-color: {}; }}", config.background_color)
                     .as_bytes(),
             )
             .expect("Failed to load CSS");

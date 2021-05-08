@@ -36,6 +36,7 @@
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
+                <property name="tooltip-text" translatable="yes">Close this preferences dialog</property>
                 <property name="use-stock">True</property>
                 <accelerator key="w" signal="activate" modifiers="GDK_CONTROL_MASK"/>
               </object>
@@ -87,6 +88,7 @@
                   <object class="GtkEntry" id="external_program">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">The command to open an external editor</property>
                     <property name="text" translatable="yes">xdg-open</property>
                   </object>
                   <packing>
@@ -105,6 +107,7 @@
                       <object class="GtkImage">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="tooltip-text" translatable="yes">Open an AppChooser dialog to select the default external program</property>
                         <property name="stock">gtk-execute</property>
                       </object>
                     </child>
@@ -144,6 +147,7 @@
                   <object class="GtkSpinButton" id="border">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Set the border which will be placed around the rendered image</property>
                     <property name="halign">end</property>
                     <property name="text" translatable="yes">10</property>
                     <property name="input-purpose">digits</property>
@@ -190,6 +194,7 @@
                   <object class="GtkSpinButton" id="line_weight">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">Set the line weight</property>
                     <property name="halign">end</property>
                     <property name="text" translatable="yes">10</property>
                     <property name="input-purpose">digits</property>
@@ -238,9 +243,10 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">The color of each fret line</property>
                     <property name="halign">end</property>
                     <property name="use-alpha">True</property>
-                    <property name="rgba">rgb(0,0,0)</property>
+                    <property name="rgba">rgb(255,255,255)</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -279,6 +285,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">The background color of the fretboard</property>
                     <property name="use-alpha">True</property>
                     <property name="rgba">rgb(36,31,49)</property>
                   </object>
@@ -320,6 +327,7 @@
                   <object class="GtkSwitch" id="draw_centerline">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">If enabled, a dashed horizontal centerline will be added to the rendered image</property>
                     <property name="halign">end</property>
                     <property name="active">True</property>
                   </object>
@@ -360,6 +368,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">The color of the dashed centerline</property>
                     <property name="halign">end</property>
                     <property name="use-alpha">True</property>
                     <property name="rgba">rgb(0,0,255)</property>
@@ -400,6 +409,7 @@
                   <object class="GtkSwitch" id="print_specs">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="tooltip-text" translatable="yes">If enabled, the specifications used to generate the rendering will be printed onto the image</property>
                     <property name="halign">end</property>
                     <property name="active">True</property>
                   </object>
@@ -440,6 +450,7 @@
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
                     <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">The font used to print the specifications</property>
                     <property name="halign">end</property>
                     <property name="font">Sans 12</property>
                     <property name="language">en-us</property>
@@ -458,6 +469,48 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">8</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="spacing">3</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Background Color:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">3</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkColorButton" id="background_color">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="tooltip-text" translatable="yes">The color of the viewport background Does not affect rendered image. Requires restart to take effect.</property>
+                    <property name="halign">end</property>
+                    <property name="use-alpha">True</property>
+                    <property name="rgba">rgb(119,118,123)</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="pack-type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">9</property>
               </packing>
             </child>
           </object>

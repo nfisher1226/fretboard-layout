@@ -30,6 +30,31 @@ of the fretboard in relation to the two outer strings.
 approximation, as the nut is slanted.
 * -o, --output <file> - the name of the output file.
 * -e, --external <program> - open the output file in an external program
+## Preferences
+Some useful defaults can be set for the rendered image by editing the file
+```~/.config/gfret/config.toml```. A sample of this file would look like this:
+``` Toml
+# An external program which can edit svg files <String>
+external_program = "inkscape"
+# The border to be placed around the rendered image <f64>
+border = 5.0
+# The line weight, in mm <f64>
+line_weight = 0.5000000000000001
+# The color of the fret lines in RGBA format
+fretline_color = "rgba(255,255,255,1)"
+The background fill color of the fretboard, in RGBA format
+fretboard_color = "rgba(0,0,0,1)"
+# Whether or not to draw the dashed centerline <bool>
+draw_centerline = true
+# The color of the dashed centerline, in RGBA format
+centerline_color = "rgba(165,29,45,1)"
+# Whether or not to print the specifications used onto the image rendering <bool>
+print_specs = true
+# The font used to print the specifications
+font = "sans 12"
+```
+If running the gui, all of these settings can be adjusted using the preferences
+dialog.
 ## Future Development
 For the gui, it would be nice to save state and allow loading specs from and saving
 to templates. **partial implementation 4/7/21** **completed 5/5/21**

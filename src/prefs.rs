@@ -21,6 +21,7 @@ pub struct Config {
     pub centerline_color: String,
     pub print_specs: bool,
     pub font: Option<String>,
+    pub background_color: String,
 }
 
 struct PrefWidgets {
@@ -35,6 +36,7 @@ struct PrefWidgets {
     centerline_color: gtk::ColorButton,
     print_specs: gtk::Switch,
     font_chooser: gtk::FontButton,
+    background_color: gtk::ColorButton,
 }
 
 impl PrefWidgets {
@@ -75,6 +77,9 @@ impl PrefWidgets {
             font_chooser: builder
                 .get_object("font_chooser")
                 .expect("Error getting 'font_chooser'"),
+            background_color: builder
+                .get_object("background_color")
+                .expect("Error getting 'background_color'"),
         }
     }
 
@@ -107,6 +112,7 @@ impl PrefWidgets {
                     None => None,
                 }
             },
+            background_color: PrefWidgets::get_color_string(&self.background_color),
         }
     }
 
@@ -151,6 +157,7 @@ impl Config {
             centerline_color: String::from("blue"),
             print_specs: true,
             font: Some(String::from("Sans Regular 12")),
+            background_color: String::from("rgba(255,255,255,1)"),
         }
     }
 
@@ -272,6 +279,12 @@ pub fn run() {
             if prefs.font_chooser.get_font().is_some() {
                 prefs.save_prefs();
             }
+        }));
+
+    prefs
+        .background_color
+        .connect_color_set(clone!(@weak prefs => move |_| {
+            prefs.save_prefs();
         }));
 
     prefs.prefs_window.run();
