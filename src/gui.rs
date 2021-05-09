@@ -5,7 +5,6 @@ use crate::Specs;
 use crate::CONFIGDIR;
 use prefs::Config;
 use clap::crate_version;
-use gdk::ModifierType;
 use gdk_pixbuf::Pixbuf;
 use gio::{Cancellable, MemoryInputStream};
 use glib::clone;
@@ -45,6 +44,8 @@ pub struct Gui {
 }
 
 impl Gui {
+    /// Returns a struct containing pointers to the widgets which keep program
+    /// state, as well as further state contained within [RefCell] containers
     fn new() -> Rc<Gui> {
         let glade_src = include_str!("ui.glade");
         let builder = gtk::Builder::from_string(glade_src);
@@ -180,7 +181,7 @@ impl Gui {
         }
     }
 
-    /// Opens a`gtk::FileChooserDialog` and sets the path to the output file.
+    /// Opens a [gtk::FileChooserDialog] and sets the path to the output file.
     fn get_output(&self) -> Option<String> {
         let currentfile = if *self.saved_once.borrow() {
             self.filename.borrow().to_string()
@@ -215,7 +216,7 @@ impl Gui {
     }
 
     /// Determines if the file has been saved once. If it has, then it is saved
-    /// again to the same path. If not, calls `self.get_output()` to allow the
+    /// again to the same path. If not, calls [Gui::get_output()] to allow the
     /// user to select a path to save to.
     fn save_file(&self) {
         let filename: String = if *self.saved_once.borrow() {
@@ -311,37 +312,13 @@ impl Gui {
         }
     }
 
-    fn process_keypress(&self, key: u16, ctrl: bool, shift: bool) {
-        if ctrl {
-            match key {
-                24 => {
-                    // q
-                    self.cleanup();
-                    gtk::main_quit();
-                }
-                58 => {
-                    // m
-                    self.checkbox_multi
-                        .set_active(!self.checkbox_multi.get_active());
-                }
-                39 => {
-                    // s
-                    if shift {
-                        self.save_file_as();
-                    } else {
-                        self.save_file();
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-
+    /// Saves the program state before exiting
     fn cleanup(&self) {
         let data: Template = self.template_from_gui();
         data.save_statefile();
     }
 
+    /// Loads styling from css before launching the gui
     fn init_css() {
         let config = match Config::from_file() {
             Some(c) => c,
@@ -434,15 +411,6 @@ pub fn run_ui(template: Option<&str>) {
         .connect_check_resize(clone!(@weak gui => move |_| {
             gui.draw_preview(false);
         }));
-
-    let gui1 = gui.clone();
-    gui.window.connect_key_press_event(move |_, gdk| {
-        let key = gdk.get_keycode().unwrap();
-        let ctrl = gdk.get_state().contains(ModifierType::CONTROL_MASK);
-        let shift = gdk.get_state().contains(ModifierType::SHIFT_MASK);
-        gui1.process_keypress(key, ctrl, shift);
-        Inhibit(false)
-    });
 
     gui.save_file
         .connect_activate(clone!(@weak gui => move |_| {

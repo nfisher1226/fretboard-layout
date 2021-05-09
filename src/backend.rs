@@ -46,6 +46,8 @@ pub struct Factors {
     pub treble_offset: f64,
 }
 
+/// This struct contains a color represented in hex notation plus an opacity
+/// value. This is necessary due to the fact that
 pub struct HexColor {
     pub color: String,
     pub alpha: f64,
@@ -314,6 +316,8 @@ impl Specs {
     }
 }
 
+/// When this function runs it either launches the gui or calls run(&specs) to
+/// generate output, based on the command line arguments given to the program
 pub fn run(matches: &ArgMatches) {
     if let Some(("cli", cli_matches)) = matches.subcommand() {
         let scale: f64 = match cli_matches.value_of_t("SCALE") {
@@ -381,6 +385,9 @@ pub fn run(matches: &ArgMatches) {
 }
 
 impl HexColor {
+    /// Converts an RGBA color (red, green, blue plus alpha) to a struct
+    /// containing a hex color string and an opacity value, suitable for
+    /// embedding into an svg image
     pub fn from_rgba(color: gdk::RGBA) -> HexColor {
         HexColor {
             color: format!("#{:02x}{:02x}{:02x}",
@@ -392,4 +399,3 @@ impl HexColor {
         }
     }
 }
-

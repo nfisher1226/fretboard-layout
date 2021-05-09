@@ -10,20 +10,36 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::{env, fs, process};
 
+/// All of the configuration values which can be set in config.toml get stored
+/// in this struct
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Config {
+    /// An external editor or viewer capable of handling svg image files
     pub external_program: String,
+    /// The border which will appear around the rendering
     pub border: f64,
+    /// The line weight for all of the elements in mm
     pub line_weight: f64,
+    /// The color of the fret lines
     pub fretline_color: String,
+    /// The background color of the fretboard
     pub fretboard_color: String,
+    /// If true, draw a dashed horizontal centerline
     pub draw_centerline: bool,
+    /// The color of the centerline
     pub centerline_color: String,
+    /// Whether or not to print the fretboard specifications on the rendered svg
     pub print_specs: bool,
+    /// The font used for the specifications
     pub font: Option<String>,
+    /// The background color of the viewport for the preview image. This does not
+    /// affect the final rendering, and changing it requires a restart to take
+    /// effect
     pub background_color: String,
 }
 
+/// Handles on the widgets in the preferences dialog window for which we need to
+/// save data
 struct PrefWidgets {
     prefs_window: gtk::Dialog,
     external_program: gtk::Entry,
@@ -40,6 +56,7 @@ struct PrefWidgets {
 }
 
 impl PrefWidgets {
+    /// Returns a struct of pointers to the widgets that contain state
     fn new() -> PrefWidgets {
         let glade_src = include_str!("prefs.glade");
         let builder = gtk::Builder::from_string(glade_src);
@@ -83,6 +100,8 @@ impl PrefWidgets {
         }
     }
 
+    /// Converts the value stored in a [gtk::ColorButton] from a [gdk::RGBA]
+    /// struct into a String suitable for saving in config.toml
     #[allow(clippy::cast_sign_loss)]
     #[allow(clippy::cast_possible_truncation)]
     fn get_color_string(button: &gtk::ColorButton) -> String {
@@ -96,6 +115,7 @@ impl PrefWidgets {
         )
     }
 
+    /// Returns a [Config] struct from the widget states
     fn config_from_widgets(&self) -> Config {
         Config {
             external_program: String::from(self.external_program.get_text()),
@@ -116,6 +136,7 @@ impl PrefWidgets {
         }
     }
 
+    /// Sets widget states based on a [Config] struct which is loaded from file
     fn load_config(&self) {
         if let Some(config) = Config::from_file() {
             if let Ok(color) = gdk::RGBA::from_str(&config.fretline_color) {
@@ -138,6 +159,7 @@ impl PrefWidgets {
         }
     }
 
+    /// Serializes a [Config] struct as toml and saves to disk
     fn save_prefs(&self) {
         let config_file = Config::get_config_file();
         let config_data = self.config_from_widgets();
@@ -146,6 +168,7 @@ impl PrefWidgets {
 }
 
 impl Config {
+    /// Creates a [Config] struct with default values
     pub fn new() -> Config {
         Config {
             external_program: String::from("xdg-open"),
@@ -161,6 +184,7 @@ impl Config {
         }
     }
 
+    /// Returns an OS appropriate configuration directory path
     pub fn get_config_dir() -> PathBuf {
         let mut configdir: PathBuf = match xdg_basedir::get_config_home() {
             Ok(c) => c,
@@ -177,12 +201,14 @@ impl Config {
         configdir
     }
 
+    /// Returns the path to config.toml
     fn get_config_file() -> PathBuf {
         let mut file = CONFIGDIR.clone();
         file.push("config.toml");
         file
     }
 
+    /// Deserializes config.toml into a [Config] struct
     pub fn from_file() -> Option<Config> {
         let config_file = Config::get_config_file();
         let config_file = if config_file.exists() {
@@ -213,6 +239,7 @@ impl Config {
     }
 }
 
+/// Runs the preferences dialog
 pub fn run() {
     let prefs = Rc::new(PrefWidgets::new());
     prefs.load_config();

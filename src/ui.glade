@@ -281,6 +281,7 @@ Author: Nathan Fisher
                 <property name="receives-default">False</property>
                 <property name="tooltip-text" translatable="yes">If checked, create a multiscale fretboard layout.</property>
                 <property name="draw-indicator">True</property>
+                <accelerator key="m" signal="activate" modifiers="GDK_CONTROL_MASK"/>
               </object>
               <packing>
                 <property name="expand">False</property>
