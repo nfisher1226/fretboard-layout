@@ -1,9 +1,10 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::prefs;
 use crate::template::Template;
 use crate::Specs;
 use crate::CONFIGDIR;
-use prefs::Config;
+/// Preferences Dialog and configuration data
+pub mod prefs;
+use crate::Config;
 use clap::crate_version;
 use gdk_pixbuf::Pixbuf;
 use gio::{Cancellable, MemoryInputStream};

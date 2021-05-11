@@ -1,6 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::fretboard::Lengths;
-use crate::prefs::Config;
+use crate::Config;
 use clap::ArgMatches;
 use pango::FontDescription;
 use rug::ops::Pow;

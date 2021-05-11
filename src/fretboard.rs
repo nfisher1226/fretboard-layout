@@ -1,6 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::backend::{Factors, HexColor};
-use crate::prefs::Config;
+use crate::Config;
 use crate::Specs;
 use std::f64;
 use std::str::FromStr;

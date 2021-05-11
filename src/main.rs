@@ -70,21 +70,18 @@
 
 use clap::{crate_version, load_yaml, App};
 use std::path::PathBuf;
-/// Opens a [gtk::AppChooserDialog]
-mod appchooser;
 /// Processes the data provided by the gui into a fully rendered svg image.
 mod backend;
+mod config;
 /// Used by the backend to calculate point locations and lines.
 mod fretboard;
 /// The Gtk user interface to gfret.
 mod gui;
-/// Preferences Dialog and configuration data
-mod prefs;
 /// Persistent templates
 mod template;
 
 use backend::Specs;
-use prefs::Config;
+use config::Config;
 
 #[macro_use]
 extern crate lazy_static;
