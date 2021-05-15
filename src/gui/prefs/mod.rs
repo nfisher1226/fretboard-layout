@@ -120,6 +120,9 @@ impl PrefWidgets {
             if let Ok(color) = gdk::RGBA::from_str(&config.fretboard_color) {
                 self.fretboard_color.set_rgba(&color);
             }
+            if let Ok(color) = gdk::RGBA::from_str(&config.background_color) {
+                self.background_color.set_rgba(&color);
+            }
             self.external_program.set_text(&config.external_program);
             self.border.set_value(config.border);
             self.line_weight.set_value(config.line_weight);

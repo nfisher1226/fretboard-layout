@@ -57,4 +57,5 @@ If running the gui, all of these settings can be adjusted using the preferences
 dialog.
 ## Future Development
 For the gui, it would be nice to save state and allow loading specs from and saving
-to templates. **partial implementation 4/7/21** **completed 5/5/21**
+to templates. **partial implementation 4/7/21** | **completed 5/5/21**
+Port to Gtk4
