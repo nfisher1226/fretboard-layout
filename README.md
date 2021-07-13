@@ -1,4 +1,12 @@
 # Gfret
+Contents
+========
+* [Introduction](#introduction)
+* [Usage](#usage)
+  * [Cli Flags](#cli-flags)
+* [Preferences](#preferences)
+* [Roadmap](#roadmap)
+
 ## Introduction
 This is a fretBoard layout tool. Given a set of parameters gfret will
 calculate the fret, nut, and bridge locations and output an svg template suitable
@@ -55,7 +63,8 @@ font = "sans 12"
 ```
 If running the gui, all of these settings can be adjusted using the preferences
 dialog.
-## Future Development
-For the gui, it would be nice to save state and allow loading specs from and saving
+## Roadmap
+* For the gui, it would be nice to save state and allow loading specs from and saving
 to templates. **partial implementation 4/7/21** | **completed 5/5/21**
-Port to Gtk4
+* Port to Gtk4
+  * Preferences window should use new preferences dialog widget

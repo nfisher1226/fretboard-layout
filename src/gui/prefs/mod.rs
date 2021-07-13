@@ -127,7 +127,9 @@ impl PrefWidgets {
             self.border.set_value(config.border);
             self.line_weight.set_value(config.line_weight);
             self.draw_centerline.set_active(config.draw_centerline);
+            self.centerline_color.set_sensitive(config.draw_centerline);
             self.print_specs.set_active(config.print_specs);
+            self.font_chooser.set_sensitive(config.print_specs);
             if let Some(font) = config.font {
                 self.font_chooser.set_font(&font);
             }
@@ -139,6 +141,18 @@ impl PrefWidgets {
         let config_file = Config::get_config_file();
         let config_data = self.config_from_widgets();
         config_data.save_to_file(&config_file);
+    }
+
+    /// Toggles the centerline color chooser button
+    fn toggle_centerline_color(&self) {
+        let state = self.draw_centerline.get_active();
+        self.centerline_color.set_sensitive(state);
+    }
+
+    /// Toggles the font chooser button
+    fn toggle_font_chooser(&self) {
+        let state = self.print_specs.get_active();
+        self.font_chooser.set_sensitive(state);
     }
 }
 
@@ -186,10 +200,13 @@ pub fn run() {
         }));
 
     let prefs_clone = prefs.clone();
-    prefs.draw_centerline.connect_state_set(move |_, _| {
-        prefs_clone.save_prefs();
-        gtk::Inhibit(false)
-    });
+    prefs
+        .draw_centerline
+        .connect_state_set(move |_, _| {
+            prefs_clone.toggle_centerline_color();
+            prefs_clone.save_prefs();
+            gtk::Inhibit(false)
+        });
 
     prefs
         .centerline_color
@@ -198,10 +215,13 @@ pub fn run() {
         }));
 
     let prefs_clone = prefs.clone();
-    prefs.print_specs.connect_state_set(move |_, _| {
-        prefs_clone.save_prefs();
-        gtk::Inhibit(false)
-    });
+    prefs
+        .print_specs
+        .connect_state_set(move |_, _| {
+            prefs_clone.toggle_font_chooser();
+            prefs_clone.save_prefs();
+            gtk::Inhibit(false)
+        });
 
     prefs
         .font_chooser

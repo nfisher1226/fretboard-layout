@@ -46,7 +46,7 @@ pub struct Gui {
 
 impl Gui {
     /// Returns a struct containing pointers to the widgets which keep program
-    /// state, as well as further state contained within [RefCell] containers
+    /// state, as well as further state contained within `RefCell` containers
     fn new() -> Rc<Gui> {
         let glade_src = include_str!("ui.glade");
         let builder = gtk::Builder::from_string(glade_src);
