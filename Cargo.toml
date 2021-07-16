@@ -1,5 +1,5 @@
 [package]
-name = "fretboard-layout"
+name = "fretboard_layout"
 version = "0.1.0"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2018"
