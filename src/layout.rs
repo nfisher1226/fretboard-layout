@@ -1,9 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::backend::{Factors, HexColor};
-use crate::Config;
-use crate::Specs;
+use crate::{Config, Factors, Specs};
 use std::f64;
-use std::str::FromStr;
 use svg::node::element::{path::Data, Path};
 
 /// Distance from bridge to fret along each side of the fretboard.
@@ -12,8 +9,10 @@ pub struct Lengths {
     pub length_treble: f64,
 }
 
+/// A 2-dimensional representation of a point
 pub struct Point(pub f64, pub f64);
 
+/// 2 Points which form a line
 pub struct Line {
     pub start: Point,
     pub end: Point,
@@ -49,14 +48,7 @@ impl Line {
         } else {
             format!("Fret {}", fret)
         };
-        let hex = if let Ok(color) = gdk::RGBA::from_str(&config.fretline_color) {
-            HexColor::from_rgba(color)
-        } else {
-            HexColor {
-                color: String::from("#ffffff"),
-                alpha: 1.0,
-            }
-        };
+        let hex = config.fretline_color.to_hex();
         let data = Data::new()
             .move_to((self.start.0, self.start.1))
             .line_to((self.end.0, self.end.1))

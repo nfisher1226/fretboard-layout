@@ -1,12 +1,15 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::fretboard::Lengths;
-use crate::Config;
-use clap::ArgMatches;
+pub mod color;
+pub mod config;
+pub mod layout;
+#[cfg(test)]
+mod tests;
+
+use color::{Color, RGBA};
+use config::Config;
+use layout::Lengths;
 use pango::FontDescription;
 use rug::ops::Pow;
-use std::process;
-use std::process::Command;
-use std::str::FromStr;
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
@@ -28,12 +31,6 @@ pub struct Specs {
     pub bridge: f64,
     /// The fret that is perpendicular to the centerline.
     pub pfret: f64,
-    /// An output file, '-' for stdout.
-    pub output: String,
-    /// Whether to open the rendered image in an external program.
-    pub external: bool,
-    /// The external program to open.
-    pub cmd: String,
 }
 
 /// This struct contains multiplication factors used to convert the raw lengths
@@ -46,14 +43,20 @@ pub struct Factors {
     pub treble_offset: f64,
 }
 
-/// This struct contains a color represented in hex notation plus an opacity
-/// value. This is necessary due to the fact that
-pub struct HexColor {
-    pub color: String,
-    pub alpha: f64,
-}
-
 impl Specs {
+    /// Returns a default Specs struct
+    pub fn default() -> Specs {
+        Specs {
+            scale: 655.0,
+            count: 24,
+            multi: false,
+            scale_treble: 610.0,
+            nut: 43.0,
+            bridge: 56.0,
+            pfret: 8.0,
+        }
+    }
+
     /// Returns the distance from bridge to nut on both sides of the fretboard
     fn get_nut(&self) -> Lengths {
         let length_treble = if self.multi {
@@ -69,7 +72,7 @@ impl Specs {
 
     /// Returns the length from bridge to fret for a given fret number, along
     /// both bass and treble sides of the board.
-    fn get_fret_lengths(&self, fret: u32) -> Lengths {
+    pub fn get_fret_lengths(&self, fret: u32) -> Lengths {
         let factor = 2.0_f64.pow(f64::from(fret) / 12.0);
         let length_bass = self.scale / factor;
         let length_treble = if self.multi {
@@ -146,11 +149,11 @@ impl Specs {
             None => String::from("Sans Regular 12"),
         };
         let font = FontDescription::from_string(&font_string);
-        let font_family = match font.get_family() {
+        let font_family = match font.family() {
             Some(fam) => fam.to_string(),
             None => String::from("sans-serif"),
         };
-        let font_weight = font.get_style().to_string();
+        let font_weight = font.style().to_string();
         line = format!("{} NutWidth: {:.2}mm |", line, self.nut);
         line = format!("{} BridgeSpacing: {:.2}mm", line, self.bridge - 6.0);
         svg::node::element::Text::new()
@@ -169,14 +172,9 @@ impl Specs {
         let start_y = (self.bridge / 2.0) + config.border;
         let end_x = config.border + self.scale;
         let end_y = (self.bridge / 2.0) + config.border;
-        let hex = if let Ok(color) = gdk::RGBA::from_str(&config.centerline_color) {
-            HexColor::from_rgba(color)
-        } else {
-            HexColor {
-                color: String::from("#0000ff"),
-                alpha: 1.0,
-            }
-        };
+        let hex = config.centerline_color.as_ref().unwrap_or(
+            &Color::Rgba(RGBA::blue())
+        ).to_hex();
         let data = Data::new()
             .move_to((start_x, start_y))
             .line_to((end_x, end_y))
@@ -219,14 +217,7 @@ impl Specs {
     ) -> svg::node::element::Path {
         let nut = fretboard[0_usize].get_fret_line(&factors, &self, &config);
         let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self, &config);
-        let hex = if let Ok(color) = gdk::RGBA::from_str(&config.fretboard_color) {
-            HexColor::from_rgba(color)
-        } else {
-            HexColor {
-                color: String::from("#343434"),
-                alpha: 1.0,
-            }
-        };
+        let hex = config.fretboard_color.to_hex();
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
             .line_to((nut.end.0, nut.end.1))
@@ -258,11 +249,8 @@ impl Specs {
     }
 
     /// Returns the complete svg Document
-    pub fn create_document(&self) -> svg::Document {
-        let config = match Config::from_file() {
-            Some(c) => c,
-            None => Config::new(),
-        };
+    pub fn create_document(&self, conf: Option<Config>) -> svg::Document {
+        let config = conf.unwrap_or(Config::default());
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors();
         let width = (config.border * 2.0) + self.scale;
@@ -278,124 +266,18 @@ impl Specs {
             .add(self.draw_fretboard(&lengths, &factors, &config))
             .add(self.draw_bridge(&factors, &config))
             .add(self.draw_frets(&lengths, &factors, &config));
-        if config.print_specs {
-            if config.draw_centerline {
+        if config.font.is_some() {
+            if config.centerline_color.is_some() {
                 document
                     .add(self.print_data(&config))
                     .add(self.draw_centerline(&config))
             } else {
                 document.add(self.print_data(&config))
             }
-        } else if config.draw_centerline {
+        } else if config.centerline_color.is_some() {
             document.add(self.draw_centerline(&config))
         } else {
             document
-        }
-    }
-
-    /// Gets the document and saves output
-    pub fn run(&self) {
-        let document = self.create_document();
-        if self.output == "-" {
-            println!("{}", document);
-        } else {
-            match svg::save(&self.output, &document) {
-                Ok(_) => println!("Output saved as {}.", self.output),
-                Err(e) => {
-                    eprintln!("{}", e);
-                    process::exit(1);
-                }
-            };
-            if self.external {
-                match Command::new(&self.cmd).args(&[&self.output]).spawn() {
-                    Ok(_) => (),
-                    Err(e) => eprintln!("{}", e),
-                }
-            }
-        }
-    }
-}
-
-/// When this function runs it either launches the gui or calls run(&specs) to
-/// generate output, based on the command line arguments given to the program
-pub fn run(matches: &ArgMatches) {
-    if let Some(("cli", cli_matches)) = matches.subcommand() {
-        let scale: f64 = match cli_matches.value_of_t("SCALE") {
-            Ok(c) => c,
-            Err(e) => {
-                eprintln!("{}", e);
-                process::exit(1);
-            }
-        };
-        let specs = Specs {
-            scale,
-            count: match cli_matches.value_of_t("COUNT") {
-                Ok(c) => c,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    process::exit(1);
-                }
-            },
-            multi: cli_matches.occurrences_of("MULTI") > 0,
-            scale_treble: if cli_matches.occurrences_of("MULTI") > 0 {
-                match cli_matches.value_of_t("MULTI") {
-                    Ok(c) => c,
-                    Err(e) => {
-                        eprintln!("{}", e);
-                        process::exit(1);
-                    }
-                }
-            } else {
-                scale
-            },
-            nut: match cli_matches.value_of_t("NUT") {
-                Ok(c) => c,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    process::exit(1);
-                }
-            },
-            bridge: match cli_matches.value_of_t::<f64>("BRIDGE") {
-                Ok(c) => c + 6.0,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    process::exit(1);
-                }
-            },
-            pfret: match cli_matches.value_of_t("PERPENDICULAR") {
-                Ok(c) => c,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    process::exit(1);
-                }
-            },
-            output: cli_matches.value_of("OUTPUT").unwrap().to_string(),
-            external: cli_matches.occurrences_of("EXTERN") > 0,
-            cmd: cli_matches.value_of("EXTERN").unwrap().to_string(),
-        };
-        specs.run();
-    } else {
-        let template = if matches.occurrences_of("TEMPLATE") > 0 {
-            matches.value_of("TEMPLATE")
-        } else {
-            None
-        };
-        crate::gui::run_ui(template);
-    }
-}
-
-impl HexColor {
-    /// Converts an RGBA color (red, green, blue plus alpha) to a struct
-    /// containing a hex color string and an opacity value, suitable for
-    /// embedding into an svg image
-    pub fn from_rgba(color: gdk::RGBA) -> HexColor {
-        HexColor {
-            color: format!("#{:02x}{:02x}{:02x}",
-                (color.red * 255.0) as u8,
-                (color.green * 255.0) as u8,
-                (color.blue * 255.0) as u8,
-            ),
-            alpha: color.alpha,
         }
     }
 }
