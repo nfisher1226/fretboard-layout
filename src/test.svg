@@ -1,0 +1,36 @@
+<svg height="76mm" preserveAspectRatio="xMidYMid meet" viewBox="0 0 675 76" width="675mm" xmlns="http://www.w3.org/2000/svg">
+<desc BridgeSpacing="50" Multiscale="true" NutWidth="43" PerpendicularFret="8" Scale="655" ScaleTreble="610"/>
+<path d="M664.9678,16.5 L648.3168,59.946564 L182.28058,64.57158 L164.5518,11.533795 L664.9678,16.5 z" fill="#000000" fill-opacity="1" id="Fretboard" stroke="none"/>
+<path d="M10,10 L38.34683,66 z" fill="none" id="Bridge" stroke="black" stroke-width="1"/>
+<g id="Frets">
+<path d="M664.9678,16.5 L648.3168,59.946564 z" fill="none" id="Nut" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M628.2072,16.135183 L614.0818,60.28632 z" fill="none" id="Fret 1" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M593.50995,15.790842 L581.7683,60.607002 z" fill="none" id="Fret 2" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M560.76,15.465827 L551.2684,60.909687 z" fill="none" id="Fret 3" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M529.84827,15.159054 L522.4803,61.195385 z" fill="none" id="Fret 4" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M500.67142,14.869498 L495.30798,61.465046 z" fill="none" id="Fret 5" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M473.13214,14.596194 L469.66074,61.719574 z" fill="none" id="Fret 6" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M447.13852,14.338229 L445.45294,61.959816 z" fill="none" id="Fret 7" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M422.60382,14.094744 L422.60382,62.186573 z" fill="none" id="Fret 8" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M399.44617,13.8649235 L401.03714,62.400604 z" fill="none" id="Fret 9" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M377.58823,13.648002 L380.6809,62.602623 z" fill="none" id="Fret 10" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M356.9571,13.443255 L361.46716,62.793304 z" fill="none" id="Fret 11" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M337.4839,13.25 L343.33182,62.97328 z" fill="none" id="Fret 12" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M319.1036,13.067592 L326.21432,63.143158 z" fill="none" id="Fret 13" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M301.75497,12.895421 L310.05756,63.3035 z" fill="none" id="Fret 14" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M285.38,12.732913 L294.80762,63.454845 z" fill="none" id="Fret 15" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M269.92413,12.579527 L280.41357,63.597694 z" fill="none" id="Fret 16" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M255.33571,12.434749 L266.8274,63.732525 z" fill="none" id="Fret 17" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M241.56607,12.298097 L254.00377,63.859787 z" fill="none" id="Fret 18" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M228.56926,12.169115 L241.89989,63.979908 z" fill="none" id="Fret 19" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M216.30191,12.047372 L230.47533,64.093285 z" fill="none" id="Fret 20" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M204.72308,11.932462 L219.69199,64.2003 z" fill="none" id="Fret 21" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M193.79411,11.824 L209.51385,64.301315 z" fill="none" id="Fret 22" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M183.47855,11.721627 L199.907,64.39665 z" fill="none" id="Fret 23" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+<path d="M173.74194,11.625 L190.83932,64.48664 z" fill="none" id="Fret 24" stroke="#ffffff" stroke-opacity="1" stroke-width="1"/>
+</g>
+<text font-family="Sans" font-size="5px" font-weight="Style::Normal" id="Specifications" x="10" y="73">
+ScaleBass: 655.00mm | ScaleTreble: 610.00mm | PerpendicularFret: 8.0 | NutWidth: 43.00mm | BridgeSpacing: 50.00mm
+</text>
+<path d="M10,38 L665,38 z" fill="none" id="Centerline" stroke="#0000ff" stroke-dasharray="4.0, 8.0" stroke-dashoffset="0" stroke-opacity="1" stroke-width="1"/>
+</svg>

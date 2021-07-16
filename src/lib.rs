@@ -57,6 +57,19 @@ impl Specs {
         }
     }
 
+    /// Returns a multiscale Specs struct
+    pub fn multi() -> Specs {
+        Specs {
+            scale: 655.0,
+            count: 24,
+            multi: true,
+            scale_treble: 610.0,
+            nut: 43.0,
+            bridge: 56.0,
+            pfret: 8.0,
+        }
+    }
+
     /// Returns the distance from bridge to nut on both sides of the fretboard
     fn get_nut(&self) -> Lengths {
         let length_treble = if self.multi {
@@ -250,7 +263,7 @@ impl Specs {
 
     /// Returns the complete svg Document
     pub fn create_document(&self, conf: Option<Config>) -> svg::Document {
-        let config = conf.unwrap_or(Config::default());
+        let config = conf.unwrap_or_else(Config::default);
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors();
         let width = (config.border * 2.0) + self.scale;

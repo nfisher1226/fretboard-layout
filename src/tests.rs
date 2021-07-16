@@ -1,3 +1,4 @@
+#![warn(clippy::all, clippy::pedantic)]
 use crate::{RGBA, Specs};
 use crate::color::{HexColor, ReducedRGBA};
 
@@ -40,4 +41,12 @@ fn lengths() {
     let lengths = specs.get_fret_lengths(24);
     assert_eq!(lengths.length_bass, 163.75);
     assert_eq!(lengths.length_bass, lengths.length_treble);
+}
+
+#[test]
+fn svg() {
+    let specs = Specs::multi();
+    let output = specs.create_document(None);
+    let svg = include_str!("test.svg");
+    assert_eq!(format!("{}\n", output), svg);
 }
