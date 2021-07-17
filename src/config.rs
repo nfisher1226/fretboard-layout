@@ -22,7 +22,7 @@ impl Config {
     /// Creates a [Config] struct with default values
     pub fn default() -> Config {
         Config {
-            border: 0.0,
+            border: 10.0,
             line_weight: 1.0,
             fretline_color: Color::Rgba(RGBA::white()),
             fretboard_color: Color::Rgba(RGBA::black()),
