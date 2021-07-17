@@ -6,7 +6,6 @@ pub mod layout;
 use color::{Color, RGBA};
 use config::Config;
 use layout::Lengths;
-use pango::FontDescription;
 use rug::ops::Pow;
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
@@ -155,16 +154,14 @@ impl Specs {
         } else {
             format!("Scale: {:.2}mm |", self.scale)
         };
-        let font_string = match &config.font {
-            Some(font) => font.to_string(),
-            None => String::from("Sans Regular 12"),
+        let font_family = match &config.font {
+            Some(font) => String::from(&font.family),
+            None => String::from("Sans"),
         };
-        let font = FontDescription::from_string(&font_string);
-        let font_family = match font.family() {
-            Some(fam) => fam.to_string(),
-            None => String::from("sans-serif"),
+        let font_weight = match &config.font {
+            Some(font) => font.weight.to_string(),
+            None =>String::from("Regular"),
         };
-        let font_weight = font.style().to_string();
         line = format!("{} NutWidth: {:.2}mm |", line, self.nut);
         line = format!("{} BridgeSpacing: {:.2}mm", line, self.bridge - 6.0);
         svg::node::element::Text::new()

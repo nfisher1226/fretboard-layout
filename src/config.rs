@@ -1,5 +1,42 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::{Color, RGBA};
+use std::fmt;
+
+#[derive(Debug)]
+pub enum FontWeight {
+    Thin,
+    Ultralight,
+    Light,
+    Semilight,
+    Book,
+    Normal,
+    Medium,
+    Semibold,
+    Bold,
+    Ultrabold,
+    Heavy,
+    Ultraheavy,
+}
+
+pub struct Font {
+    pub family: String,
+    pub weight: FontWeight,
+}
+
+impl fmt::Display for FontWeight {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl Font {
+    fn default() -> Font {
+        Font {
+            family: String::from("Sans"),
+            weight: FontWeight::Normal,
+        }
+    }
+}
 
 /// All of the configuration values which can be set in config.toml get stored
 /// in this struct
@@ -15,7 +52,7 @@ pub struct Config {
     /// The color of the centerline
     pub centerline_color: Option<Color>,
     /// The font used for the specifications
-    pub font: Option<String>,
+    pub font: Option<Font>,
 }
 
 impl Config {
@@ -27,7 +64,7 @@ impl Config {
             fretline_color: Color::Rgba(RGBA::white()),
             fretboard_color: Color::Rgba(RGBA::black()),
             centerline_color: Some(Color::Rgba(RGBA::blue())),
-            font: Some(String::from("Sans Regular 12")),
+            font: Some(Font::default()),
         }
     }
 }
@@ -46,7 +83,7 @@ mod tests {
                 assert_eq!(color.red, 1.0);
                 assert_eq!(color.green, 1.0);
                 assert_eq!(color.blue, 1.0);
-            }
+            },
             _ => panic!("Wrong type"),
         }
     }
