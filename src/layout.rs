@@ -62,3 +62,19 @@ impl Line {
             .set("d", data)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn lengths() {
+        let specs = Specs::default();
+        let lengths = specs.get_fret_lengths(12);
+        assert_eq!(lengths.length_bass, 327.5);
+        assert_eq!(lengths.length_treble, lengths.length_treble);
+        let lengths = specs.get_fret_lengths(24);
+        assert_eq!(lengths.length_bass, 163.75);
+        assert_eq!(lengths.length_bass, lengths.length_treble);
+    }
+}

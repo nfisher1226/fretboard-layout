@@ -31,3 +31,23 @@ impl Config {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default() {
+        let cfg = Config::default();
+        assert_eq!(cfg.border, 10.0);
+        assert_eq!(cfg.line_weight, 1.0);
+        match cfg.fretline_color {
+            Color::Rgba(color) => {
+                assert_eq!(color.red, 1.0);
+                assert_eq!(color.green, 1.0);
+                assert_eq!(color.blue, 1.0);
+            }
+            _ => panic!("Wrong type"),
+        }
+    }
+}

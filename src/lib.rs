@@ -2,8 +2,6 @@
 pub mod color;
 pub mod config;
 pub mod layout;
-#[cfg(test)]
-mod tests;
 
 use color::{Color, RGBA};
 use config::Config;
@@ -292,5 +290,26 @@ impl Specs {
         } else {
             document
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn factors_default() {
+        let factors = Specs::default().get_factors();
+        assert_eq!(factors.x_ratio, 0.9999507592328689);
+        assert_eq!(factors.y_ratio, 0.009923664122137405);
+        assert_eq!(factors.treble_offset, 0.0);
+    }
+
+    #[test]
+    fn factors_multi() {
+        let factors = Specs::multi().get_factors();
+        assert_eq!(factors.x_ratio, 0.9999507592328689);
+        assert_eq!(factors.y_ratio, 0.009923664122137405);
+        assert_eq!(factors.treble_offset, 28.346827734356623);
     }
 }

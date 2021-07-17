@@ -34,11 +34,9 @@ pub enum Color {
 impl Color {
     pub fn to_hex(&self) -> HexColor {
         match self {
-            Color::Hex(c) => {
-                HexColor {
-                    color: c.color.clone(),
-                    alpha: c.alpha.clone(),
-                }
+            Color::Hex(c) => HexColor {
+                color: c.color.clone(),
+                alpha: c.alpha.clone(),
             },
             Color::Rgba(c) => c.to_hex(),
             Color::Reduced(c) => c.to_hex(),
@@ -86,33 +84,54 @@ impl HexColor {
 impl ReducedRGBA {
     pub fn to_hex(&self) -> HexColor {
         HexColor {
-            color: format!("#{:02x}{:02x}{:02x}",
-                self.red,
-                self.green,
-            self.blue,
-            ),
+            color: format!("#{:02x}{:02x}{:02x}", self.red, self.green, self.blue,),
             alpha: self.alpha as f64 / 255.0,
         }
     }
 
     pub fn black() -> ReducedRGBA {
-        ReducedRGBA { red: 0, green: 0, blue: 0, alpha: 255 }
+        ReducedRGBA {
+            red: 0,
+            green: 0,
+            blue: 0,
+            alpha: 255,
+        }
     }
 
     pub fn white() -> ReducedRGBA {
-        ReducedRGBA { red: 255, green: 255, blue: 255, alpha: 255 }
+        ReducedRGBA {
+            red: 255,
+            green: 255,
+            blue: 255,
+            alpha: 255,
+        }
     }
 
     pub fn red() -> ReducedRGBA {
-        ReducedRGBA { red: 255, green: 0, blue: 0, alpha: 255 }
+        ReducedRGBA {
+            red: 255,
+            green: 0,
+            blue: 0,
+            alpha: 255,
+        }
     }
 
     pub fn green() -> ReducedRGBA {
-        ReducedRGBA { red: 0, green: 255, blue: 0, alpha: 255 }
+        ReducedRGBA {
+            red: 0,
+            green: 255,
+            blue: 0,
+            alpha: 255,
+        }
     }
 
     pub fn blue() -> ReducedRGBA {
-        ReducedRGBA { red: 0, green: 0, blue: 255, alpha: 255 }
+        ReducedRGBA {
+            red: 0,
+            green: 0,
+            blue: 255,
+            alpha: 255,
+        }
     }
 }
 
@@ -122,7 +141,8 @@ impl RGBA {
     /// embedding into an svg image
     pub fn to_hex(&self) -> HexColor {
         HexColor {
-            color: format!("#{:02x}{:02x}{:02x}",
+            color: format!(
+                "#{:02x}{:02x}{:02x}",
                 (self.red * 255.0) as u8,
                 (self.green * 255.0) as u8,
                 (self.blue * 255.0) as u8,
@@ -209,5 +229,40 @@ impl RGBA {
             blue: 1.0,
             alpha: 1.0,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn black() {
+        assert_eq!(RGBA::black().to_hex().color, HexColor::black().color);
+        assert_eq!(ReducedRGBA::black().to_hex().color, HexColor::black().color);
+    }
+
+    #[test]
+    fn white() {
+        assert_eq!(RGBA::white().to_hex().color, HexColor::white().color);
+        assert_eq!(ReducedRGBA::white().to_hex().color, HexColor::white().color);
+    }
+
+    #[test]
+    fn red() {
+        assert_eq!(RGBA::red().to_hex().color, HexColor::red().color);
+        assert_eq!(ReducedRGBA::red().to_hex().color, HexColor::red().color);
+    }
+
+    #[test]
+    fn green() {
+        assert_eq!(RGBA::green().to_hex().color, HexColor::green().color);
+        assert_eq!(ReducedRGBA::green().to_hex().color, HexColor::green().color);
+    }
+
+    #[test]
+    fn blue() {
+        assert_eq!(RGBA::blue().to_hex().color, HexColor::blue().color);
+        assert_eq!(ReducedRGBA::blue().to_hex().color, HexColor::blue().color);
     }
 }
