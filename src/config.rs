@@ -1,8 +1,9 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::{Color, RGBA};
 use std::fmt;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Deserialize, Debug, Serialize)]
 pub enum FontWeight {
     Thin,
     Ultralight,
@@ -18,6 +19,7 @@ pub enum FontWeight {
     Ultraheavy,
 }
 
+#[derive(Deserialize, Debug, Serialize)]
 pub struct Font {
     pub family: String,
     pub weight: FontWeight,
@@ -40,6 +42,7 @@ impl Font {
 
 /// All of the configuration values which can be set in config.toml get stored
 /// in this struct
+#[derive(Deserialize, Debug, Serialize)]
 pub struct Config {
     /// The border which will appear around the rendering
     pub border: f64,

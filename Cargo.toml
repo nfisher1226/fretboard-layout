@@ -18,6 +18,10 @@ svg = "0.10.*"
 version = "1.12.*"
 features = ["float"]
 
+[dependencies.serde]
+version = "1.0.*"
+features = ["derive"]
+
 [profile.release]
 panic = 'abort'
 lto = true

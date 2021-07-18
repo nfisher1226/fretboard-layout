@@ -1,7 +1,9 @@
 #![warn(clippy::all, clippy::pedantic)]
+use serde::{Deserialize, Serialize};
 
 /// This struct contains a color represented in hex notation plus an opacity
 /// value. This is necessary to represent colors in an SVG image
+#[derive(Deserialize, Debug, Serialize)]
 pub struct HexColor {
     pub color: String,
     pub alpha: f64,
@@ -9,6 +11,7 @@ pub struct HexColor {
 
 /// This struct represents colors in floating point precision as separate
 /// Red, Green, and Blue channels plus a separate Alpha (Opacity) channel
+#[derive(Deserialize, Debug, Serialize)]
 pub struct RGBA {
     pub red: f64,
     pub green: f64,
@@ -18,6 +21,7 @@ pub struct RGBA {
 
 /// This struct represents colors in 8-bit precision as separate
 /// Red, Green, and Blue channels
+#[derive(Deserialize, Debug, Serialize)]
 pub struct ReducedRGBA {
     pub red: u8,
     pub green: u8,
@@ -25,6 +29,7 @@ pub struct ReducedRGBA {
     pub alpha: u8,
 }
 
+#[derive(Deserialize, Debug, Serialize)]
 pub enum Color {
     Hex(HexColor),
     Reduced(ReducedRGBA),
@@ -148,6 +153,15 @@ impl RGBA {
                 (self.blue * 255.0) as u8,
             ),
             alpha: self.alpha,
+        }
+    }
+
+    pub fn to_reduced(&self) -> ReducedRGBA {
+        ReducedRGBA {
+            red: (self.red * 255.0) as u8,
+            green: (self.green* 255.0) as u8,
+            blue: (self.blue* 255.0) as u8,
+            alpha: (self.alpha* 255.0) as u8,
         }
     }
 
