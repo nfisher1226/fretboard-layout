@@ -31,6 +31,26 @@ impl fmt::Display for FontWeight {
     }
 }
 
+impl FontWeight {
+    pub fn from_str(str: &str) -> Option<FontWeight> {
+        match str {
+            "Thin" | "thin" => Some(FontWeight::Thin),
+            "Ultralight" | "ultralight" => Some(FontWeight::Ultralight),
+            "Light" | "light" => Some(FontWeight::Light),
+            "Semilight" | "semilight" => Some(FontWeight::Semilight),
+            "Book" | "book" => Some(FontWeight::Book),
+            "Normal" | "normal" => Some(FontWeight::Normal),
+            "Medium" | "medium" => Some(FontWeight::Medium),
+            "Semibold" | "semibold" => Some(FontWeight::Semibold),
+            "Bold" | "bold" => Some(FontWeight::Bold),
+            "Ultrabold" | "ultrabold" => Some(FontWeight::Ultrabold),
+            "Heavy" | "heavy" => Some(FontWeight::Heavy),
+            "Ultraheavy" | "ultraheavy" => Some(FontWeight::Ultraheavy),
+            _ => None,
+        }
+    }
+}
+
 impl Font {
     fn default() -> Font {
         Font {

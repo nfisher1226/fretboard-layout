@@ -10,7 +10,7 @@ checksum = "822d7d63e0c0260a050f6b1f0d316f5c79b9eab830aca526ed904e1011bd64ca"
 
 [[package]]
 name = "fretboard_layout"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rug",
  "serde",
