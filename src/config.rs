@@ -52,7 +52,8 @@ impl FontWeight {
 }
 
 impl Font {
-    fn default() -> Font {
+    /// Returns "Sans Normal"
+    pub fn default() -> Font {
         Font {
             family: String::from("Sans"),
             weight: FontWeight::Normal,

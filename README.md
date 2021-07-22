@@ -1,5 +1,4 @@
 # Fretboard Layout
-==================
 ## Introduction
 This library takes a set of specifications for a musical instrument fretboard
 and generates an SVG image suitable for use as a template in the design of an
