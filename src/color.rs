@@ -30,6 +30,7 @@ pub struct ReducedRGBA {
 }
 
 #[derive(Clone, Deserialize, Debug, Serialize)]
+#[serde(tag = "ColorType")]
 pub enum Color {
     Hex(HexColor),
     Reduced(ReducedRGBA),
