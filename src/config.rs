@@ -3,7 +3,7 @@ use crate::{Color, RGBA};
 use std::fmt;
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
     Ultralight,
@@ -19,7 +19,7 @@ pub enum FontWeight {
     Ultraheavy,
 }
 
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Font {
     pub family: String,
     pub weight: FontWeight,
@@ -109,5 +109,11 @@ mod tests {
             },
             _ => panic!("Wrong type"),
         }
+    }
+
+    #[test]
+    fn font_weight_from_str() {
+        assert_eq!(None, FontWeight::from_str("foo"));
+        assert_eq!(Some(FontWeight::Bold), FontWeight::from_str("bold"));
     }
 }
