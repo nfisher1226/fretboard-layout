@@ -1,10 +1,29 @@
 #![warn(clippy::all, clippy::pedantic)]
+//! Fretboard_layout is a library for turning a set of specifications into a
+//! complete template of a stringed musical instrument fretboard, such as a
+//! guitar, banjo, or mandolin.
+//! ## Usage
+//!```rust
+//!use fretboard_layout::{Config,Specs};
+//!
+//!fn main() {
+//!    // the [Specs] struct constains the specifications used to generate the svg
+//!    let mut specs = Specs::default();
+//!    specs.set_multi(Some(615.0));
+//!    specs.set_scale(675.0);
+//!    // the (optional) [Config] struct fine tunes the visual representation
+//!    let mut cfg = Config::default();
+//!    cfg.set_line_weight(0.5);
+//!    let svg = specs.create_document(Some(cfg));
+//!}
+//!```
+
 pub mod color;
 pub mod config;
 pub mod layout;
 
 use color::{Color, RGBA};
-use config::Config;
+pub use config::Config;
 use layout::Lengths;
 use rug::ops::Pow;
 use svg::node::element::{path::Data, Description, Group, Path};
@@ -65,6 +84,36 @@ impl Specs {
             bridge: 56.0,
             pfret: 8.0,
         }
+    }
+
+    pub fn set_scale(&mut self, scale: f64) {
+        self.scale = scale;
+    }
+
+    pub fn set_count(&mut self, count: u32) {
+        self.count = count;
+    }
+
+    pub fn set_multi(&mut self, scale: Option<f64>) {
+        match scale {
+            Some(s) => {
+                self.multi = true;
+                self.scale_treble = s;
+            },
+            None => self.multi = false,
+        }
+    }
+
+    pub fn set_nut(&mut self, nut: f64) {
+        self.nut = nut;
+    }
+
+    pub fn set_bridge(&mut self, bridge: f64) {
+        self.bridge = bridge;
+    }
+
+    pub fn set_pfret(&mut self, pfret: f64) {
+        self.pfret = pfret;
     }
 
     /// Returns the distance from bridge to nut on both sides of the fretboard
@@ -256,7 +305,17 @@ impl Specs {
         frets
     }
 
-    /// Returns the complete svg Document
+    ///Returns the complete svg Document
+    ///# Example
+    ///
+    ///```rust
+    ///use fretboard_layout::{Config, Specs};
+    ///
+    ///fn run() {
+    ///    let specs = Specs::default();
+    ///    let doc = specs.create_document(Some(Config::default()));
+    ///}
+    ///```
     pub fn create_document(&self, conf: Option<Config>) -> svg::Document {
         let config = conf.unwrap_or_else(Config::default);
         let lengths: Vec<Lengths> = self.get_all_lengths();

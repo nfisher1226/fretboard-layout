@@ -29,6 +29,7 @@ pub struct ReducedRGBA {
     pub alpha: u8,
 }
 
+/// Enum representing the possible storage types for colors
 #[derive(Clone, Deserialize, Debug, Serialize)]
 #[serde(tag = "ColorType")]
 pub enum Color {
@@ -40,10 +41,7 @@ pub enum Color {
 impl Color {
     pub fn to_hex(&self) -> HexColor {
         match self {
-            Color::Hex(c) => HexColor {
-                color: c.color.clone(),
-                alpha: c.alpha.clone(),
-            },
+            Color::Hex(c) => c.clone(),
             Color::Rgba(c) => c.to_hex(),
             Color::Reduced(c) => c.to_hex(),
         }
@@ -95,6 +93,35 @@ impl ReducedRGBA {
         }
     }
 
+    pub fn to_rgba(&self) -> RGBA {
+        RGBA {
+            red: self.red as f64 / 255.0,
+            green: self.green as f64 / 255.0,
+            blue: self.blue as f64 / 255.0,
+            alpha: self.alpha as f64 / 255.0,
+        }
+    }
+
+    pub fn to_string(&self) -> String {
+        format!("RGBA({}, {}, {}, {})", self.red, self.green, self.blue, self.alpha)
+    }
+
+    pub fn set_red(&mut self, color: u8) {
+        self.red = color;
+    }
+
+    pub fn set_green(&mut self, color: u8) {
+        self.green = color;
+    }
+
+    pub fn set_blue(&mut self, color: u8) {
+        self.blue = color;
+    }
+
+    pub fn set_alpha(&mut self, color: u8) {
+        self.alpha = color;
+    }
+
     pub fn black() -> ReducedRGBA {
         ReducedRGBA {
             red: 0,
@@ -139,6 +166,36 @@ impl ReducedRGBA {
             alpha: 255,
         }
     }
+
+    /// Returns "yellow" as an [ReducedRGBA] struct
+    pub fn yellow() -> ReducedRGBA {
+        ReducedRGBA {
+            red: 255,
+            green: 255,
+            blue: 0,
+            alpha: 255,
+        }
+    }
+
+    /// Returns "cyan" as an [ReducedRGBA] struct
+    pub fn cyan() -> ReducedRGBA {
+        ReducedRGBA {
+            red: 0,
+            green: 255,
+            blue: 255,
+            alpha: 255,
+        }
+    }
+
+    /// Returns "magenta" as an [ReducedRGBA] struct
+    pub fn magenta() -> ReducedRGBA {
+        ReducedRGBA {
+            red: 255,
+            green: 0,
+            blue: 255,
+            alpha: 255,
+        }
+    }
 }
 
 impl RGBA {
@@ -164,6 +221,26 @@ impl RGBA {
             blue: (self.blue* 255.0) as u8,
             alpha: (self.alpha* 255.0) as u8,
         }
+    }
+
+    pub fn to_string(&self) -> String {
+        self.to_reduced().to_string()
+    }
+
+    pub fn set_red(&mut self, color: f64) {
+        self.red = color;
+    }
+
+    pub fn set_green(&mut self, color: f64) {
+        self.green = color;
+    }
+
+    pub fn set_blue(&mut self, color: f64) {
+        self.blue = color;
+    }
+
+    pub fn set_alpha(&mut self, color: f64) {
+        self.alpha = color;
     }
 
     /// Returns "black" as an [RGBA] struct
@@ -279,5 +356,21 @@ mod tests {
     fn blue() {
         assert_eq!(RGBA::blue().to_hex().color, HexColor::blue().color);
         assert_eq!(ReducedRGBA::blue().to_hex().color, HexColor::blue().color);
+    }
+
+    #[test]
+    fn mutable() {
+        let mut grey = RGBA{ red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0 };
+        grey.set_red(0.45);
+        assert_eq!(grey.red, 0.45);
+        let mut gray = grey.to_reduced();
+        gray.set_green(120);
+        assert_eq!(gray.green, 120);
+    }
+
+    #[test]
+    fn to_string() {
+        let yellow = RGBA::yellow();
+        assert_eq!(yellow.to_string(), "RGBA(255, 255, 0, 255)");
     }
 }

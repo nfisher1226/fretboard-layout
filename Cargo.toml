@@ -1,6 +1,6 @@
 [package]
 name = "fretboard_layout"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2018"
 license-file = "LICENSE"

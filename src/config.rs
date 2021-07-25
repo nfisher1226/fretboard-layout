@@ -91,6 +91,30 @@ impl Config {
             font: Some(Font::default()),
         }
     }
+
+    pub fn set_border(&mut self, border: f64) {
+        self.border = border;
+    }
+
+    pub fn set_line_weight(&mut self, weight: f64) {
+        self.line_weight = weight;
+    }
+
+    pub fn set_fretline_color(&mut self, color: Color) {
+        self.fretline_color = color;
+    }
+
+    pub fn set_fretboard_color(&mut self, color: Color) {
+        self.fretboard_color = color;
+    }
+
+    pub fn set_centerline_color(&mut self, color: Option<Color>) {
+        self.centerline_color = color;
+    }
+
+    pub fn set_font(&mut self, font: Option<Font>) {
+        self.font = font;
+    }
 }
 
 #[cfg(test)]
@@ -110,6 +134,15 @@ mod tests {
             },
             _ => panic!("Wrong type"),
         }
+    }
+
+    #[test]
+    fn change_cfg() {
+        let mut cfg = Config::default();
+        cfg.set_border(5.0);
+        cfg.set_font(None);
+        assert_eq!(cfg.border, 5.0);
+        assert!(cfg.font.is_none());
     }
 
     #[test]
