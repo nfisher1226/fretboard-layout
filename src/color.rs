@@ -1,6 +1,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 use serde::{Deserialize, Serialize};
-
+#[cfg(feature = "gdk")]
+use gdk;
 /// This struct contains a color represented in hex notation plus an opacity
 /// value. This is necessary to represent colors in an SVG image
 #[derive(Clone, Deserialize, Debug, Serialize)]
@@ -95,6 +96,25 @@ impl ReducedRGBA {
         }
     }
 
+    pub fn to_rgba(&self) -> RGBA {
+        RGBA {
+            red: self.red as f64 / 255.0,
+            green: self.green as f64 / 255.0,
+            blue: self.blue as f64 / 255.0,
+            alpha: self.alpha as f64 / 255.0,
+        }
+    }
+
+    #[cfg(feature = "gdk")]
+    pub fn to_gdk(&self) -> gdk::RGBA {
+        gdk::RGBA {
+            red: self.red as f64 / 255.0,
+            green: self.green as f64 / 255.0,
+            blue: self.blue as f64 / 255.0,
+            alpha: self.alpha as f64 / 255.0,
+        }
+    }
+
     pub fn black() -> ReducedRGBA {
         ReducedRGBA {
             red: 0,
@@ -163,6 +183,16 @@ impl RGBA {
             green: (self.green* 255.0) as u8,
             blue: (self.blue* 255.0) as u8,
             alpha: (self.alpha* 255.0) as u8,
+        }
+    }
+
+    #[cfg(feature = "gdk")]
+    pub fn to_gdk(&self) -> gdk::RGBA {
+        gdk::RGBA {
+            red: self.red,
+            green: self.green,
+            blue: self.blue,
+            alpha: self.alpha,
         }
     }
 
@@ -279,5 +309,16 @@ mod tests {
     fn blue() {
         assert_eq!(RGBA::blue().to_hex().color, HexColor::blue().color);
         assert_eq!(ReducedRGBA::blue().to_hex().color, HexColor::blue().color);
+    }
+
+    #[cfg(feature = "gdk")]
+    #[test]
+    fn rgba_to_gdk() {
+        let red = RGBA::red();
+        let gdk_red = red.to_gdk();
+        assert_eq!(red.red, gdk_red.red);
+        assert_eq!(red.green, gdk_red.green);
+        assert_eq!(red.blue, gdk_red.blue);
+        assert_eq!(red.alpha, gdk_red.alpha);
     }
 }
