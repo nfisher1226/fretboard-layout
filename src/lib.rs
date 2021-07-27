@@ -1,9 +1,8 @@
 #![warn(clippy::all, clippy::pedantic)]
-pub mod color;
 pub mod config;
 pub mod layout;
 
-use color::{Color, RGBA};
+use rgba_simple::{Color, RGBA};
 use config::Config;
 use layout::Lengths;
 use rug::ops::Pow;
