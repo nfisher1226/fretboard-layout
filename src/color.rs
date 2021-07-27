@@ -49,9 +49,47 @@ impl Color {
             Color::Reduced(c) => c.to_hex(),
         }
     }
+
+    #[cfg(feature = "gdk")]
+    pub fn to_gdk(&self) -> Option<gdk::RGBA> {
+        match self {
+            Color::Hex(c) => c.to_gdk(),
+            Color::Rgba(c) => Some(c.to_gdk()),
+            Color::Reduced(c) => Some(c.to_gdk()),
+        }
+    }
 }
 
 impl HexColor {
+    pub fn to_reduced(&self) -> Option<ReducedRGBA> {
+        if let Ok(buf) = hex::decode(&self.color[1..]) {
+            return Some(ReducedRGBA {
+                red: buf[0],
+                green: buf[1],
+                blue: buf[2],
+                alpha: (self.alpha * 255.0) as u8,
+            });
+        }
+        None
+    }
+
+    pub fn to_rgba(&self) -> Option<RGBA> {
+        if let Some(color) = self.to_reduced() {
+            Some(color.to_rgba())
+        } else {
+            None
+        }
+    }
+
+    #[cfg(feature = "gdk")]
+    pub fn to_gdk(&self) -> Option<gdk::RGBA> {
+        if let Some(color) = self.to_reduced() {
+            Some(color.to_gdk())
+        } else {
+            None
+        }
+    }
+
     pub fn black() -> HexColor {
         HexColor {
             color: String::from("#000000"),
@@ -113,6 +151,16 @@ impl ReducedRGBA {
             blue: self.blue as f64 / 255.0,
             alpha: self.alpha as f64 / 255.0,
         }
+    }
+
+    #[cfg(feature = "gdk")]
+    pub fn from_gdk(color: &gdk::RGBA) -> ReducedRGBA {
+        RGBA {
+            red: color.red,
+            green: color.green,
+            blue: color.blue,
+            alpha: color.alpha,
+        }.to_reduced()
     }
 
     pub fn black() -> ReducedRGBA {
@@ -193,6 +241,16 @@ impl RGBA {
             green: self.green,
             blue: self.blue,
             alpha: self.alpha,
+        }
+    }
+
+    #[cfg(feature = "gdk")]
+    pub fn from_gdk(color: &gdk::RGBA) -> RGBA {
+        RGBA {
+            red: color.red,
+            green: color.green,
+            blue: color.blue,
+            alpha: color.alpha,
         }
     }
 
@@ -311,11 +369,37 @@ mod tests {
         assert_eq!(ReducedRGBA::blue().to_hex().color, HexColor::blue().color);
     }
 
+    #[test]
+    fn to_hex() {
+        let red_hex = HexColor { color: String::from("#ff0000"), alpha: 1.0 };
+        let red = red_hex.to_reduced().unwrap();
+        assert_eq!(red.red, 255);
+        assert_eq!(red.green, 0);
+        assert_eq!(red.blue, 0);
+        assert_eq!(red.alpha, 255);
+    }
+
     #[cfg(feature = "gdk")]
     #[test]
     fn rgba_to_gdk() {
         let red = RGBA::red();
         let gdk_red = red.to_gdk();
+        assert_eq!(red.red, gdk_red.red);
+        assert_eq!(red.green, gdk_red.green);
+        assert_eq!(red.blue, gdk_red.blue);
+        assert_eq!(red.alpha, gdk_red.alpha);
+    }
+
+    #[cfg(feature = "gdk")]
+    #[test]
+    fn rgba_from_gdk() {
+        let gdk_red = gdk::RGBA {
+            red: 1.0,
+            green: 0.0,
+            blue: 0.0,
+            alpha: 1.0,
+        };
+        let red = RGBA::from_gdk(&gdk_red);
         assert_eq!(red.red, gdk_red.red);
         assert_eq!(red.green, gdk_red.green);
         assert_eq!(red.blue, gdk_red.blue);

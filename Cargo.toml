@@ -13,6 +13,7 @@ categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 
 [dependencies]
 svg = "~0.10"
+hex ="~0.4"
 
 [dependencies.rug]
 version = "~1.12"
