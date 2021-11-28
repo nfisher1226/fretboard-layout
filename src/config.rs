@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::{Color, RGBA};
+use rgba_simple::{Color, RGBA};
 use std::fmt;
 use serde::{Deserialize, Serialize};
 
@@ -58,6 +58,14 @@ impl Font {
             family: String::from("Sans"),
             weight: FontWeight::Normal,
         }
+    }
+
+    pub fn set_family(&mut self, family: String) {
+        self.family = family;
+    }
+
+    pub fn set_weight(&mut self, weight: FontWeight) {
+        self.weight = weight;
     }
 }
 

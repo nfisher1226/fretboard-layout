@@ -18,12 +18,11 @@
 //!}
 //!```
 
-pub mod color;
 pub mod config;
+pub use config::Config;
 pub mod layout;
 
-use color::{Color, RGBA};
-pub use config::Config;
+use rgba_simple::{Color, RGBA};
 use layout::Lengths;
 use rug::ops::Pow;
 use svg::node::element::{path::Data, Description, Group, Path};
