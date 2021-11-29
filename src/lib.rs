@@ -66,8 +66,6 @@ pub struct Specs {
     pub scale: f64,
     /// Number of frets to render
     pub count: u32,
-    /// The scale length for the treble side. Ignored for single scale designs.
-    pub scale_treble: f64,
     pub variant: Variant,
     /// The width of the fretboard at the nut.
     pub nut: f64,
@@ -95,7 +93,6 @@ impl Specs {
         Specs {
             scale: 655.0,
             count: 24,
-            scale_treble: 610.0,
             variant: Variant::default(),
             nut: 43.0,
             bridge: 56.0,
@@ -108,7 +105,6 @@ impl Specs {
         Specs {
             scale: 655.0,
             count: 24,
-            scale_treble: 610.0,
             variant: Variant::Multiscale(610.0, Handedness::Right),
             nut: 43.0,
             bridge: 56.0,
@@ -127,7 +123,6 @@ impl Specs {
     pub fn set_multi(&mut self, scale: Option<f64>) {
         match scale {
             Some(s) => {
-                self.scale_treble = s;
                 if let Some(hand) = self.variant.handedness() {
                     self.variant = Variant::Multiscale(s, hand);
                 } else {
@@ -221,7 +216,10 @@ impl Specs {
                 Variant::Monoscale => false,
                 Variant::Multiscale(_, _) => true,
             })
-            .set("ScaleTreble", self.scale_treble)
+            .set("ScaleTreble", match self.variant {
+                Variant::Monoscale => self.scale,
+                Variant::Multiscale(s, _) => s,
+            })
             .set("PerpendicularFret", self.pfret)
             .set("BridgeSpacing", self.bridge - 6.0)
             .set("NutWidth", self.nut)
