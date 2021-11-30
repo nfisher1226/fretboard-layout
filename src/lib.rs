@@ -280,9 +280,16 @@ impl Specs {
 
     /// adds the bridge as a line between the outer strings
     fn draw_bridge(&self, factors: &Factors, config: &Config) -> svg::node::element::Path {
-        let start_x = config.border;
+        let start_x = match self.variant {
+            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => config.border,
+            Variant::Multiscale(_, Handedness::Left) => config.border + factors.treble_offset,
+        };
         let start_y = config.border;
-        let end_x = config.border + factors.treble_offset;
+        let end_x = match self.variant {
+            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) =>
+                config.border + factors.treble_offset,
+            Variant::Multiscale(_, Handedness::Left) => config.border,
+        };
         let end_y = config.border + self.bridge;
         let data = Data::new()
             .move_to((start_x, start_y))
@@ -329,7 +336,7 @@ impl Specs {
         config: &Config,
     ) -> svg::node::element::Group {
         let mut frets = Group::new().set("id", "Frets");
-        for fret in 0..=self.count {
+        for fret in 0..= self.count {
             let line = fretboard[fret as usize].get_fret_line(&factors, &self, &config);
             frets = frets.add(line.draw_fret(fret, &config));
         }

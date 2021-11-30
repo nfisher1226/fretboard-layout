@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::{Config, Factors, Specs};
+use crate::{Config, Factors, Handedness, Specs, Variant};
 use std::f64;
 use svg::node::element::{path::Data, Path};
 
@@ -20,21 +20,31 @@ pub struct Line {
 
 impl Lengths {
     /// Plots the end of a fret, nut or bridge along the bass side of the scale
-    fn get_point_bass(&self, factors: &Factors, config: &Config) -> Point {
+    fn get_point_bass(&self, factors: &Factors, specs: &Specs, config: &Config) -> Point {
         let x = (factors.x_ratio * self.length_bass) + config.border;
-        let y = (factors.y_ratio * self.length_bass) + config.border;
+        let y = match specs.variant {
+            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) =>
+                (factors.y_ratio * self.length_bass) + config.border,
+            Variant::Multiscale(_, Handedness::Left) =>
+                specs.bridge - (factors.y_ratio * self.length_bass) + config.border,
+        };
         Point(x, y)
     }
     /// Plots the end of a fret, nut or bridge along the treble side of the scale
     fn get_point_treble(&self, factors: &Factors, specs: &Specs, config: &Config) -> Point {
         let x = factors.treble_offset + (factors.x_ratio * self.length_treble) + config.border;
-        let y = specs.bridge - (factors.y_ratio * self.length_treble) + config.border;
+        let y = match specs.variant {
+            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) =>
+                specs.bridge - (factors.y_ratio * self.length_treble) + config.border,
+            Variant::Multiscale(_, Handedness::Left) =>
+                (factors.y_ratio * self.length_treble) + config.border,
+        };
         Point(x, y)
     }
     /// Returns a Point struct containing both ends of a fret, nut or bridge
     /// which will form a line
     pub fn get_fret_line(&self, factors: &Factors, specs: &Specs, config: &Config) -> Line {
-        let start = self.get_point_bass(&factors, &config);
+        let start = self.get_point_bass(&factors, specs, &config);
         let end = self.get_point_treble(&factors, &specs, &config);
         Line { start, end }
     }
