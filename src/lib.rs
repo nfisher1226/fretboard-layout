@@ -19,7 +19,7 @@
 //!```
 
 pub mod config;
-pub use config::Config;
+pub use config::{ Config, Units };
 pub mod layout;
 
 use rgba_simple::{Color, RGBA};
@@ -66,6 +66,7 @@ pub struct Specs {
     pub scale: f64,
     /// Number of frets to render
     pub count: u32,
+    /// Monoscale or Multiscale Right orLeft handed
     pub variant: Variant,
     /// The width of the fretboard at the nut.
     pub nut: f64,
@@ -227,11 +228,15 @@ impl Specs {
 
     /// Prints the specs used in the rendered image
     fn print_data(&self, config: &Config) -> svg::node::element::Text {
+        let units = match config.units {
+            Units::Metric => String::from("mm"),
+            Units::Imperial => String::from("in"),
+        };
         let mut line = match self.variant {
-            Variant::Monoscale => format!("Scale: {:.2}mm |", self.scale),
+            Variant::Monoscale => format!("Scale: {:.2}{} |", self.scale, &units),
             Variant::Multiscale(s, _) => format!(
-                "ScaleBass: {:.2}mm | ScaleTreble: {:.2}mm | PerpendicularFret: {:.1} |",
-                self.scale, s, self.pfret
+                "ScaleBass: {:.2}{} | ScaleTreble: {:.2}{} | PerpendicularFret: {:.1} |",
+                self.scale, &units, s, &units, self.pfret
             ),
         };
         let font_family = match &config.font {
@@ -242,8 +247,8 @@ impl Specs {
             Some(font) => font.weight.to_string(),
             None =>String::from("Regular"),
         };
-        line = format!("{} NutWidth: {:.2}mm |", line, self.nut);
-        line = format!("{} BridgeSpacing: {:.2}mm", line, self.bridge - 6.0);
+        line = format!("{} NutWidth: {:.2}{} |", line, self.nut, &units);
+        line = format!("{} BridgeSpacing: {:.2}{}", line, self.bridge - 6.0, &units);
         svg::node::element::Text::new()
             .set("x", config.border)
             .set("y", (config.border * 1.7) + self.bridge)

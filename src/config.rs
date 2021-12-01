@@ -4,6 +4,12 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+pub enum Units {
+    Metric,
+    Imperial,
+}
+
+#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
     Ultralight,
@@ -25,6 +31,19 @@ pub struct Font {
     pub weight: FontWeight,
 }
 
+impl fmt::Display for Units {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl Units {
+    /// Returns Units::Metric
+    pub fn default() -> Units {
+        Units::Metric
+    }
+}
+
 impl fmt::Display for FontWeight {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
@@ -32,6 +51,10 @@ impl fmt::Display for FontWeight {
 }
 
 impl FontWeight {
+    pub fn default() -> FontWeight {
+        FontWeight::Normal
+    }
+
     pub fn from_str(str: &str) -> Option<FontWeight> {
         match str {
             "Thin" | "thin" => Some(FontWeight::Thin),
@@ -56,7 +79,7 @@ impl Font {
     pub fn default() -> Font {
         Font {
             family: String::from("Sans"),
-            weight: FontWeight::Normal,
+            weight: FontWeight::default(),
         }
     }
 
@@ -73,6 +96,8 @@ impl Font {
 /// in this struct
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Config {
+    /// Whether to use Millimeters (mm) or Inches (in) when displaying lengths
+    pub units: Units,
     /// The border which will appear around the rendering
     pub border: f64,
     /// The line weight for all of the elements in mm
@@ -91,6 +116,7 @@ impl Config {
     /// Creates a [Config] struct with default values
     pub fn default() -> Config {
         Config {
+            units: Units::default(),
             border: 10.0,
             line_weight: 1.0,
             fretline_color: Color::Rgba(RGBA::white()),
@@ -98,6 +124,10 @@ impl Config {
             centerline_color: Some(Color::Rgba(RGBA::blue())),
             font: Some(Font::default()),
         }
+    }
+
+    pub fn set_units(&mut self, units: Units) {
+        self.units = units;
     }
 
     pub fn set_border(&mut self, border: f64) {
