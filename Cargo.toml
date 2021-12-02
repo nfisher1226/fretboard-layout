@@ -2,7 +2,7 @@
 name = "fretboard_layout"
 version = "0.1.2"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
-edition = "2018"
+edition = "2021"
 license-file = "LICENSE"
 description = "Generate an svg template of a musical instrument fretboard"
 repository = "https://codeberg.org/jeang3nie/fretboard-layout"
