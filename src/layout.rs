@@ -22,22 +22,22 @@ impl Lengths {
     /// Plots the end of a fret, nut or bridge along the bass side of the scale
     fn get_point_bass(&self, factors: &Factors, specs: &Specs, config: &Config) -> Point {
         let x = (factors.x_ratio * self.length_bass) + config.border;
-        let y = match specs.variant {
-            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) =>
-                (factors.y_ratio * self.length_bass) + config.border,
-            Variant::Multiscale(_, Handedness::Left) =>
-                specs.bridge - (factors.y_ratio * self.length_bass) + config.border,
+        let hand = specs.variant.handedness();
+        let opposite = factors.y_ratio * self.length_bass;
+        let y = match hand {
+            Some(Handedness::Left) => specs.bridge - opposite + config.border,
+            _ => opposite + config.border,
         };
         Point(x, y)
     }
     /// Plots the end of a fret, nut or bridge along the treble side of the scale
     fn get_point_treble(&self, factors: &Factors, specs: &Specs, config: &Config) -> Point {
         let x = factors.treble_offset + (factors.x_ratio * self.length_treble) + config.border;
-        let y = match specs.variant {
-            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) =>
-                specs.bridge - (factors.y_ratio * self.length_treble) + config.border,
-            Variant::Multiscale(_, Handedness::Left) =>
-                (factors.y_ratio * self.length_treble) + config.border,
+        let hand = specs.variant.handedness();
+        let opposite = factors.y_ratio * self.length_treble;
+        let y = match hand {
+            Some(Handedness::Left) => specs.bridge - opposite + config.border,
+            _ => opposite + config.border,
         };
         Point(x, y)
     }
