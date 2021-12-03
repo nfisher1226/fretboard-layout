@@ -24,7 +24,6 @@ pub mod layout;
 
 use rgba_simple::{Color, RGBA};
 use layout::Lengths;
-use rug::ops::Pow;
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
@@ -161,7 +160,7 @@ impl Specs {
     /// Returns the length from bridge to fret for a given fret number, along
     /// both bass and treble sides of the board.
     pub fn get_fret_lengths(&self, fret: u32) -> Lengths {
-        let factor = 2.0_f64.pow(f64::from(fret) / 12.0);
+        let factor = 2.0_f64.powf(f64::from(fret) / 12.0);
         let length_bass = self.scale / factor;
         let length_treble = match self.variant {
             Variant::Monoscale => length_bass,
@@ -193,7 +192,7 @@ impl Specs {
         let height = (self.bridge - self.nut) / 2.0;
         let y_ratio = height / self.scale;
         let x_ratio = y_ratio.acos().sin();
-        let factor = 2.0_f64.pow(self.pfret / 12.0);
+        let factor = 2.0_f64.powf(self.pfret / 12.0);
         let length_bass = self.scale / factor;
         let length_treble = match self.variant {
             Variant::Monoscale => length_bass,

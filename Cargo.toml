@@ -1,6 +1,6 @@
 [package]
 name = "fretboard_layout"
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2021"
 license-file = "LICENSE"
@@ -15,10 +15,6 @@ categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 svg = "~0.10"
 hex ="~0.4"
 rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple.git" }
-
-[dependencies.rug]
-version = "~1.14"
-features = ["float"]
 
 [dependencies.serde]
 version = "~1.0"
