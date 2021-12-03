@@ -36,8 +36,8 @@ impl Lengths {
         let hand = specs.variant.handedness();
         let opposite = factors.y_ratio * self.length_treble;
         let y = match hand {
-            Some(Handedness::Left) => specs.bridge - opposite + config.border,
-            _ => opposite + config.border,
+            Some(Handedness::Left) => opposite + config.border,
+            _ => specs.bridge - opposite + config.border,
         };
         Point(x, y)
     }
