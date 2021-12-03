@@ -17,7 +17,7 @@ hex ="~0.4"
 rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple.git" }
 
 [dependencies.rug]
-version = "~1.12"
+version = "~1.14"
 features = ["float"]
 
 [dependencies.serde]

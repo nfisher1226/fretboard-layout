@@ -62,7 +62,7 @@ dependencies = [
 [[package]]
 name = "rgba_simple"
 version = "0.1.0"
-source = "git+https://codeberg.org/jeang3nie/rgba-simple.git#ff57afeafee3cbe77ca656a95b1e2b49cf4d3ac9"
+source = "git+https://codeberg.org/jeang3nie/rgba-simple.git#de12ee2f0639991d0f1b108a414412387daef206"
 dependencies = [
  "hex",
  "serde",
@@ -70,9 +70,9 @@ dependencies = [
 
 [[package]]
 name = "rug"
-version = "1.12.0"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32f75e07492c4d17d12f226d17e689fdb698db7a1e875fca0fac15626283bf24"
+checksum = "f5b5ccc39761dbd2f1d64817f6e62eba658b4f35e711a070f55043c0fd1385c7"
 dependencies = [
  "az",
  "gmp-mpfr-sys",
