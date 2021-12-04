@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::{Config, Factors, Handedness, Specs, Variant};
+use crate::{Config, Factors, Handedness, Specs};
 use std::f64;
 use svg::node::element::{path::Data, Path};
 

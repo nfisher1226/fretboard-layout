@@ -24,16 +24,17 @@ pub mod layout;
 
 use layout::Lengths;
 use rgba_simple::{Color, RGBA};
+use serde::{Deserialize, Serialize};
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Handedness {
     Right,
     Left,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub enum Variant {
     Monoscale,
     Multiscale(f64, Handedness),
@@ -44,14 +45,14 @@ impl Variant {
         Variant::Monoscale
     }
 
-    fn value(&self) -> Option<f64> {
+    pub fn value(&self) -> Option<f64> {
         match self {
             Variant::Monoscale => None,
             Variant::Multiscale(x, _) => Some(*x),
         }
     }
 
-    fn handedness(&self) -> Option<Handedness> {
+    pub fn handedness(&self) -> Option<Handedness> {
         match self {
             Variant::Monoscale => None,
             Variant::Multiscale(_, x) => Some(*x),
