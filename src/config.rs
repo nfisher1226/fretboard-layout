@@ -1,7 +1,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 use rgba_simple::{Color, RGBA};
-use std::fmt;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum Units {
@@ -169,7 +169,7 @@ mod tests {
                 assert_eq!(color.red, 1.0);
                 assert_eq!(color.green, 1.0);
                 assert_eq!(color.blue, 1.0);
-            },
+            }
             _ => panic!("Wrong type"),
         }
     }

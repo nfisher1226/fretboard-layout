@@ -19,11 +19,11 @@
 //!```
 
 pub mod config;
-pub use config::{ Config, Units };
+pub use config::{Config, Units};
 pub mod layout;
 
-use rgba_simple::{Color, RGBA};
 use layout::Lengths;
+use rgba_simple::{Color, RGBA};
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
@@ -128,7 +128,7 @@ impl Specs {
                 } else {
                     self.variant = Variant::Multiscale(s, Handedness::Right);
                 };
-            },
+            }
             None => self.variant = Variant::Monoscale,
         }
     }
@@ -212,14 +212,20 @@ impl Specs {
     fn create_description(&self) -> svg::node::element::Description {
         Description::new()
             .set("Scale", self.scale)
-            .set("Multiscale", match self.variant {
-                Variant::Monoscale => false,
-                Variant::Multiscale(_, _) => true,
-            })
-            .set("ScaleTreble", match self.variant {
-                Variant::Monoscale => self.scale,
-                Variant::Multiscale(s, _) => s,
-            })
+            .set(
+                "Multiscale",
+                match self.variant {
+                    Variant::Monoscale => false,
+                    Variant::Multiscale(_, _) => true,
+                },
+            )
+            .set(
+                "ScaleTreble",
+                match self.variant {
+                    Variant::Monoscale => self.scale,
+                    Variant::Multiscale(s, _) => s,
+                },
+            )
             .set("PerpendicularFret", self.pfret)
             .set("BridgeSpacing", self.bridge - 6.0)
             .set("NutWidth", self.nut)
@@ -244,7 +250,7 @@ impl Specs {
         };
         let font_weight = match &config.font {
             Some(font) => font.weight.to_string(),
-            None =>String::from("Regular"),
+            None => String::from("Regular"),
         };
         line = format!("{} NutWidth: {:.2}{} |", line, self.nut, &units);
         line = format!("{} BridgeSpacing: {:.2}{}", line, self.bridge - 6.0, &units);
@@ -264,9 +270,11 @@ impl Specs {
         let start_y = (self.bridge / 2.0) + config.border;
         let end_x = config.border + self.scale;
         let end_y = (self.bridge / 2.0) + config.border;
-        let hex = config.centerline_color.as_ref().unwrap_or(
-            &Color::Rgba(RGBA::blue())
-        ).to_hex();
+        let hex = config
+            .centerline_color
+            .as_ref()
+            .unwrap_or(&Color::Rgba(RGBA::blue()))
+            .to_hex();
         let data = Data::new()
             .move_to((start_x, start_y))
             .line_to((end_x, end_y))
@@ -290,8 +298,9 @@ impl Specs {
         };
         let start_y = config.border;
         let end_x = match self.variant {
-            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) =>
-                config.border + factors.treble_offset,
+            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => {
+                config.border + factors.treble_offset
+            }
             Variant::Multiscale(_, Handedness::Left) => config.border,
         };
         let end_y = config.border + self.bridge;
@@ -340,7 +349,7 @@ impl Specs {
         config: &Config,
     ) -> svg::node::element::Group {
         let mut frets = Group::new().set("id", "Frets");
-        for fret in 0..= self.count {
+        for fret in 0..=self.count {
             let line = fretboard[fret as usize].get_fret_line(&factors, &self, &config);
             frets = frets.add(line.draw_fret(fret, &config));
         }
