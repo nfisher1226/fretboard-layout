@@ -34,17 +34,21 @@ pub enum Handedness {
     Left,
 }
 
+impl Default for Handedness {
+    fn default() -> Self { Handedness::Right }
+}
+
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub enum Variant {
     Monoscale,
     Multiscale(f64, Handedness),
 }
 
-impl Variant {
-    fn default() -> Variant {
-        Variant::Monoscale
-    }
+impl Default for Variant {
+    fn default() -> Self { Variant::Monoscale }
+}
 
+impl Variant {
     pub fn value(&self) -> Option<f64> {
         match self {
             Variant::Monoscale => None,

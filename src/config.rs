@@ -37,11 +37,8 @@ impl fmt::Display for Units {
     }
 }
 
-impl Units {
-    /// Returns Units::Metric
-    pub fn default() -> Units {
-        Units::Metric
-    }
+impl Default for Units {
+    fn default() -> Self { Units::Metric }
 }
 
 impl fmt::Display for FontWeight {
@@ -50,11 +47,11 @@ impl fmt::Display for FontWeight {
     }
 }
 
-impl FontWeight {
-    pub fn default() -> FontWeight {
-        FontWeight::Normal
-    }
+impl Default for FontWeight {
+    fn default() -> Self { FontWeight::Normal }
+}
 
+impl FontWeight {
     pub fn from_str(str: &str) -> Option<FontWeight> {
         match str {
             "Thin" | "thin" => Some(FontWeight::Thin),
@@ -74,15 +71,16 @@ impl FontWeight {
     }
 }
 
-impl Font {
-    /// Returns "Sans Normal"
-    pub fn default() -> Font {
+impl Default for Font {
+    fn default() -> Self {
         Font {
             family: String::from("Sans"),
             weight: FontWeight::default(),
         }
     }
+}
 
+impl Font {
     pub fn set_family(&mut self, family: String) {
         self.family = family;
     }
@@ -112,9 +110,8 @@ pub struct Config {
     pub font: Option<Font>,
 }
 
-impl Config {
-    /// Creates a [Config] struct with default values
-    pub fn default() -> Config {
+impl Default for Config {
+    fn default() -> Self {
         Config {
             units: Units::default(),
             border: 10.0,
@@ -125,7 +122,9 @@ impl Config {
             font: Some(Font::default()),
         }
     }
+}
 
+impl Config {
     pub fn set_units(&mut self, units: Units) {
         self.units = units;
     }
