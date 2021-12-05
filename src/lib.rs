@@ -1,12 +1,11 @@
 #![warn(clippy::all, clippy::pedantic)]
-//! Fretboard_layout is a library for turning a set of specifications into a
+//! `Fretboard_layout` is a library for turning a set of specifications into a
 //! complete template of a stringed musical instrument fretboard, such as a
 //! guitar, banjo, or mandolin.
 //! ## Usage
 //!```rust
 //!use fretboard_layout::{Config,Specs};
 //!
-//!fn main() {
 //!    // the [Specs] struct constains the specifications used to generate the svg
 //!    let mut specs = Specs::default();
 //!    specs.set_multi(Some(615.0));
@@ -15,7 +14,6 @@
 //!    let mut cfg = Config::default();
 //!    cfg.set_line_weight(0.5);
 //!    let svg = specs.create_document(Some(cfg));
-//!}
 //!```
 
 pub mod config;
@@ -35,7 +33,9 @@ pub enum Handedness {
 }
 
 impl Default for Handedness {
-    fn default() -> Self { Handedness::Right }
+    fn default() -> Self {
+        Handedness::Right
+    }
 }
 
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
@@ -45,7 +45,9 @@ pub enum Variant {
 }
 
 impl Default for Variant {
-    fn default() -> Self { Variant::Monoscale }
+    fn default() -> Self {
+        Variant::Monoscale
+    }
 }
 
 impl Variant {
@@ -92,9 +94,8 @@ pub struct Factors {
     pub treble_offset: f64,
 }
 
-impl Specs {
-    /// Returns a default Specs struct
-    pub fn default() -> Specs {
+impl Default for Specs {
+    fn default() -> Self {
         Specs {
             scale: 655.0,
             count: 24,
@@ -104,7 +105,9 @@ impl Specs {
             pfret: 8.0,
         }
     }
+}
 
+impl Specs {
     /// Returns a multiscale Specs struct
     pub fn multi() -> Specs {
         Specs {
@@ -328,8 +331,8 @@ impl Specs {
         factors: &Factors,
         config: &Config,
     ) -> svg::node::element::Path {
-        let nut = fretboard[0_usize].get_fret_line(&factors, &self, &config);
-        let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self, &config);
+        let nut = fretboard[0_usize].get_fret_line(factors, self, config);
+        let end = fretboard[self.count as usize + 1].get_fret_line(factors, self, config);
         let hex = config.fretboard_color.to_hex();
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
@@ -355,8 +358,8 @@ impl Specs {
     ) -> svg::node::element::Group {
         let mut frets = Group::new().set("id", "Frets");
         for fret in 0..=self.count {
-            let line = fretboard[fret as usize].get_fret_line(&factors, &self, &config);
-            frets = frets.add(line.draw_fret(fret, &config));
+            let line = fretboard[fret as usize].get_fret_line(factors, self, config);
+            frets = frets.add(line.draw_fret(fret, config));
         }
         frets
     }
@@ -373,7 +376,7 @@ impl Specs {
     ///}
     ///```
     pub fn create_document(&self, conf: Option<Config>) -> svg::Document {
-        let config = conf.unwrap_or_else(Config::default);
+        let config = conf.unwrap_or_default();
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors();
         let width = (config.border * 2.0) + self.scale;
@@ -386,9 +389,9 @@ impl Specs {
             .set("preserveAspectRatio", "xMidYMid meet")
             .set("viewBox", (0, 0, width, height))
             .add(self.create_description())
-            .add(self.draw_fretboard(&lengths, &factors, &config))
-            .add(self.draw_bridge(&factors, &config))
-            .add(self.draw_frets(&lengths, &factors, &config));
+            .add(self.draw_fretboard(&lengths, factors, &config))
+            .add(self.draw_bridge(factors, &config))
+            .add(self.draw_frets(&lengths, factors, &config));
         if config.font.is_some() {
             if config.centerline_color.is_some() {
                 document

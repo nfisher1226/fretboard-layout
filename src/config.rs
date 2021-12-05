@@ -2,6 +2,7 @@
 use rgba_simple::{Color, RGBA};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::str::FromStr;
 
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum Units {
@@ -25,6 +26,9 @@ pub enum FontWeight {
     Ultraheavy,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct ParseFontError;
+
 #[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Font {
     pub family: String,
@@ -38,7 +42,9 @@ impl fmt::Display for Units {
 }
 
 impl Default for Units {
-    fn default() -> Self { Units::Metric }
+    fn default() -> Self {
+        Units::Metric
+    }
 }
 
 impl fmt::Display for FontWeight {
@@ -48,25 +54,28 @@ impl fmt::Display for FontWeight {
 }
 
 impl Default for FontWeight {
-    fn default() -> Self { FontWeight::Normal }
+    fn default() -> Self {
+        FontWeight::Normal
+    }
 }
 
-impl FontWeight {
-    pub fn from_str(str: &str) -> Option<FontWeight> {
+impl FromStr for FontWeight {
+    type Err = ParseFontError;
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
         match str {
-            "Thin" | "thin" => Some(FontWeight::Thin),
-            "Ultralight" | "ultralight" => Some(FontWeight::Ultralight),
-            "Light" | "light" => Some(FontWeight::Light),
-            "Semilight" | "semilight" => Some(FontWeight::Semilight),
-            "Book" | "book" => Some(FontWeight::Book),
-            "Normal" | "normal" => Some(FontWeight::Normal),
-            "Medium" | "medium" => Some(FontWeight::Medium),
-            "Semibold" | "semibold" => Some(FontWeight::Semibold),
-            "Bold" | "bold" => Some(FontWeight::Bold),
-            "Ultrabold" | "ultrabold" => Some(FontWeight::Ultrabold),
-            "Heavy" | "heavy" => Some(FontWeight::Heavy),
-            "Ultraheavy" | "ultraheavy" => Some(FontWeight::Ultraheavy),
-            _ => None,
+            "Thin" | "thin" => Ok(FontWeight::Thin),
+            "Ultralight" | "ultralight" => Ok(FontWeight::Ultralight),
+            "Light" | "light" => Ok(FontWeight::Light),
+            "Semilight" | "semilight" => Ok(FontWeight::Semilight),
+            "Book" | "book" => Ok(FontWeight::Book),
+            "Normal" | "normal" => Ok(FontWeight::Normal),
+            "Medium" | "medium" => Ok(FontWeight::Medium),
+            "Semibold" | "semibold" => Ok(FontWeight::Semibold),
+            "Bold" | "bold" => Ok(FontWeight::Bold),
+            "Ultrabold" | "ultrabold" => Ok(FontWeight::Ultrabold),
+            "Heavy" | "heavy" => Ok(FontWeight::Heavy),
+            "Ultraheavy" | "ultraheavy" => Ok(FontWeight::Ultraheavy),
+            _ => Err(ParseFontError),
         }
     }
 }
@@ -184,7 +193,7 @@ mod tests {
 
     #[test]
     fn font_weight_from_str() {
-        assert_eq!(None, FontWeight::from_str("foo"));
-        assert_eq!(Some(FontWeight::Bold), FontWeight::from_str("bold"));
+        assert_eq!(Err(ParseFontError), FontWeight::from_str("foo"));
+        assert_eq!(Ok(FontWeight::Bold), FontWeight::from_str("bold"));
     }
 }

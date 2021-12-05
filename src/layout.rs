@@ -44,8 +44,8 @@ impl Lengths {
     /// Returns a Point struct containing both ends of a fret, nut or bridge
     /// which will form a line
     pub fn get_fret_line(&self, factors: &Factors, specs: &Specs, config: &Config) -> Line {
-        let start = self.get_point_bass(&factors, specs, &config);
-        let end = self.get_point_treble(&factors, &specs, &config);
+        let start = self.get_point_bass(factors, specs, config);
+        let end = self.get_point_treble(factors, specs, config);
         Line { start, end }
     }
 }
