@@ -47,6 +47,12 @@ impl Default for Units {
     }
 }
 
+impl fmt::Display for ParseFontError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 impl fmt::Display for FontWeight {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
