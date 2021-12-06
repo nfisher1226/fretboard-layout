@@ -13,8 +13,12 @@ categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 
 [dependencies]
 svg = "~0.10"
-hex ="~0.4"
 rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple.git" }
+
+[dependencies.hex]
+version = "~0.4"
+default-features = false
+features = ["std"]
 
 [dependencies.serde]
 version = "~1.0"
