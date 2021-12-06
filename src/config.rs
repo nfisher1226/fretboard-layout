@@ -74,7 +74,7 @@ impl FromStr for FontWeight {
             "Light" | "light" => Ok(FontWeight::Light),
             "Semilight" | "semilight" => Ok(FontWeight::Semilight),
             "Book" | "book" => Ok(FontWeight::Book),
-            "Normal" | "normal" => Ok(FontWeight::Normal),
+            "Normal" | "normal" | "Regular" | "regular" => Ok(FontWeight::Normal),
             "Medium" | "medium" => Ok(FontWeight::Medium),
             "Semibold" | "semibold" => Ok(FontWeight::Semibold),
             "Bold" | "bold" => Ok(FontWeight::Bold),
