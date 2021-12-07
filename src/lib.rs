@@ -21,7 +21,7 @@ pub use config::{Config, Units};
 pub mod layout;
 
 use layout::Lengths;
-use rgba_simple::{Color, RGBA};
+use rgba_simple::{Color, HexColor, RGBA, ToHex};
 use serde::{Deserialize, Serialize};
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
@@ -282,7 +282,11 @@ impl Specs {
             .centerline_color
             .as_ref()
             .unwrap_or(&Color::Rgba(RGBA::blue()))
-            .to_hex();
+            .to_hex()
+            .unwrap_or(HexColor {
+                color: String::from("#0000FF"),
+                alpha: 1.0,
+            });
         let data = Data::new()
             .move_to((start_x, start_y))
             .line_to((end_x, end_y))
@@ -333,7 +337,16 @@ impl Specs {
     ) -> svg::node::element::Path {
         let nut = fretboard[0_usize].get_fret_line(factors, self, config);
         let end = fretboard[self.count as usize + 1].get_fret_line(factors, self, config);
-        let hex = config.fretboard_color.to_hex();
+        let hex = match config.fretboard_color.to_hex() {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("Error getting fretboard color: {}", e);
+                HexColor {
+                    color: String::from("#000000"),
+                    alpha: 1.0,
+                }
+            },
+        };
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
             .line_to((nut.end.0, nut.end.1))

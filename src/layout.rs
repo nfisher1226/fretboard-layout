@@ -1,7 +1,9 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::{Config, Factors, Handedness, Specs};
-use std::f64;
+use rgba_simple::{HexColor, ToHex};
 use svg::node::element::{path::Data, Path};
+
+use std::f64;
 
 /// Distance from bridge to fret along each side of the fretboard.
 pub struct Lengths {
@@ -58,7 +60,16 @@ impl Line {
         } else {
             format!("Fret {}", fret)
         };
-        let hex = config.fretline_color.to_hex();
+        let hex = match config.fretline_color.to_hex() {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("Error getting fretline color: {}", e);
+                HexColor {
+                    color: String::from("#FFFFFF"),
+                    alpha: 1.0,
+                }
+            },
+        };
         let data = Data::new()
             .move_to((self.start.0, self.start.1))
             .line_to((self.end.0, self.end.1))

@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "fretboard_layout"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "hex",
  "rgba_simple",
@@ -38,8 +38,8 @@ dependencies = [
 
 [[package]]
 name = "rgba_simple"
-version = "0.1.1"
-source = "git+https://codeberg.org/jeang3nie/rgba-simple.git#5c80154851f3771ab780d8b9abb8266a664f05c4"
+version = "0.2.0"
+source = "git+https://codeberg.org/jeang3nie/rgba-simple.git#7985ea78b5e18eb822e57cd5512fe3aacfb74e6d"
 dependencies = [
  "hex",
  "serde",
