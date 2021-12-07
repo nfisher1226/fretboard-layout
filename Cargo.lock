@@ -39,7 +39,7 @@ dependencies = [
 [[package]]
 name = "rgba_simple"
 version = "0.2.0"
-source = "git+https://codeberg.org/jeang3nie/rgba-simple.git#7985ea78b5e18eb822e57cd5512fe3aacfb74e6d"
+source = "git+https://codeberg.org/jeang3nie/rgba-simple.git#187441701513fc50f765c31c4512639dfd1fab23"
 dependencies = [
  "hex",
  "serde",
