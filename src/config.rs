@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use rgba_simple::{Color, RGBA};
+use rgba_simple::{Color, Primary, RGBA};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
