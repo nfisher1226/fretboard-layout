@@ -419,6 +419,18 @@ impl Specs {
             document
         }
     }
+
+    pub fn to_imperial(&mut self) {
+        self.scale /= 25.4;
+        self.nut /= 25.4;
+        self.bridge /= 25.4;
+    }
+
+    pub fn to_imperial(&mut self) {
+        self.scale *= 25.4;
+        self.nut *= 25.4;
+        self.bridge *= 25.4;
+    }
 }
 
 #[cfg(test)]
