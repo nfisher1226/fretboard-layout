@@ -21,7 +21,7 @@ pub use config::{Config, Units};
 pub mod layout;
 
 use layout::Lengths;
-use rgba_simple::{Color, HexColor, Primary, RGBA, ToHex};
+use rgba_simple::{Color, Convert, HexColor, Primary, RGBA};
 use serde::{Deserialize, Serialize};
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;

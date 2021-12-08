@@ -1,6 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
 use crate::{Config, Factors, Handedness, Specs};
-use rgba_simple::{HexColor, ToHex};
+use rgba_simple::{Convert, HexColor};
 use svg::node::element::{path::Data, Path};
 
 use std::f64;
