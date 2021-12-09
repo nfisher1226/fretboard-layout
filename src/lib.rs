@@ -261,13 +261,21 @@ impl Specs {
             None => String::from("Regular"),
         };
         line = format!("{} NutWidth: {:.2}{} |", line, self.nut, &units);
-        line = format!("{} BridgeSpacing: {:.2}{}", line, self.bridge - 6.0, &units);
+        let bridge = match config.units {
+            Units::Metric => self.bridge - 6.0,
+            Units::Imperial => self.bridge - (6.0 / 20.4),
+        };
+        line = format!("{} BridgeSpacing: {:.2}{}", line, bridge, &units);
+        let font_size = match config.units {
+            Units::Metric => String::from("5px"),
+            Units::Imperial => String::from("0.25px"),
+        };
         svg::node::element::Text::new()
             .set("x", config.border)
             .set("y", (config.border * 1.7) + self.bridge)
             .set("font-family", font_family)
             .set("font-weight", font_weight)
-            .set("font-size", "5px")
+            .set("font-size", font_size)
             .set("id", "Specifications")
             .add(svg::node::Text::new(line))
     }
@@ -278,6 +286,10 @@ impl Specs {
         let start_y = (self.bridge / 2.0) + config.border;
         let end_x = config.border + self.scale;
         let end_y = (self.bridge / 2.0) + config.border;
+        let dasharray = match config.units {
+            Units::Metric => String::from("4.0, 8.0"),
+            Units::Imperial => String::from("0.2, 0.4"),
+        };
         let hex = config
             .centerline_color
             .as_ref()
@@ -295,7 +307,7 @@ impl Specs {
             .set("fill", "none")
             .set("stroke", hex.color.as_str())
             .set("stroke-opacity", hex.alpha)
-            .set("stroke-dasharray", "4.0, 8.0")
+            .set("stroke-dasharray", dasharray)
             .set("stroke-dashoffset", "0")
             .set("stroke-width", config.line_weight)
             .set("id", "Centerline")
@@ -418,18 +430,6 @@ impl Specs {
         } else {
             document
         }
-    }
-
-    pub fn to_imperial(&mut self) {
-        self.scale /= 25.4;
-        self.nut /= 25.4;
-        self.bridge /= 25.4;
-    }
-
-    pub fn to_imperial(&mut self) {
-        self.scale *= 25.4;
-        self.nut *= 25.4;
-        self.bridge *= 25.4;
     }
 }
 
