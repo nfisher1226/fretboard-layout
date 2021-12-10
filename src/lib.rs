@@ -401,13 +401,17 @@ impl Specs {
     ///}
     ///```
     pub fn create_document(&self, conf: Option<Config>) -> svg::Document {
+        let units = match conf.units {
+            Units::Metric => String::from("mm"),
+            Units::Imperial => String::from("in"),
+        };
         let config = conf.unwrap_or_default();
         let lengths: Vec<Lengths> = self.get_all_lengths();
         let factors = &self.get_factors();
         let width = (config.border * 2.0) + self.scale;
-        let widthmm = format!("{}mm", width);
+        let widthmm = format!("{}{}", width, units);
         let height = (config.border * 2.0) + self.bridge;
-        let heightmm = format!("{}mm", height);
+        let heightmm = format!("{}{}", height, units);
         let document = Document::new()
             .set("width", widthmm)
             .set("height", heightmm)
