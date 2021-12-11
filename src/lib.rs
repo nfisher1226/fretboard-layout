@@ -16,8 +16,10 @@
 //!    let svg = specs.create_document(Some(cfg));
 //!```
 
+/// Some miscellaneous settings like colors, line styling and measurements
 pub mod config;
 pub use config::{Config, Units};
+/// Plots positions and outputs svg
 pub mod layout;
 
 use layout::Lengths;
@@ -26,6 +28,7 @@ use serde::{Deserialize, Serialize};
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
 
+/// Whether the output is for right or left handed usage
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Handedness {
     Right,
@@ -38,6 +41,10 @@ impl Default for Handedness {
     }
 }
 
+/// A monoscale neck is traditional, while a multiscale neck (also known as fan
+/// fret) allows for the bass scale to be longer than the treble scale, giving
+/// advantages in playability and string tension, at the expense of added
+/// complexity.
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub enum Variant {
     Monoscale,

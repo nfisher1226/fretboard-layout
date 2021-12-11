@@ -4,12 +4,14 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
 
+/// Whther to use Metric (mm) or Imperial (in) measurements
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum Units {
     Metric,
     Imperial,
 }
 
+/// Font weight and style
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
@@ -26,6 +28,7 @@ pub enum FontWeight {
     Ultraheavy,
 }
 
+/// Returned if a valid font cannot be parsed from the config
 #[derive(Clone, Debug, PartialEq)]
 pub struct ParseFontError;
 
