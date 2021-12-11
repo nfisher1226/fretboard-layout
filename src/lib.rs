@@ -1,20 +1,20 @@
 #![warn(clippy::all, clippy::pedantic)]
-//! `Fretboard_layout` is a library for turning a set of specifications into a
+//! `fretboard_layout` is a library for turning a set of specifications into a
 //! complete template of a stringed musical instrument fretboard, such as a
 //! guitar, banjo, or mandolin.
 //! ## Usage
-//!```rust
-//!use fretboard_layout::{Config,Specs};
+//! ```rust
+//! use fretboard_layout::{Config,Specs};
 //!
-//!    // the [Specs] struct constains the specifications used to generate the svg
-//!    let mut specs = Specs::default();
-//!    specs.set_multi(Some(615.0));
-//!    specs.set_scale(675.0);
-//!    // the (optional) [Config] struct fine tunes the visual representation
-//!    let mut cfg = Config::default();
-//!    cfg.set_line_weight(0.5);
-//!    let svg = specs.create_document(Some(cfg));
-//!```
+//!     // the [Specs] struct constains the specifications used to generate the svg
+//!     let mut specs = Specs::default();
+//!     specs.set_multi(Some(615.0));
+//!     specs.set_scale(675.0);
+//!     // the (optional) [Config] struct fine tunes the visual representation
+//!     let mut cfg = Config::default();
+//!     cfg.set_line_weight(0.5);
+//!     let svg = specs.create_document(Some(cfg));
+//! ```
 
 /// Some miscellaneous settings like colors, line styling and measurements
 pub mod config;
@@ -45,7 +45,7 @@ impl Default for Handedness {
 /// fret) allows for the bass scale to be longer than the treble scale, giving
 /// advantages in playability and string tension, at the expense of added
 /// complexity.
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Variant {
     Monoscale,
     Multiscale(f64, Handedness),

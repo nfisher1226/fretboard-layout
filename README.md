@@ -1,13 +1,21 @@
 # Fretboard Layout
-## Introduction
-This library takes a set of specifications for a musical instrument fretboard
-and generates an SVG image suitable for use as a template in the design of an
-instrument. Currently, measurements are expected to be in millimeters.
-```rust
-use fretboard_layout::Specs;
-use svg::Document;
+<!-- cargo-sync-readme start -->
 
-fn main() -> Document {
-    Specs::default().create_document(None)
-}
+`fretboard_layout` is a library for turning a set of specifications into a
+complete template of a stringed musical instrument fretboard, such as a
+guitar, banjo, or mandolin.
+## Usage
+```rust
+use fretboard_layout::{Config,Specs};
+
+    // the [Specs] struct constains the specifications used to generate the svg
+    let mut specs = Specs::default();
+    specs.set_multi(Some(615.0));
+    specs.set_scale(675.0);
+    // the (optional) [Config] struct fine tunes the visual representation
+    let mut cfg = Config::default();
+    cfg.set_line_weight(0.5);
+    let svg = specs.create_document(Some(cfg));
 ```
+
+<!-- cargo-sync-readme end -->

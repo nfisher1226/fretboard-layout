@@ -5,14 +5,14 @@ use std::fmt;
 use std::str::FromStr;
 
 /// Whther to use Metric (mm) or Imperial (in) measurements
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
 pub enum Units {
     Metric,
     Imperial,
 }
 
 /// Font weight and style
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
     Ultralight,
@@ -29,7 +29,7 @@ pub enum FontWeight {
 }
 
 /// Returned if a valid font cannot be parsed from the config
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct ParseFontError;
 
 #[derive(Clone, Deserialize, Debug, Serialize)]
@@ -101,8 +101,16 @@ impl Default for Font {
 }
 
 impl Font {
+    pub fn family(&self) -> &str {
+        &self.family
+    }
+
     pub fn set_family(&mut self, family: String) {
         self.family = family;
+    }
+
+    pub fn weight(&self) -> FontWeight {
+        self.weight
     }
 
     pub fn set_weight(&mut self, weight: FontWeight) {
@@ -145,28 +153,62 @@ impl Default for Config {
 }
 
 impl Config {
+    pub fn units(&self) -> Units {
+        self.units
+    }
+
     pub fn set_units(&mut self, units: Units) {
         self.units = units;
+    }
+
+    pub fn border(&self) -> f64 {
+        self.border
     }
 
     pub fn set_border(&mut self, border: f64) {
         self.border = border;
     }
 
+    pub fn line_weight(&self) -> f64 {
+        self.line_weight
+    }
+
     pub fn set_line_weight(&mut self, weight: f64) {
         self.line_weight = weight;
+    }
+
+    pub fn fretline_color(&self) -> Color {
+        self.fretline_color.clone()
     }
 
     pub fn set_fretline_color(&mut self, color: Color) {
         self.fretline_color = color;
     }
 
+    pub fn fretboard_color(&self) -> Color {
+        self.fretboard_color.clone()
+    }
+
     pub fn set_fretboard_color(&mut self, color: Color) {
         self.fretboard_color = color;
     }
 
+    pub fn centerline_color(&self) -> Option<Color> {
+        match &self.centerline_color {
+            Some(c) => Some(c.clone()),
+            None => None,
+        }
+    }
+
     pub fn set_centerline_color(&mut self, color: Option<Color>) {
         self.centerline_color = color;
+    }
+
+    pub fn font(&self) -> Option<Font> {
+        match &self.font {
+            Some(f) => Some(f.clone()),
+            None => None,
+        }
     }
 
     pub fn set_font(&mut self, font: Option<Font>) {
