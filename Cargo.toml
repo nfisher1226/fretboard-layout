@@ -1,6 +1,6 @@
 [package]
 name = "fretboard_layout"
-version = "0.1.8"
+version = "0.1.9"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2021"
 license-file = "LICENSE"
@@ -13,12 +13,7 @@ categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 
 [dependencies]
 svg = "~0.10"
-rgba_simple = "~0.3"
-
-[dependencies.hex]
-version = "~0.4"
-default-features = false
-features = ["std"]
+rgba_simple = "~0.4"
 
 [dependencies.serde]
 version = "~1.0"
