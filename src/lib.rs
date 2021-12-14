@@ -4,7 +4,7 @@
 //! guitar, banjo, or mandolin.
 //! ## Usage
 //! ```rust
-//! use fretboard_layout::{Config,Specs};
+//! use fretboard_layout::{Config, Specs};
 //!
 //!     // the [Specs] struct constains the specifications used to generate the svg
 //!     let mut specs = Specs::default();
@@ -17,12 +17,12 @@
 //! ```
 
 /// Some miscellaneous settings like colors, line styling and measurements
-pub mod config;
+mod config;
 pub use config::{Config, Units};
 /// Plots positions and outputs svg
-pub mod layout;
+mod layout;
 
-use layout::Lengths;
+pub use layout::{Lengths, Line};
 use rgba_simple::{Color, Convert, HexColor, Primary, RGBA};
 use serde::{Deserialize, Serialize};
 use svg::node::element::{path::Data, Description, Group, Path};
@@ -127,12 +127,24 @@ impl Specs {
         }
     }
 
+    pub fn scale(&self) -> f64 {
+        self.scale
+    }
+
     pub fn set_scale(&mut self, scale: f64) {
         self.scale = scale;
     }
 
+    pub fn count(&self) -> u32 {
+        self.count
+    }
+
     pub fn set_count(&mut self, count: u32) {
         self.count = count;
+    }
+
+    pub fn variant(&self) -> Variant {
+        self.variant
     }
 
     pub fn set_multi(&mut self, scale: Option<f64>) {
