@@ -1,14 +1,19 @@
 #![warn(clippy::all, clippy::pedantic)]
-use rgba_simple::{Color, RGBA};
+use rgba_simple::{Color, Primary, RGBA};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::str::FromStr;
 
+/// Whether to use Metric (millimeters) or Imperrial (inches) measurements
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum Units {
+    /// Output measurements are given in *millimeters*
     Metric,
+    /// Output measurements are given in *inches*
     Imperial,
 }
 
+/// The weight, or style, of the font
 #[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
@@ -25,11 +30,18 @@ pub enum FontWeight {
     Ultraheavy,
 }
 
+/// The font used to print the description in the output file
 #[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Font {
+    /// The *family* , eg *Sans* or *ComicSans*
     pub family: String,
+    /// The *weight* or *style* of the given font
     pub weight: FontWeight,
 }
+
+/// Error returned if unable to parse a font from a given `str`
+#[derive(Debug, PartialEq)]
+pub struct ParseFontError;
 
 impl fmt::Display for Units {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -37,9 +49,9 @@ impl fmt::Display for Units {
     }
 }
 
-impl Units {
-    /// Returns Units::Metric
-    pub fn default() -> Units {
+impl Default for Units {
+    /// Returns `Units::Metric`
+    fn default() -> Self {
         Units::Metric
     }
 }
@@ -50,43 +62,58 @@ impl fmt::Display for FontWeight {
     }
 }
 
-impl FontWeight {
-    pub fn default() -> FontWeight {
+impl Default for FontWeight {
+    fn default() -> Self {
         FontWeight::Normal
     }
+}
 
-    pub fn from_str(str: &str) -> Option<FontWeight> {
+impl FromStr for FontWeight {
+    type Err = ParseFontError;
+
+    #[allow(clippy::must_use_candidate)]
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
         match str {
-            "Thin" | "thin" => Some(FontWeight::Thin),
-            "Ultralight" | "ultralight" => Some(FontWeight::Ultralight),
-            "Light" | "light" => Some(FontWeight::Light),
-            "Semilight" | "semilight" => Some(FontWeight::Semilight),
-            "Book" | "book" => Some(FontWeight::Book),
-            "Normal" | "normal" => Some(FontWeight::Normal),
-            "Medium" | "medium" => Some(FontWeight::Medium),
-            "Semibold" | "semibold" => Some(FontWeight::Semibold),
-            "Bold" | "bold" => Some(FontWeight::Bold),
-            "Ultrabold" | "ultrabold" => Some(FontWeight::Ultrabold),
-            "Heavy" | "heavy" => Some(FontWeight::Heavy),
-            "Ultraheavy" | "ultraheavy" => Some(FontWeight::Ultraheavy),
-            _ => None,
+            "Thin" | "thin" => Ok(FontWeight::Thin),
+            "Ultralight" | "ultralight" => Ok(FontWeight::Ultralight),
+            "Light" | "light" => Ok(FontWeight::Light),
+            "Semilight" | "semilight" => Ok(FontWeight::Semilight),
+            "Book" | "book" => Ok(FontWeight::Book),
+            "Normal" | "normal" => Ok(FontWeight::Normal),
+            "Medium" | "medium" => Ok(FontWeight::Medium),
+            "Semibold" | "semibold" => Ok(FontWeight::Semibold),
+            "Bold" | "bold" => Ok(FontWeight::Bold),
+            "Ultrabold" | "ultrabold" => Ok(FontWeight::Ultrabold),
+            "Heavy" | "heavy" => Ok(FontWeight::Heavy),
+            "Ultraheavy" | "ultraheavy" => Ok(FontWeight::Ultraheavy),
+            _ => Err(ParseFontError),
         }
     }
 }
 
-impl Font {
+impl Default for Font {
     /// Returns "Sans Normal"
-    pub fn default() -> Font {
+    fn default() -> Font {
         Font {
             family: String::from("Sans"),
             weight: FontWeight::default(),
         }
     }
+}
 
+impl fmt::Display for ParseFontError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl Font {
+    /// Set the *family* of the font
     pub fn set_family(&mut self, family: String) {
         self.family = family;
     }
 
+    /// Set the *weight* or *style* of the font
     pub fn set_weight(&mut self, weight: FontWeight) {
         self.weight = weight;
     }
@@ -112,9 +139,9 @@ pub struct Config {
     pub font: Option<Font>,
 }
 
-impl Config {
+impl Default for Config {
     /// Creates a [Config] struct with default values
-    pub fn default() -> Config {
+    fn default() -> Config {
         Config {
             units: Units::default(),
             border: 10.0,
@@ -125,7 +152,9 @@ impl Config {
             font: Some(Font::default()),
         }
     }
+}
 
+impl Config {
     pub fn set_units(&mut self, units: Units) {
         self.units = units;
     }
@@ -185,7 +214,7 @@ mod tests {
 
     #[test]
     fn font_weight_from_str() {
-        assert_eq!(None, FontWeight::from_str("foo"));
-        assert_eq!(Some(FontWeight::Bold), FontWeight::from_str("bold"));
+        assert_eq!(Err(ParseFontError), FontWeight::from_str("foo"));
+        assert_eq!(Ok(FontWeight::Bold), FontWeight::from_str("bold"));
     }
 }
