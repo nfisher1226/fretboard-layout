@@ -373,6 +373,10 @@ impl Specs {
             Some(font) => font.weight.to_string(),
             None => String::from("Regular"),
         };
+        let font_size = match config.units {
+            Units::Metric => "5px",
+            Units::Imperial => "0.245px"
+        };
         line = format!("{} NutWidth: {:.2}{} |", line, self.nut, &units);
         line = format!("{} BridgeSpacing: {:.2}{}", line, self.bridge - 6.0, &units);
         svg::node::element::Text::new()
@@ -380,7 +384,7 @@ impl Specs {
             .set("y", (config.border * 1.7) + self.bridge)
             .set("font-family", font_family)
             .set("font-weight", font_weight)
-            .set("font-size", "5px")
+            .set("font-size", font_size)
             .set("id", "Specifications")
             .add(svg::node::Text::new(line))
     }
@@ -401,6 +405,10 @@ impl Specs {
             },
             None => HexColor::blue(),
         };
+        let dasharray = match config.units {
+            Units::Metric => "4.0, 8.0",
+            Units::Imperial => "0.196, 0.392"
+        };
         let data = Data::new()
             .move_to((start_x, start_y))
             .line_to((end_x, end_y))
@@ -409,7 +417,7 @@ impl Specs {
             .set("fill", "none")
             .set("stroke", hex.color.as_str())
             .set("stroke-opacity", hex.alpha)
-            .set("stroke-dasharray", "4.0, 8.0")
+            .set("stroke-dasharray", dasharray)
             .set("stroke-dashoffset", "0")
             .set("stroke-width", config.line_weight)
             .set("id", "Centerline")
