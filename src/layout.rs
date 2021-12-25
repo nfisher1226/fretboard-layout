@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use crate::{Config, Factors, Handedness, Specs};
+use crate::{Config, Handedness, Specs};
 use std::f64;
 use svg::node::element::{path::Data, Path};
 
@@ -20,10 +20,10 @@ pub struct Line {
 
 impl Lengths {
     /// Plots the end of a fret, nut or bridge along the bass side of the scale
-    fn get_point_bass(&self, factors: &Factors, specs: &Specs, config: &Config) -> Point {
-        let x = (factors.x_ratio * self.length_bass) + config.border;
+    fn get_point_bass(&self, specs: &Specs, config: &Config) -> Point {
+        let x = (specs.factors.x_ratio * self.length_bass) + config.border;
         let hand = specs.variant.handedness();
-        let opposite = factors.y_ratio * self.length_bass;
+        let opposite = specs.factors.y_ratio * self.length_bass;
         let y = match hand {
             Some(Handedness::Left) => specs.bridge - opposite + config.border,
             _ => opposite + config.border,
@@ -31,10 +31,10 @@ impl Lengths {
         Point(x, y)
     }
     /// Plots the end of a fret, nut or bridge along the treble side of the scale
-    fn get_point_treble(&self, factors: &Factors, specs: &Specs, config: &Config) -> Point {
-        let x = factors.treble_offset + (factors.x_ratio * self.length_treble) + config.border;
+    fn get_point_treble(&self, specs: &Specs, config: &Config) -> Point {
+        let x = specs.factors.treble_offset + (specs.factors.x_ratio * self.length_treble) + config.border;
         let hand = specs.variant.handedness();
-        let opposite = factors.y_ratio * self.length_treble;
+        let opposite = specs.factors.y_ratio * self.length_treble;
         let y = match hand {
             Some(Handedness::Left) => opposite + config.border,
             _ => specs.bridge - opposite + config.border,
@@ -43,9 +43,9 @@ impl Lengths {
     }
     /// Returns a Point struct containing both ends of a fret, nut or bridge
     /// which will form a line
-    pub fn get_fret_line(&self, factors: &Factors, specs: &Specs, config: &Config) -> Line {
-        let start = self.get_point_bass(&factors, specs, &config);
-        let end = self.get_point_treble(&factors, &specs, &config);
+    pub fn get_fret_line(&self, specs: &Specs, config: &Config) -> Line {
+        let start = self.get_point_bass(specs, &config);
+        let end = self.get_point_treble(&specs, &config);
         Line { start, end }
     }
 }

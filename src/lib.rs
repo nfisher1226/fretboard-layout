@@ -34,17 +34,25 @@ pub enum Handedness {
     Left,
 }
 
+impl Default for Handedness {
+    fn default() -> Self {
+        Self::Right
+    }
+}
+
 #[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub enum Variant {
     Monoscale,
     Multiscale(f64, Handedness),
 }
 
-impl Variant {
-    fn default() -> Variant {
-        Variant::Monoscale
+impl Default for Variant {
+    fn default() -> Self {
+        Self::Monoscale
     }
+}
 
+impl Variant {
     pub fn value(&self) -> Option<f64> {
         match self {
             Variant::Monoscale => None,
@@ -56,6 +64,53 @@ impl Variant {
         match self {
             Variant::Monoscale => None,
             Variant::Multiscale(_, x) => Some(*x),
+        }
+    }
+}
+
+/// This struct contains multiplication factors used to convert the raw lengths
+/// from bridge to fret into x,y coordinates. It also contains an offset distance
+/// used to correctly orient the two scales in a multiscale design so that the
+/// desired fret is perpendicular to the centerline.
+pub struct Factors {
+    pub x_ratio: f64,
+    pub y_ratio: f64,
+    pub treble_offset: f64,
+}
+
+impl Default for Factors {
+    fn default() -> Self {
+        Self::init(655.0, &Variant::default(), 43.0, 56.0, 8.0)
+    }
+}
+
+impl Factors {
+    /// Uses trigonometry to place the fret ends, based on visualizing their
+    /// locations as a triangle where the hypotenuse is the string, and the
+    /// opposite is the distance from the bridge parallel to the centerline.
+    fn init(
+        scale: f64,
+        variant: &Variant,
+        nut: f64,
+        bridge: f64,
+        pfret: f64,
+    ) -> Self {
+        let height = (bridge - nut) / 2.0;
+        let y_ratio = height / scale;
+        let x_ratio = y_ratio.acos().sin();
+        let factor = 2.0_f64.powf(pfret / 12.0);
+        let length_bass = scale / factor;
+        let length_treble = match variant {
+            Variant::Monoscale => length_bass,
+            Variant::Multiscale(s, _) => s / factor,
+        };
+        let bass_pfret = x_ratio * length_bass;
+        let treble_pfret = x_ratio * length_treble;
+        let treble_offset = bass_pfret - treble_pfret;
+        Self {
+            x_ratio,
+            y_ratio,
+            treble_offset,
         }
     }
 }
@@ -76,31 +131,25 @@ pub struct Specs {
     pub bridge: f64,
     /// The fret that is perpendicular to the centerline.
     pub pfret: f64,
+    pub factors: Factors,
 }
 
-/// This struct contains multiplication factors used to convert the raw lengths
-/// from bridge to fret into x,y coordinates. It also contains an offset distance
-/// used to correctly orient the two scales in a multiscale design so that the
-/// desired fret is perpendicular to the centerline.
-pub struct Factors {
-    pub x_ratio: f64,
-    pub y_ratio: f64,
-    pub treble_offset: f64,
-}
-
-impl Specs {
+impl Default for Specs {
     /// Returns a default Specs struct
-    pub fn default() -> Specs {
-        Specs {
+    fn default() -> Self {
+        Self {
             scale: 655.0,
             count: 24,
             variant: Variant::default(),
             nut: 43.0,
             bridge: 56.0,
             pfret: 8.0,
+            factors: Factors::default(),
         }
     }
+}
 
+impl Specs {
     /// Returns a multiscale Specs struct
     pub fn multi() -> Specs {
         Specs {
@@ -110,6 +159,13 @@ impl Specs {
             nut: 43.0,
             bridge: 56.0,
             pfret: 8.0,
+            factors: Factors::init(
+                655.0,
+                &Variant::Multiscale(610.0, Handedness::Right),
+                43.0,
+                56.0,
+                8.0,
+            ),
         }
     }
 
@@ -184,29 +240,6 @@ impl Specs {
             fretboard.push(fret);
         }
         fretboard
-    }
-
-    /// Uses trigonometry to place the fret ends, based on visualizing their
-    /// locations as a triangle where the hypotenuse is the string, and the
-    /// opposite is the distance from the bridge parallel to the centerline.
-    fn get_factors(&self) -> Factors {
-        let height = (self.bridge - self.nut) / 2.0;
-        let y_ratio = height / self.scale;
-        let x_ratio = y_ratio.acos().sin();
-        let factor = 2.0_f64.powf(self.pfret / 12.0);
-        let length_bass = self.scale / factor;
-        let length_treble = match self.variant {
-            Variant::Monoscale => length_bass,
-            Variant::Multiscale(s, _) => s / factor,
-        };
-        let bass_pfret = x_ratio * length_bass;
-        let treble_pfret = x_ratio * length_treble;
-        let treble_offset = bass_pfret - treble_pfret;
-        Factors {
-            x_ratio,
-            y_ratio,
-            treble_offset,
-        }
     }
 
     /// Embeds a text description into the svg
@@ -292,15 +325,15 @@ impl Specs {
     }
 
     /// adds the bridge as a line between the outer strings
-    fn draw_bridge(&self, factors: &Factors, config: &Config) -> svg::node::element::Path {
+    fn draw_bridge(&self, config: &Config) -> svg::node::element::Path {
         let start_x = match self.variant {
             Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => config.border,
-            Variant::Multiscale(_, Handedness::Left) => config.border + factors.treble_offset,
+            Variant::Multiscale(_, Handedness::Left) => config.border + self.factors.treble_offset,
         };
         let start_y = config.border;
         let end_x = match self.variant {
             Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => {
-                config.border + factors.treble_offset
+                config.border + self.factors.treble_offset
             }
             Variant::Multiscale(_, Handedness::Left) => config.border,
         };
@@ -321,11 +354,10 @@ impl Specs {
     fn draw_fretboard(
         &self,
         fretboard: &[Lengths],
-        factors: &Factors,
         config: &Config,
     ) -> svg::node::element::Path {
-        let nut = fretboard[0_usize].get_fret_line(&factors, &self, &config);
-        let end = fretboard[self.count as usize + 1].get_fret_line(&factors, &self, &config);
+        let nut = fretboard[0_usize].get_fret_line(&self, &config);
+        let end = fretboard[self.count as usize + 1].get_fret_line(&self, &config);
         let hex = config.fretboard_color.to_hex();
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
@@ -342,17 +374,28 @@ impl Specs {
             .set("d", data)
     }
 
+    /// draws a single fret
+    fn draw_fret(
+        &self,
+        config: &Config,
+        num: u32,
+    ) -> svg::node::element::Path {
+        self.get_fret_lengths(num)
+            .get_fret_line(&self, &config)
+            .draw_fret(num, &config)
+    }
+
     /// Iterates through each fret, returning a group of svg Paths
     fn draw_frets(
         &self,
         fretboard: &[Lengths],
-        factors: &Factors,
         config: &Config,
     ) -> svg::node::element::Group {
-        let mut frets = Group::new().set("id", "Frets");
+        let mut frets = Group::new()
+            .set("id", "Frets");
         for fret in 0..=self.count {
-            let line = fretboard[fret as usize].get_fret_line(&factors, &self, &config);
-            frets = frets.add(line.draw_fret(fret, &config));
+            let fret = self.draw_fret(config, fret);
+            frets = frets.add(fret);
         }
         frets
     }
@@ -371,7 +414,6 @@ impl Specs {
     pub fn create_document(&self, conf: Option<Config>) -> svg::Document {
         let config = conf.unwrap_or_else(Config::default);
         let lengths: Vec<Lengths> = self.get_all_lengths();
-        let factors = &self.get_factors();
         let width = (config.border * 2.0) + self.scale;
         let widthmm = format!("{}mm", width);
         let height = (config.border * 2.0) + self.bridge;
@@ -382,9 +424,9 @@ impl Specs {
             .set("preserveAspectRatio", "xMidYMid meet")
             .set("viewBox", (0, 0, width, height))
             .add(self.create_description())
-            .add(self.draw_fretboard(&lengths, &factors, &config))
-            .add(self.draw_bridge(&factors, &config))
-            .add(self.draw_frets(&lengths, &factors, &config));
+            .add(self.draw_fretboard(&lengths, &config))
+            .add(self.draw_bridge(&config))
+            .add(self.draw_frets(&lengths, &config));
         if config.font.is_some() {
             if config.centerline_color.is_some() {
                 document
@@ -422,17 +464,17 @@ mod tests {
 
     #[test]
     fn factors_default() {
-        let factors = Specs::default().get_factors();
-        assert_eq!(factors.x_ratio, 0.9999507592328689);
-        assert_eq!(factors.y_ratio, 0.009923664122137405);
-        assert_eq!(factors.treble_offset, 0.0);
+        let specs = Specs::default();
+        assert_eq!(specs.factors.x_ratio, 0.9999507592328689);
+        assert_eq!(specs.factors.y_ratio, 0.009923664122137405);
+        assert_eq!(specs.factors.treble_offset, 0.0);
     }
 
     #[test]
     fn factors_multi() {
-        let factors = Specs::multi().get_factors();
-        assert_eq!(factors.x_ratio, 0.9999507592328689);
-        assert_eq!(factors.y_ratio, 0.009923664122137405);
-        assert_eq!(factors.treble_offset, 28.346827734356623);
+        let specs = Specs::multi();
+        assert_eq!(specs.factors.x_ratio, 0.9999507592328689);
+        assert_eq!(specs.factors.y_ratio, 0.009923664122137405);
+        assert_eq!(specs.factors.treble_offset, 28.346827734356623);
     }
 }
