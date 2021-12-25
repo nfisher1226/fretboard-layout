@@ -65,6 +65,10 @@ impl Default for Variant {
 }
 
 impl Variant {
+    fn multi() -> Self {
+        Self::Multiscale(610.0, Handedness::default())
+    }
+
     /// Return the treble side scale length if the neck is `Multiscale`, or else
     /// `None`
     #[allow(clippy::must_use_candidate)]
@@ -233,37 +237,36 @@ pub struct Specs {
 impl Default for Specs {
     /// Returns a default Specs struct
     fn default() -> Self {
-        Self {
-            scale: 655.0,
-            count: 24,
-            variant: Variant::default(),
-            nut: 43.0,
-            bridge: 56.0,
-            pfret: 8.0,
-            factors: Factors::default(),
-        }
+        Self::init(655.0, 24, Variant::default(), 43.0, 56.0, 8.0)
     }
 }
 
 impl Specs {
+    #[must_use]
+    pub fn init(
+        scale: f64,
+        count: u32,
+        variant: Variant,
+        nut: f64,
+        bridge: f64,
+        pfret: f64
+    ) -> Self {
+        let factors = Factors::init(scale, &variant, nut, bridge, pfret);
+        Self {
+            scale,
+            count,
+            variant,
+            nut,
+            bridge,
+            pfret,
+            factors
+        }
+    }
+
     /// Returns a multiscale Specs struct
     #[allow(clippy::must_use_candidate)]
     pub fn multi() -> Self {
-        Self {
-            scale: 655.0,
-            count: 24,
-            variant: Variant::Multiscale(610.0, Handedness::Right),
-            nut: 43.0,
-            bridge: 56.0,
-            pfret: 8.0,
-            factors: Factors::init(
-                655.0,
-                &Variant::Multiscale(610.0, Handedness::Right),
-                43.0,
-                56.0,
-                8.0,
-            ),
-        }
+        Self::init(655.0, 24, Variant::multi(), 43.0, 56.0, 8.0)
     }
 
     pub fn set_scale(&mut self, scale: f64) {
