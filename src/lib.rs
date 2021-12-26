@@ -375,10 +375,14 @@ impl Specs {
         };
         let font_size = match config.units {
             Units::Metric => "5px",
-            Units::Imperial => "0.245px"
+            Units::Imperial => "0.25px"
         };
         line = format!("{} NutWidth: {:.2}{} |", line, self.nut, &units);
-        line = format!("{} BridgeSpacing: {:.2}{}", line, self.bridge - 6.0, &units);
+        let bridge = match config.units {
+            Units::Metric => self.bridge - 6.0,
+            Units::Imperial => self.bridge - (6.0 / 20.4),
+        };
+        line = format!("{} BridgeSpacing: {:.2}{}", line, bridge - 6.0, &units);
         svg::node::element::Text::new()
             .set("x", config.border)
             .set("y", (config.border * 1.7) + self.bridge)
@@ -407,7 +411,7 @@ impl Specs {
         };
         let dasharray = match config.units {
             Units::Metric => "4.0, 8.0",
-            Units::Imperial => "0.196, 0.392"
+            Units::Imperial => "0.2, 0.4"
         };
         let data = Data::new()
             .move_to((start_x, start_y))
