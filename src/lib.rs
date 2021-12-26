@@ -382,7 +382,7 @@ impl Specs {
             Units::Metric => self.bridge - 6.0,
             Units::Imperial => self.bridge - (6.0 / 20.4),
         };
-        line = format!("{} BridgeSpacing: {:.2}{}", line, bridge - 6.0, &units);
+        line = format!("{} BridgeSpacing: {:.2}{}", line, bridge, &units);
         svg::node::element::Text::new()
             .set("x", config.border)
             .set("y", (config.border * 1.7) + self.bridge)
