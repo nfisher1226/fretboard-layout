@@ -13,7 +13,7 @@ categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 
 [dependencies]
 svg = "~0.10"
-rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple.git" }
+rgba_simple = "~0.4"
 
 [dependencies.serde]
 version = "~1.0"

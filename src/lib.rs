@@ -21,9 +21,9 @@ pub use config::{Config, Font, FontWeight, Units};
 
 use rgba_simple::{Convert, HexColor, Primary};
 use serde::{Deserialize, Serialize};
+use std::f64;
 use svg::node::element::{path::Data, Description, Group, Path};
 use svg::Document;
-use std::f64;
 
 /// Whether the output represents a right handed or left handed neck style
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
@@ -54,7 +54,7 @@ pub enum Variant {
         /// The scale length along the treble side of the neck
         f64,
         /// Right or left handed output
-        Handedness
+        Handedness,
     ),
 }
 
@@ -112,13 +112,7 @@ impl Factors {
     /// Uses trigonometry to place the fret ends, based on visualizing their
     /// locations as a triangle where the hypotenuse is the string, and the
     /// opposite is the distance from the bridge parallel to the centerline.
-    fn init(
-        scale: f64,
-        variant: &Variant,
-        nut: f64,
-        bridge: f64,
-        pfret: f64,
-    ) -> Self {
+    fn init(scale: f64, variant: &Variant, nut: f64, bridge: f64, pfret: f64) -> Self {
         let height = (bridge - nut) / 2.0;
         let y_ratio = height / scale;
         let x_ratio = y_ratio.acos().sin();
@@ -168,7 +162,9 @@ impl Lengths {
     }
     /// Plots the end of a fret, nut or bridge along the treble side of the scale
     fn get_point_treble(&self, specs: &Specs, config: &Config) -> Point {
-        let x = specs.factors.treble_offset + (specs.factors.x_ratio * self.length_treble) + config.border;
+        let x = specs.factors.treble_offset
+            + (specs.factors.x_ratio * self.length_treble)
+            + config.border;
         let hand = specs.variant.handedness();
         let opposite = specs.factors.y_ratio * self.length_treble;
         let y = match hand {
@@ -249,7 +245,7 @@ impl Specs {
         variant: Variant,
         nut: f64,
         bridge: f64,
-        pfret: f64
+        pfret: f64,
     ) -> Self {
         let factors = Factors::init(scale, &variant, nut, bridge, pfret);
         Self {
@@ -259,7 +255,7 @@ impl Specs {
             nut,
             bridge,
             pfret,
-            factors
+            factors,
         }
     }
 
@@ -375,7 +371,7 @@ impl Specs {
         };
         let font_size = match config.units {
             Units::Metric => "5px",
-            Units::Imperial => "0.25px"
+            Units::Imperial => "0.25px",
         };
         line = format!("{} NutWidth: {:.2}{} |", line, self.nut, &units);
         let bridge = match config.units {
@@ -411,7 +407,7 @@ impl Specs {
         };
         let dasharray = match config.units {
             Units::Metric => "4.0, 8.0",
-            Units::Imperial => "0.2, 0.4"
+            Units::Imperial => "0.2, 0.4",
         };
         let data = Data::new()
             .move_to((start_x, start_y))
@@ -455,10 +451,7 @@ impl Specs {
     }
 
     /// Draws the outline of the fretboard
-    fn draw_fretboard(
-        &self,
-        config: &Config,
-    ) -> svg::node::element::Path {
+    fn draw_fretboard(&self, config: &Config) -> svg::node::element::Path {
         let nut = self.get_nut().get_fret_line(self, config);
         let end = self
             .get_fret_lengths(self.count + 1)
@@ -486,23 +479,15 @@ impl Specs {
     }
 
     /// draws a single fret
-    fn draw_fret(
-        &self,
-        config: &Config,
-        num: u32,
-    ) -> svg::node::element::Path {
+    fn draw_fret(&self, config: &Config, num: u32) -> svg::node::element::Path {
         self.get_fret_lengths(num)
             .get_fret_line(self, config)
             .draw_fret(num, config)
     }
 
     /// Iterates through each fret, returning a group of svg Paths
-    fn draw_frets(
-        &self,
-        config: &Config,
-    ) -> svg::node::element::Group {
-        let mut frets = Group::new()
-            .set("id", "Frets");
+    fn draw_frets(&self, config: &Config) -> svg::node::element::Group {
+        let mut frets = Group::new().set("id", "Frets");
         for fret in 0..=self.count {
             let fret = self.draw_fret(config, fret);
             frets = frets.add(fret);

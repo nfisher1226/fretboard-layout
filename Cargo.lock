@@ -32,7 +32,8 @@ dependencies = [
 [[package]]
 name = "rgba_simple"
 version = "0.4.0"
-source = "git+https://codeberg.org/jeang3nie/rgba-simple.git#e85ccf2e5f82214ffd083fa29dea26f5efae3dda"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "76f9e2b1d15bf9a4109e05b6cd7628401624d44864c637961b519ebf34084fc9"
 dependencies = [
  "serde",
 ]

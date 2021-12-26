@@ -215,6 +215,6 @@ mod tests {
     #[test]
     fn font_weight_from_str() {
         assert_eq!(Err(ParseFontError), FontWeight::from_str("foo"));
-        assert_eq!(Ok(FontWeight::Bold), FontWeight::from_str("bold"));
+        assert_eq!(Ok(FontWeight::Bold), FontWeight::from_str("Style::bold"));
     }
 }
