@@ -541,15 +541,19 @@ impl Specs {
         let widthmm = format!("{}{}", width, units);
         let height = (config.border * 2.0) + self.bridge;
         let heightmm = format!("{}{}", height, units);
+        let description = self.create_description();
+        let fretboard = self.draw_fretboard(&config);
+        let bridge = self.draw_bridge(&config);
+        let frets = self.draw_frets(&config);
         let document = Document::new()
             .set("width", widthmm)
             .set("height", heightmm)
             .set("preserveAspectRatio", "xMidYMid meet")
             .set("viewBox", (0, 0, width, height))
-            .add(self.create_description())
-            .add(self.draw_fretboard(&config))
-            .add(self.draw_bridge(&config))
-            .add(self.draw_frets(&config));
+            .add(description)
+            .add(fretboard)
+            .add(bridge)
+            .add(frets);
         if config.font.is_some() {
             if config.centerline_color.is_some() {
                 document

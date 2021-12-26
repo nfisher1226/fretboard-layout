@@ -129,7 +129,7 @@ impl Font {
 
 /// All of the configuration values which can be set in config.toml get stored
 /// in this struct
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Config {
     /// Whether to use Millimeters (mm) or Inches (in) when displaying lengths
     pub units: Units,
