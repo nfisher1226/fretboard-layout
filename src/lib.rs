@@ -41,7 +41,7 @@ impl Default for Handedness {
 /// Whether to output a traditional `Monoscale` style neck with the same scale
 /// across it's entire width, or a modern `Multiscale` neck, with a shorter scale
 /// along the treble side, also known as *fan fret*.
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Variant {
     /// A traditional fretbaord where the same scale length is used all of the
     /// way across the fretboard.
@@ -90,10 +90,10 @@ impl Variant {
     }
 }
 
-/// This struct contains multiplication factors used to convert the raw lengths
-/// from bridge to fret into x,y coordinates. It also contains an offset distance
-/// used to correctly orient the two scales in a multiscale design so that the
-/// desired fret is perpendicular to the centerline.
+// This struct contains multiplication factors used to convert the raw lengths
+// from bridge to fret into x,y coordinates. It also contains an offset distance
+// used to correctly orient the two scales in a multiscale design so that the
+// desired fret is perpendicular to the centerline.
 struct Factors {
     x_ratio: f64,
     y_ratio: f64,
@@ -265,12 +265,24 @@ impl Specs {
         Self::init(655.0, 24, Variant::multi(), 43.0, 56.0, 8.0)
     }
 
+    pub fn scale(&self) -> f64 {
+        self.scale
+    }
+
     pub fn set_scale(&mut self, scale: f64) {
         self.scale = scale;
     }
 
+    pub fn count(&self) -> u32 {
+        self.count
+    }
+
     pub fn set_count(&mut self, count: u32) {
         self.count = count;
+    }
+
+    pub fn variant(&self) -> Variant {
+        self.variant
     }
 
     pub fn set_multi(&mut self, scale: Option<f64>) {
@@ -286,12 +298,24 @@ impl Specs {
         }
     }
 
+    pub fn nut(&self) -> f64 {
+        self.nut
+    }
+
     pub fn set_nut(&mut self, nut: f64) {
         self.nut = nut;
     }
 
+    pub fn bridge(&self) -> f64 {
+        self.bridge
+    }
+
     pub fn set_bridge(&mut self, bridge: f64) {
         self.bridge = bridge;
+    }
+
+    pub fn pfret(&self) -> f64 {
+        self.pfret
     }
 
     pub fn set_pfret(&mut self, pfret: f64) {

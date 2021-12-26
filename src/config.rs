@@ -5,7 +5,7 @@ use std::fmt;
 use std::str::FromStr;
 
 /// Whether to use Metric (millimeters) or Imperrial (inches) measurements
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
 pub enum Units {
     /// Output measurements are given in *millimeters*
     Metric,
@@ -14,7 +14,7 @@ pub enum Units {
 }
 
 /// The weight, or style, of the font
-#[derive(Clone, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
     Ultralight,
@@ -52,7 +52,7 @@ impl fmt::Display for Units {
 impl Default for Units {
     /// Returns `Units::Metric`
     fn default() -> Self {
-        Units::Metric
+        Self::Metric
     }
 }
 
@@ -64,7 +64,7 @@ impl fmt::Display for FontWeight {
 
 impl Default for FontWeight {
     fn default() -> Self {
-        FontWeight::Normal
+        Self::Normal
     }
 }
 
@@ -93,8 +93,8 @@ impl FromStr for FontWeight {
 
 impl Default for Font {
     /// Returns "Sans Normal"
-    fn default() -> Font {
-        Font {
+    fn default() -> Self {
+        Self {
             family: String::from("Sans"),
             weight: FontWeight::default(),
         }
@@ -108,9 +108,17 @@ impl fmt::Display for ParseFontError {
 }
 
 impl Font {
+    pub fn family(&self) -> String {
+        String::from(&self.family)
+    }
+
     /// Set the *family* of the font
     pub fn set_family(&mut self, family: String) {
         self.family = family;
+    }
+
+    pub fn weight(&self) -> FontWeight {
+        self.weight
     }
 
     /// Set the *weight* or *style* of the font
@@ -155,28 +163,62 @@ impl Default for Config {
 }
 
 impl Config {
+    pub fn units(&self) -> Units {
+        self.units
+    }
+
     pub fn set_units(&mut self, units: Units) {
         self.units = units;
+    }
+
+    pub fn border(&self) -> f64 {
+        self.border
     }
 
     pub fn set_border(&mut self, border: f64) {
         self.border = border;
     }
 
+    pub fn line_weight(&self) -> f64 {
+        self.line_weight
+    }
+
     pub fn set_line_weight(&mut self, weight: f64) {
         self.line_weight = weight;
+    }
+
+    pub fn fretline_color(&self) -> Color {
+        self.fretline_color.clone()
     }
 
     pub fn set_fretline_color(&mut self, color: Color) {
         self.fretline_color = color;
     }
 
+    pub fn fretboard_color(&self) -> Color {
+        self.fretboard_color.clone()
+    }
+
     pub fn set_fretboard_color(&mut self, color: Color) {
         self.fretboard_color = color;
     }
 
+    pub fn centerline_color(&self) -> Option<Color> {
+        match &self.centerline_color {
+            Some(c) => Some(c.clone()),
+            None => None,
+        }
+    }
+
     pub fn set_centerline_color(&mut self, color: Option<Color>) {
         self.centerline_color = color;
+    }
+
+    pub fn font(&self) -> Option<Font> {
+        match &self.font {
+            Some(f) => Some(f.clone()),
+            None => None,
+        }
     }
 
     pub fn set_font(&mut self, font: Option<Font>) {
