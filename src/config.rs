@@ -74,18 +74,18 @@ impl FromStr for FontWeight {
     #[allow(clippy::must_use_candidate)]
     fn from_str(str: &str) -> Result<Self, Self::Err> {
         match str {
-            "Thin" | "thin" => Ok(FontWeight::Thin),
-            "Ultralight" | "ultralight" => Ok(FontWeight::Ultralight),
-            "Light" | "light" => Ok(FontWeight::Light),
-            "Semilight" | "semilight" => Ok(FontWeight::Semilight),
-            "Book" | "book" => Ok(FontWeight::Book),
-            "Normal" | "normal" => Ok(FontWeight::Normal),
-            "Medium" | "medium" => Ok(FontWeight::Medium),
-            "Semibold" | "semibold" => Ok(FontWeight::Semibold),
-            "Bold" | "bold" => Ok(FontWeight::Bold),
-            "Ultrabold" | "ultrabold" => Ok(FontWeight::Ultrabold),
-            "Heavy" | "heavy" => Ok(FontWeight::Heavy),
-            "Ultraheavy" | "ultraheavy" => Ok(FontWeight::Ultraheavy),
+            "Style::Thin" | "Style::thin" => Ok(FontWeight::Thin),
+            "Style::Ultralight" | "Style::ultralight" => Ok(FontWeight::Ultralight),
+            "Style::Light" | "Style::light" => Ok(FontWeight::Light),
+            "Style::Semilight" | "Style::semilight" => Ok(FontWeight::Semilight),
+            "Style::Book" | "Style::book" => Ok(FontWeight::Book),
+            "Style::Normal" | "Style::normal" => Ok(FontWeight::Normal),
+            "Style::Medium" | "Style::medium" => Ok(FontWeight::Medium),
+            "Style::Semibold" | "Style::semibold" => Ok(FontWeight::Semibold),
+            "Style::Bold" | "Style::bold" => Ok(FontWeight::Bold),
+            "Style::Ultrabold" | "Style::ultrabold" => Ok(FontWeight::Ultrabold),
+            "Style::Heavy" | "Style::heavy" => Ok(FontWeight::Heavy),
+            "Style::Ultraheavy" | "Style::ultraheavy" => Ok(FontWeight::Ultraheavy),
             _ => Err(ParseFontError),
         }
     }
