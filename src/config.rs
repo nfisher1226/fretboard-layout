@@ -4,14 +4,16 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
 
-/// Whther to use Metric (mm) or Imperial (in) measurements
+/// Whether to use Metric (millimeters) or Imperrial (inches) measurements
 #[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
 pub enum Units {
+    /// Output measurements are given in *millimeters*
     Metric,
+    /// Output measurements are given in *inches*
     Imperial,
 }
 
-/// Font weight and style
+/// The weight, or style, of the font
 #[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
@@ -28,15 +30,18 @@ pub enum FontWeight {
     Ultraheavy,
 }
 
-/// Returned if a valid font cannot be parsed from the config
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct ParseFontError;
-
+/// The font used to print the description in the output file
 #[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Font {
+    /// The *family* , eg *Sans* or *ComicSans*
     pub family: String,
+    /// The *weight* or *style* of the given font
     pub weight: FontWeight,
 }
+
+/// Error returned if unable to parse a font from a given `str`
+#[derive(Debug, PartialEq)]
+pub struct ParseFontError;
 
 impl fmt::Display for Units {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -45,8 +50,9 @@ impl fmt::Display for Units {
 }
 
 impl Default for Units {
+    /// Returns `Units::Metric`
     fn default() -> Self {
-        Units::Metric
+        Self::Metric
     }
 }
 
@@ -64,12 +70,14 @@ impl fmt::Display for FontWeight {
 
 impl Default for FontWeight {
     fn default() -> Self {
-        FontWeight::Normal
+        Self::Normal
     }
 }
 
 impl FromStr for FontWeight {
     type Err = ParseFontError;
+
+    #[allow(clippy::must_use_candidate)]
     fn from_str(str: &str) -> Result<Self, Self::Err> {
         match str {
             "Style::Thin" | "Style::thin" => Ok(FontWeight::Thin),
@@ -92,8 +100,9 @@ impl FromStr for FontWeight {
 }
 
 impl Default for Font {
+    /// Returns "Sans Normal"
     fn default() -> Self {
-        Font {
+        Self {
             family: String::from("Sans"),
             weight: FontWeight::default(),
         }
@@ -101,10 +110,11 @@ impl Default for Font {
 }
 
 impl Font {
-    pub fn family(&self) -> &str {
-        &self.family
+    pub fn family(&self) -> String {
+        String::from(&self.family)
     }
 
+    /// Set the *family* of the font
     pub fn set_family(&mut self, family: String) {
         self.family = family;
     }
@@ -113,6 +123,7 @@ impl Font {
         self.weight
     }
 
+    /// Set the *weight* or *style* of the font
     pub fn set_weight(&mut self, weight: FontWeight) {
         self.weight = weight;
     }
@@ -120,7 +131,7 @@ impl Font {
 
 /// All of the configuration values which can be set in config.toml get stored
 /// in this struct
-#[derive(Deserialize, Debug, Serialize)]
+#[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Config {
     /// Whether to use Millimeters (mm) or Inches (in) when displaying lengths
     pub units: Units,
@@ -139,8 +150,9 @@ pub struct Config {
 }
 
 impl Default for Config {
+    /// Creates a [Config] struct with default values
     fn default() -> Self {
-        Config {
+        Self {
             units: Units::default(),
             border: 10.0,
             line_weight: 1.0,
