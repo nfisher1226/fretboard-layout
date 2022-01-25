@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-use rgba_simple::{Color, Primary, RGBA};
+use rgba_simple::{Color, Primary, PrimaryColor, RGBA};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
@@ -156,9 +156,9 @@ impl Default for Config {
             units: Units::default(),
             border: 10.0,
             line_weight: 1.0,
-            fretline_color: Color::Rgba(RGBA::white()),
-            fretboard_color: Color::Rgba(RGBA::black()),
-            centerline_color: Some(Color::Rgba(RGBA::blue())),
+            fretline_color: Color::Rgba(RGBA::primary(PrimaryColor::White)),
+            fretboard_color: Color::Rgba(RGBA::primary(PrimaryColor::Black)),
+            centerline_color: Some(Color::Rgba(RGBA::primary(PrimaryColor::Blue))),
             font: Some(Font::default()),
         }
     }

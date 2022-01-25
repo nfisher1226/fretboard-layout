@@ -20,7 +20,7 @@
 mod config;
 pub use config::{Config, Font, FontWeight, Units};
 
-use rgba_simple::{Convert, HexColor, Primary};
+use rgba_simple::{Convert, HexColor, Primary, PrimaryColor};
 use serde::{Deserialize, Serialize};
 use std::f64;
 use svg::node::element::{path::Data, Description, Group, Path};
@@ -195,7 +195,7 @@ impl Line {
             Ok(c) => c,
             Err(e) => {
                 eprintln!("Error getting fretline color from config: {}", e);
-                HexColor::white()
+                HexColor::primary(PrimaryColor::White)
             }
         };
         let data = Data::new()
@@ -427,10 +427,10 @@ impl Specs {
                 Ok(h) => h,
                 Err(e) => {
                     eprintln!("Error getting centerline_color from config: {}", e);
-                    HexColor::blue()
+                    HexColor::primary(PrimaryColor::Blue)
                 }
             },
-            None => HexColor::blue(),
+            None => HexColor::primary(PrimaryColor::Blue),
         };
         let dasharray = match config.units {
             Units::Metric => "4.0, 8.0",
@@ -487,7 +487,7 @@ impl Specs {
             Ok(c) => c,
             Err(e) => {
                 eprintln!("Error getting fretboard color: {}", e);
-                HexColor::black()
+                HexColor::primary(PrimaryColor::Black)
             }
         };
         let data = Data::new()
