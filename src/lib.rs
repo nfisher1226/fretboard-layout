@@ -152,26 +152,33 @@ struct Line {
 impl Lengths {
     /// Plots the end of a fret, nut or bridge along the bass side of the scale
     fn get_point_bass(&self, specs: &Specs, config: &Config) -> Point {
-        let x = (specs.factors.x_ratio * self.length_bass) + config.border;
         let hand = specs.variant.handedness();
-        let opposite = specs.factors.y_ratio * self.length_bass;
-        let y = match hand {
-            Some(Handedness::Left) => specs.bridge - opposite + config.border,
-            _ => opposite + config.border,
+        let x = match hand {
+            Some(Handedness::Left) => {
+                specs.scale - (specs.factors.x_ratio * self.length_bass) + config.border
+            },
+            _ => (specs.factors.x_ratio * self.length_bass) + config.border,
         };
+        let opposite = specs.factors.y_ratio * self.length_bass;
+        let y = opposite + config.border;
         Point(x, y)
     }
     /// Plots the end of a fret, nut or bridge along the treble side of the scale
     fn get_point_treble(&self, specs: &Specs, config: &Config) -> Point {
-        let x = specs.factors.treble_offset
-            + (specs.factors.x_ratio * self.length_treble)
-            + config.border;
         let hand = specs.variant.handedness();
-        let opposite = specs.factors.y_ratio * self.length_treble;
-        let y = match hand {
-            Some(Handedness::Left) => opposite + config.border,
-            _ => specs.bridge - opposite + config.border,
+        let x = match hand {
+            Some(Handedness::Left) => {
+                specs.scale + config.border - specs.factors.treble_offset
+                - (specs.factors.x_ratio * self.length_treble)
+            },
+            _ => {
+                specs.factors.treble_offset
+                + (specs.factors.x_ratio * self.length_treble)
+                + config.border
+            },
         };
+        let opposite = specs.factors.y_ratio * self.length_treble;
+        let y = specs.bridge - opposite + config.border;
         Point(x, y)
     }
     /// Returns a Point struct containing both ends of a fret, nut or bridge
@@ -455,14 +462,16 @@ impl Specs {
     fn draw_bridge(&self, config: &Config) -> svg::node::element::Path {
         let start_x = match self.variant {
             Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => config.border,
-            Variant::Multiscale(_, Handedness::Left) => config.border + self.factors.treble_offset,
+            Variant::Multiscale(_, Handedness::Left) => config.border + self.scale,
         };
         let start_y = config.border;
         let end_x = match self.variant {
             Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => {
                 config.border + self.factors.treble_offset
-            }
-            Variant::Multiscale(_, Handedness::Left) => config.border,
+            },
+            Variant::Multiscale(_, Handedness::Left) => {
+                config.border + self.scale - self.factors.treble_offset
+            },
         };
         let end_y = config.border + self.bridge;
         let data = Data::new()
