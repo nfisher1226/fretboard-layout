@@ -4,6 +4,7 @@
 `fretboard_layout` is a library for turning a set of specifications into a
 complete template of a stringed musical instrument fretboard, such as a
 guitar, banjo, or mandolin.
+![Sample output](https://jeang3nie.codeberg.page/gfret/sample.svg)
 ## Usage
 ```rust
 use fretboard_layout::{Config,Specs};

@@ -4,9 +4,9 @@ version = "0.3.0"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
-license-file = "LICENSE"
 description = "Generate an svg template of a musical instrument fretboard"
 repository = "https://codeberg.org/jeang3nie/fretboard-layout"
+homepage = "https://jeang3nie.codeberg.page"
 keywords = ["graphics", "design", "vector-graphics", "lutherie"]
 categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 
