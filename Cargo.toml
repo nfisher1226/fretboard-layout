@@ -1,8 +1,9 @@
 [package]
 name = "fretboard_layout"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2021"
+license = "BSD-2-Clause"
 license-file = "LICENSE"
 description = "Generate an svg template of a musical instrument fretboard"
 repository = "https://codeberg.org/jeang3nie/fretboard-layout"
@@ -13,7 +14,7 @@ categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 
 [dependencies]
 svg = "~0.10"
-rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple.git" }
+rgba_simple = "~0.5"
 
 [dependencies.serde]
 version = "~1.0"
