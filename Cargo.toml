@@ -11,9 +11,12 @@ keywords = ["graphics", "design", "vector-graphics", "lutherie"]
 categories = ["graphics", "multimedia::images", "mathematics", "simulation"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+gdk = ["rgba_simple/gdk"]
 
 [dependencies]
 svg = "~0.10"
+rayon = "~1.5"
 rgba_simple = "~0.5"
 
 [dependencies.serde]

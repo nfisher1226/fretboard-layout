@@ -22,7 +22,8 @@
 mod config;
 pub use config::{Config, Font, FontWeight, Units};
 
-use rgba_simple::{Convert, HexColor, Primary, PrimaryColor};
+use rayon::prelude::*;
+pub use rgba_simple::{Color, Convert as ConvertColor, HexColor, Primary, PrimaryColor, ReducedRGBA, RGBA};
 use serde::{Deserialize, Serialize};
 use std::f64;
 use svg::node::element::{path::Data, Description, Group, Path};
@@ -524,13 +525,13 @@ impl Specs {
     }
 
     /// Iterates through each fret, returning a group of svg Paths
-    fn draw_frets(&self, config: &Config) -> svg::node::element::Group {
-        let mut frets = Group::new().set("id", "Frets");
-        for fret in 0..=self.count {
-            let fret = self.draw_fret(config, fret);
-            frets = frets.add(fret);
-        }
-        frets
+    fn draw_frets(&self, cfg: &Config) -> svg::node::element::Group {
+        let frets = Group::new().set("id", "Frets");
+        let f: Vec<svg::node::element::Path> = (0..=self.count)
+            .into_par_iter()
+            .map(|fret| self.draw_fret(cfg, fret))
+            .collect();
+        f.into_iter().fold(frets, |acc, fret| acc.add(fret))
     }
 
     ///Returns the complete svg Document
