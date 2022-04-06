@@ -110,6 +110,7 @@ impl Default for Font {
 }
 
 impl Font {
+    #[allow(clippy::must_use_candidate)]
     pub fn family(&self) -> String {
         String::from(&self.family)
     }
@@ -119,6 +120,7 @@ impl Font {
         self.family = family;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn weight(&self) -> FontWeight {
         self.weight
     }
@@ -165,6 +167,7 @@ impl Default for Config {
 }
 
 impl Config {
+    #[allow(clippy::must_use_candidate)]
     pub fn units(&self) -> Units {
         self.units
     }
@@ -173,6 +176,7 @@ impl Config {
         self.units = units;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn border(&self) -> f64 {
         self.border
     }
@@ -181,6 +185,7 @@ impl Config {
         self.border = border;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn line_weight(&self) -> f64 {
         self.line_weight
     }
@@ -189,6 +194,7 @@ impl Config {
         self.line_weight = weight;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn fretline_color(&self) -> Color {
         self.fretline_color.clone()
     }
@@ -197,6 +203,7 @@ impl Config {
         self.fretline_color = color;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn fretboard_color(&self) -> Color {
         self.fretboard_color.clone()
     }
@@ -205,22 +212,18 @@ impl Config {
         self.fretboard_color = color;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn centerline_color(&self) -> Option<Color> {
-        match &self.centerline_color {
-            Some(c) => Some(c.clone()),
-            None => None,
-        }
+        self.centerline_color.as_ref().cloned()
     }
 
     pub fn set_centerline_color(&mut self, color: Option<Color>) {
         self.centerline_color = color;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn font(&self) -> Option<Font> {
-        match &self.font {
-            Some(f) => Some(f.clone()),
-            None => None,
-        }
+        self.font.as_ref().cloned()
     }
 
     pub fn set_font(&mut self, font: Option<Font>) {

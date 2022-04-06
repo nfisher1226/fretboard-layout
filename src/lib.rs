@@ -23,7 +23,9 @@ mod config;
 pub use config::{Config, Font, FontWeight, Units};
 
 use rayon::prelude::*;
-pub use rgba_simple::{Color, Convert as ConvertColor, HexColor, Primary, PrimaryColor, ReducedRGBA, RGBA};
+pub use rgba_simple::{
+    Color, Convert as ConvertColor, HexColor, Primary, PrimaryColor, ReducedRGBA, RGBA,
+};
 use serde::{Deserialize, Serialize};
 use std::f64;
 use svg::node::element::{path::Data, Description, Group, Path};
@@ -159,7 +161,7 @@ impl Lengths {
         let x = match hand {
             Some(Handedness::Left) => {
                 specs.scale - (specs.factors.x_ratio * self.length_bass) + config.border
-            },
+            }
             _ => (specs.factors.x_ratio * self.length_bass) + config.border,
         };
         let opposite = specs.factors.y_ratio * self.length_bass;
@@ -171,14 +173,15 @@ impl Lengths {
         let hand = specs.variant.handedness();
         let x = match hand {
             Some(Handedness::Left) => {
-                specs.scale + config.border - specs.factors.treble_offset
-                - (specs.factors.x_ratio * self.length_treble)
-            },
+                specs.scale + config.border
+                    - specs.factors.treble_offset
+                    - (specs.factors.x_ratio * self.length_treble)
+            }
             _ => {
                 specs.factors.treble_offset
-                + (specs.factors.x_ratio * self.length_treble)
-                + config.border
-            },
+                    + (specs.factors.x_ratio * self.length_treble)
+                    + config.border
+            }
         };
         let opposite = specs.factors.y_ratio * self.length_treble;
         let y = specs.bridge - opposite + config.border;
@@ -278,6 +281,7 @@ impl Specs {
         Self::init(655.0, 24, Variant::multi(), 43.0, 56.0, 8.0)
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn scale(&self) -> f64 {
         self.scale
     }
@@ -286,6 +290,7 @@ impl Specs {
         self.scale = scale;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn count(&self) -> u32 {
         self.count
     }
@@ -294,6 +299,7 @@ impl Specs {
         self.count = count;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn variant(&self) -> Variant {
         self.variant
     }
@@ -311,6 +317,7 @@ impl Specs {
         }
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn nut(&self) -> f64 {
         self.nut
     }
@@ -319,6 +326,7 @@ impl Specs {
         self.nut = nut;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn bridge(&self) -> f64 {
         self.bridge
     }
@@ -327,6 +335,7 @@ impl Specs {
         self.bridge = bridge;
     }
 
+    #[allow(clippy::must_use_candidate)]
     pub fn pfret(&self) -> f64 {
         self.pfret
     }
@@ -471,10 +480,10 @@ impl Specs {
         let end_x = match self.variant {
             Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => {
                 config.border + self.factors.treble_offset
-            },
+            }
             Variant::Multiscale(_, Handedness::Left) => {
                 config.border + self.scale - self.factors.treble_offset
-            },
+            }
         };
         let end_y = config.border + self.bridge;
         let data = Data::new()
@@ -531,7 +540,7 @@ impl Specs {
             .into_par_iter()
             .map(|fret| self.draw_fret(cfg, fret))
             .collect();
-        f.into_iter().fold(frets, |acc, fret| acc.add(fret))
+        f.into_iter().fold(frets, svg::node::element::Group::add)
     }
 
     ///Returns the complete svg Document
