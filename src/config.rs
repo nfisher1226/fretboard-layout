@@ -1,6 +1,10 @@
 #![warn(clippy::all, clippy::pedantic)]
 use {
-    rgba_simple::{Primary, PrimaryColor::*, RGBA},
+    rgba_simple::{
+        Primary,
+        PrimaryColor::{Black, Blue, White},
+        RGBA,
+    },
     serde::{Deserialize, Serialize},
     std::{fmt, str::FromStr},
 };
@@ -197,7 +201,7 @@ impl Config {
 
     #[allow(clippy::must_use_candidate)]
     pub fn fretline_color(&self) -> RGBA<u8> {
-        self.fretline_color.clone()
+        self.fretline_color
     }
 
     pub fn set_fretline_color(&mut self, color: RGBA<u8>) {
@@ -206,7 +210,7 @@ impl Config {
 
     #[allow(clippy::must_use_candidate)]
     pub fn fretboard_color(&self) -> RGBA<u8> {
-        self.fretboard_color.clone()
+        self.fretboard_color
     }
 
     pub fn set_fretboard_color(&mut self, color: RGBA<u8>) {
@@ -215,7 +219,7 @@ impl Config {
 
     #[allow(clippy::must_use_candidate)]
     pub fn centerline_color(&self) -> Option<RGBA<u8>> {
-        self.centerline_color.as_ref().cloned()
+        self.centerline_color.as_ref().copied()
     }
 
     pub fn set_centerline_color(&mut self, color: Option<RGBA<u8>>) {

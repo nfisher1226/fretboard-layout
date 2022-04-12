@@ -27,13 +27,13 @@ pub use {
 
 use {
     rayon::prelude::*,
-    PrimaryColor::*,
     serde::{Deserialize, Serialize},
     std::f64,
     svg::{
         node::element::{path::Data, Description, Group, Path},
         Document,
     },
+    PrimaryColor::Blue,
 };
 
 /// Whether the output represents a right handed or left handed neck style
@@ -440,7 +440,7 @@ impl Specs {
         let end_x = config.border + self.scale;
         let end_y = (self.bridge / 2.0) + config.border;
         let (hex, opacity) = match &config.centerline_color {
-            Some(c) => (c.to_hex(), c.alpha as f32 * 255.0),
+            Some(c) => (c.to_hex(), f32::from(c.alpha) * 255.0),
             None => (RGBA::<u8>::primary(Blue).to_hex(), 1.0),
         };
         let dasharray = match config.units {
@@ -496,7 +496,10 @@ impl Specs {
         let end = self
             .get_fret_lengths(self.count + 1)
             .get_fret_line(self, config);
-        let (hex, alpha) = (config.fretboard_color.to_hex(), config.fretboard_color.alpha);
+        let (hex, alpha) = (
+            config.fretboard_color.to_hex(),
+            config.fretboard_color.alpha,
+        );
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
             .line_to((nut.end.0, nut.end.1))
