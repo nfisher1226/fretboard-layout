@@ -1,5 +1,4 @@
 # Fretboard Layout
-<!-- cargo-sync-readme start -->
 
 `fretboard_layout` is a library for turning a set of specifications into a
 complete template of a stringed musical instrument fretboard, such as a
@@ -20,5 +19,3 @@ use fretboard_layout::{Config,Specs};
     cfg.set_line_weight(0.5);
     let svg = specs.create_document(Some(cfg));
 ```
-
-<!-- cargo-sync-readme end -->

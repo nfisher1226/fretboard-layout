@@ -112,7 +112,7 @@ checksum = "e78d4f1cc4ae33bbfc157ed5d5a5ef3bc29227303d595861deb238fcec4e9457"
 
 [[package]]
 name = "fretboard_layout"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "rayon",
  "rgba_simple",
@@ -491,7 +491,8 @@ dependencies = [
 [[package]]
 name = "rgba_simple"
 version = "0.6.0"
-source = "git+https://codeberg.org/jeang3nie/rgba-simple#f373c733975e158183ddeedbe94b903bbbbe7f67"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93f6e5bd1653168fcfc1e7280a9d4a01145971e132adcda3e69bbaa9b6974d1a"
 dependencies = [
  "gdk4",
  "serde",

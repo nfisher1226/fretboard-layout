@@ -1,6 +1,6 @@
 [package]
 name = "fretboard_layout"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
@@ -17,8 +17,7 @@ gdk = ["rgba_simple/gdk"]
 [dependencies]
 svg = "~0.10"
 rayon = "~1.5"
-#rgba_simple = "~0.5"
-rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple" }
+rgba_simple = "0.6"
 
 [dependencies.serde]
 version = "~1.0"
