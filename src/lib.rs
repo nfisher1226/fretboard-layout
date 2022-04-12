@@ -20,16 +20,21 @@
 
 /// Some miscellaneous settings like colors, line styling and measurements
 mod config;
-pub use config::{Config, Font, FontWeight, Units};
+pub use {
+    config::{Config, Font, FontWeight, Units},
+    rgba_simple::*,
+};
 
-use rayon::prelude::*;
-pub use rgba_simple::{Hex, Primary, PrimaryColor, PrimaryColor::*, RGBA};
-#[cfg(feature = "gdk")]
-pub use rgba_simple::{ToGdk, FromGdk};
-use serde::{Deserialize, Serialize};
-use std::f64;
-use svg::node::element::{path::Data, Description, Group, Path};
-use svg::Document;
+use {
+    rayon::prelude::*,
+    PrimaryColor::*,
+    serde::{Deserialize, Serialize},
+    std::f64,
+    svg::{
+        node::element::{path::Data, Description, Group, Path},
+        Document,
+    },
+};
 
 /// Whether the output represents a right handed or left handed neck style
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]

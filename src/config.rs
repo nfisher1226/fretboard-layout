@@ -1,8 +1,9 @@
 #![warn(clippy::all, clippy::pedantic)]
-pub use rgba_simple::{Hex, Primary, PrimaryColor::*, RGBA};
-use serde::{Deserialize, Serialize};
-use std::fmt;
-use std::str::FromStr;
+use {
+    rgba_simple::{Primary, PrimaryColor::*, RGBA},
+    serde::{Deserialize, Serialize},
+    std::{fmt, str::FromStr},
+};
 
 /// Whether to use Metric (millimeters) or Imperrial (inches) measurements
 #[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
