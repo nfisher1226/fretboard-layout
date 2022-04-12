@@ -23,9 +23,9 @@ mod config;
 pub use config::{Config, Font, FontWeight, Units};
 
 use rayon::prelude::*;
-pub use rgba_simple::{
-    Color, Convert as ConvertColor, HexColor, Primary, PrimaryColor, ReducedRGBA, RGBA,
-};
+pub use rgba_simple::{Hex, Primary, PrimaryColor, PrimaryColor::*, RGBA};
+#[cfg(feature = "gdk")]
+pub use rgba_simple::{ToGdk, FromGdk};
 use serde::{Deserialize, Serialize};
 use std::f64;
 use svg::node::element::{path::Data, Description, Group, Path};
@@ -204,21 +204,14 @@ impl Line {
         } else {
             format!("Fret {}", fret)
         };
-        let hex = match config.fretline_color.to_hex() {
-            Ok(c) => c,
-            Err(e) => {
-                eprintln!("Error getting fretline color from config: {}", e);
-                HexColor::primary(PrimaryColor::White)
-            }
-        };
         let data = Data::new()
             .move_to((self.start.0, self.start.1))
             .line_to((self.end.0, self.end.1))
             .close();
         Path::new()
             .set("fill", "none")
-            .set("stroke", hex.color)
-            .set("stroke-opacity", hex.alpha)
+            .set("stroke", config.fretline_color.to_hex())
+            .set("stroke-opacity", config.fretline_color.alpha)
             .set("stroke-width", config.line_weight)
             .set("id", id)
             .set("d", data)
@@ -441,15 +434,9 @@ impl Specs {
         let start_y = (self.bridge / 2.0) + config.border;
         let end_x = config.border + self.scale;
         let end_y = (self.bridge / 2.0) + config.border;
-        let hex = match &config.centerline_color {
-            Some(c) => match c.to_hex() {
-                Ok(h) => h,
-                Err(e) => {
-                    eprintln!("Error getting centerline_color from config: {}", e);
-                    HexColor::primary(PrimaryColor::Blue)
-                }
-            },
-            None => HexColor::primary(PrimaryColor::Blue),
+        let (hex, opacity) = match &config.centerline_color {
+            Some(c) => (c.to_hex(), c.alpha as f32 * 255.0),
+            None => (RGBA::<u8>::primary(Blue).to_hex(), 1.0),
         };
         let dasharray = match config.units {
             Units::Metric => "4.0, 8.0",
@@ -461,8 +448,8 @@ impl Specs {
             .close();
         Path::new()
             .set("fill", "none")
-            .set("stroke", hex.color.as_str())
-            .set("stroke-opacity", hex.alpha)
+            .set("stroke", hex)
+            .set("stroke-opacity", opacity)
             .set("stroke-dasharray", dasharray)
             .set("stroke-dashoffset", "0")
             .set("stroke-width", config.line_weight)
@@ -504,13 +491,7 @@ impl Specs {
         let end = self
             .get_fret_lengths(self.count + 1)
             .get_fret_line(self, config);
-        let hex = match config.fretboard_color.to_hex() {
-            Ok(c) => c,
-            Err(e) => {
-                eprintln!("Error getting fretboard color: {}", e);
-                HexColor::primary(PrimaryColor::Black)
-            }
-        };
+        let (hex, alpha) = (config.fretboard_color.to_hex(), config.fretboard_color.alpha);
         let data = Data::new()
             .move_to((nut.start.0, nut.start.1))
             .line_to((nut.end.0, nut.end.1))
@@ -519,8 +500,8 @@ impl Specs {
             .line_to((nut.start.0, nut.start.1))
             .close();
         Path::new()
-            .set("fill", hex.color)
-            .set("fill-opacity", hex.alpha)
+            .set("fill", hex)
+            .set("fill-opacity", alpha)
             .set("stroke", "none")
             .set("id", "Fretboard")
             .set("d", data)

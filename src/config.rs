@@ -1,5 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
-pub use rgba_simple::{Color, Primary, PrimaryColor, RGBA};
+pub use rgba_simple::{Hex, Primary, PrimaryColor::*, RGBA};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
@@ -142,11 +142,11 @@ pub struct Config {
     /// The line weight for all of the elements in mm
     pub line_weight: f64,
     /// The color of the fret lines
-    pub fretline_color: Color,
+    pub fretline_color: RGBA<u8>,
     /// The background color of the fretboard
-    pub fretboard_color: Color,
+    pub fretboard_color: RGBA<u8>,
     /// The color of the centerline
-    pub centerline_color: Option<Color>,
+    pub centerline_color: Option<RGBA<u8>>,
     /// The font used for the specifications
     pub font: Option<Font>,
 }
@@ -158,9 +158,9 @@ impl Default for Config {
             units: Units::default(),
             border: 10.0,
             line_weight: 1.0,
-            fretline_color: Color::Rgba(RGBA::primary(PrimaryColor::White)),
-            fretboard_color: Color::Rgba(RGBA::primary(PrimaryColor::Black)),
-            centerline_color: Some(Color::Rgba(RGBA::primary(PrimaryColor::Blue))),
+            fretline_color: RGBA::primary(White),
+            fretboard_color: RGBA::primary(Black),
+            centerline_color: Some(RGBA::primary(Blue)),
             font: Some(Font::default()),
         }
     }
@@ -195,29 +195,29 @@ impl Config {
     }
 
     #[allow(clippy::must_use_candidate)]
-    pub fn fretline_color(&self) -> Color {
+    pub fn fretline_color(&self) -> RGBA<u8> {
         self.fretline_color.clone()
     }
 
-    pub fn set_fretline_color(&mut self, color: Color) {
+    pub fn set_fretline_color(&mut self, color: RGBA<u8>) {
         self.fretline_color = color;
     }
 
     #[allow(clippy::must_use_candidate)]
-    pub fn fretboard_color(&self) -> Color {
+    pub fn fretboard_color(&self) -> RGBA<u8> {
         self.fretboard_color.clone()
     }
 
-    pub fn set_fretboard_color(&mut self, color: Color) {
+    pub fn set_fretboard_color(&mut self, color: RGBA<u8>) {
         self.fretboard_color = color;
     }
 
     #[allow(clippy::must_use_candidate)]
-    pub fn centerline_color(&self) -> Option<Color> {
+    pub fn centerline_color(&self) -> Option<RGBA<u8>> {
         self.centerline_color.as_ref().cloned()
     }
 
-    pub fn set_centerline_color(&mut self, color: Option<Color>) {
+    pub fn set_centerline_color(&mut self, color: Option<RGBA<u8>>) {
         self.centerline_color = color;
     }
 
