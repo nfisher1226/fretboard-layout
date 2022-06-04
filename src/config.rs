@@ -1,4 +1,5 @@
 #![warn(clippy::all, clippy::pedantic)]
+
 use {
     crate::{
         Primary,
@@ -6,11 +7,11 @@ use {
         RGBA,
     },
     serde::{Deserialize, Serialize},
-    std::{fmt, str::FromStr},
+    std::{error::Error, fmt, str::FromStr},
 };
 
-/// Whether to use Metric (millimeters) or Imperrial (inches) measurements
-#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
+/// Whether to use Metric (millimeters) or Imperial (inches) measurements
+#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
 pub enum Units {
     /// Output measurements are given in *millimeters*
     Metric,
@@ -19,7 +20,7 @@ pub enum Units {
 }
 
 /// The weight, or style, of the font
-#[derive(Clone, Copy, Deserialize, Debug, PartialEq, Serialize)]
+#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
 pub enum FontWeight {
     Thin,
     Ultralight,
@@ -45,7 +46,7 @@ pub struct Font {
 }
 
 /// Error returned if unable to parse a font from a given `str`
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ParseFontError;
 
 impl fmt::Display for Units {
@@ -64,6 +65,12 @@ impl Default for Units {
 impl fmt::Display for ParseFontError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
+    }
+}
+
+impl Error for ParseFontError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
     }
 }
 

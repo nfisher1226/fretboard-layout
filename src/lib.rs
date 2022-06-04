@@ -18,7 +18,7 @@ use {
 };
 
 /// Whether the output represents a right handed or left handed neck style
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum Handedness {
     Right,
     Left,
