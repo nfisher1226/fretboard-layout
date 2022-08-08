@@ -94,6 +94,51 @@ impl Variant {
     }
 }
 
+pub struct MultiscaleBuilder {
+    scale: f64,
+    handedness: Handedness,
+    pfret: f64,
+}
+
+impl Default for MultiscaleBuilder {
+    fn default() -> Self {
+        Self {
+            scale: 610.0,
+            handedness: Handedness::default(),
+            pfret: 8.0,
+        }
+    }
+}
+
+impl MultiscaleBuilder {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn scale(mut self, scale: f64) -> Self {
+        self.scale = scale;
+        self
+    }
+
+    pub fn handedness(mut self, handedness: Handedness) -> Self {
+        self.handedness = handedness;
+        self
+    }
+
+    pub fn pfret(mut self, pfret: f64) -> Self {
+        self.pfret = pfret;
+        self
+    }
+
+    pub fn build(self) -> Variant {
+        Variant::Multiscale {
+            scale: self.scale,
+            handedness: self.handedness,
+            pfret: self.pfret
+        }
+    }
+}
+
 // This struct contains multiplication factors used to convert the raw lengths
 // from bridge to fret into x,y coordinates. It also contains an offset distance
 // used to correctly orient the two scales in a multiscale design so that the
