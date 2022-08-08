@@ -251,9 +251,11 @@ impl Specs {
             factors,
         }
     }
-}
 
-impl Specs {
+    pub fn builder() -> SpecsBuilder {
+        SpecsBuilder::new()
+    }
+
     /// Returns a multiscale Specs struct
     #[allow(clippy::must_use_candidate)]
     pub fn multi() -> Self {
@@ -562,6 +564,69 @@ impl Specs {
         } else {
             document
         }
+    }
+}
+
+/// A Specs builder
+pub struct SpecsBuilder {
+    scale: f64,
+    count: u32,
+    variant: Variant,
+    nut: f64,
+    bridge: f64,
+    pfret: f64,
+}
+
+impl Default for SpecsBuilder {
+    fn default() -> Self {
+        Self {
+            scale: 655.0,
+            count: 24,
+            variant: Variant::Monoscale,
+            nut: 43.0,
+            bridge: 56.0,
+            pfret: 8.0,
+        }
+    }
+}
+
+impl SpecsBuilder {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn scale(mut self, scale: f64) -> Self {
+        self.scale = scale;
+        self
+    }
+
+    pub fn count(mut self, count: u32) -> Self {
+        self.count = count;
+        self
+    }
+
+    pub fn variant(mut self, variant: Variant) -> Self {
+        self.variant = variant;
+        self
+    }
+
+    pub fn nut(mut self, nut: f64) -> Self {
+        self.nut = nut;
+        self
+    }
+
+    pub fn bridge(mut self, bridge: f64) -> Self {
+        self.bridge = bridge;
+        self
+    }
+
+    pub fn pfret(mut self, pfret: f64) -> Self {
+        self.pfret = pfret;
+        self
+    }
+
+    pub fn build(self) -> Specs {
+        Specs::init(self.scale, self.count, self.variant, self.nut, self.bridge, self.pfret)
     }
 }
 
