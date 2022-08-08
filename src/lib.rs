@@ -47,6 +47,8 @@ pub enum Variant {
         scale: f64,
         /// Right or left handed output
         handedness: Handedness,
+        /// Which fret is perpendicular to the centerline
+        pfret: f64,
     },
 }
 
@@ -58,7 +60,7 @@ impl Default for Variant {
 
 impl Variant {
     fn multi() -> Self {
-        Self::Multiscale {scale: 610.0, handedness: Handedness::default() }
+        Self::Multiscale { scale: 610.0, handedness: Handedness::default(), pfret: 8.0 }
     }
 
     /// Return the treble side scale length if the neck is `Multiscale`, or else
@@ -80,6 +82,16 @@ impl Variant {
             Self::Multiscale { handedness: x, .. } => Some(*x),
         }
     }
+
+    /// Returns which fret is perpendicular to the centerline, or `None` if the
+    /// fretboard is Monoscale
+    #[allow(clippy::must_use_candidate)]
+    pub fn pfret(&self) -> Option<f64> {
+        match self {
+            Self::Monoscale => None,
+            Self::Multiscale { pfret: x, .. } => Some(*x),
+        }
+    }
 }
 
 // This struct contains multiplication factors used to convert the raw lengths
@@ -96,7 +108,7 @@ struct Factors {
 
 impl Default for Factors {
     fn default() -> Self {
-        Self::init(655.0, &Variant::default(), 43.0, 56.0, 8.0)
+        Self::init(655.0, &Variant::default(), 43.0, 56.0)
     }
 }
 
@@ -104,10 +116,14 @@ impl Factors {
     /// Uses trigonometry to place the fret ends, based on visualizing their
     /// locations as a triangle where the hypotenuse is the string, and the
     /// opposite is the distance from the bridge parallel to the centerline.
-    fn init(scale: f64, variant: &Variant, nut: f64, bridge: f64, pfret: f64) -> Self {
+    fn init(scale: f64, variant: &Variant, nut: f64, bridge: f64) -> Self {
         let height = (bridge - nut) / 2.0;
         let y_ratio = height / scale;
         let x_ratio = y_ratio.acos().sin();
+        let pfret = match variant.pfret() {
+            Some(x) => x,
+            None => 8.0,
+        };
         let factor = 2.0_f64.powf(pfret / 12.0);
         let length_bass = scale / factor;
         let length_treble = match variant {
@@ -218,15 +234,13 @@ pub struct Specs {
     /// width of the bridge, but the distance perpendicular to the centerline
     /// between the outer two strings.
     pub bridge: f64,
-    /// The fret that is perpendicular to the centerline.
-    pub pfret: f64,
     factors: Factors,
 }
 
 impl Default for Specs {
     /// Returns a default Specs struct
     fn default() -> Self {
-        Self::init(655.0, 24, Variant::default(), 43.0, 56.0, 8.0)
+        Self::init(655.0, 24, Variant::default(), 43.0, 56.0)
     }
 }
 
@@ -238,16 +252,14 @@ impl Specs {
         variant: Variant,
         nut: f64,
         bridge: f64,
-        pfret: f64,
     ) -> Self {
-        let factors = Factors::init(scale, &variant, nut, bridge, pfret);
+        let factors = Factors::init(scale, &variant, nut, bridge);
         Self {
             scale,
             count,
             variant,
             nut,
             bridge,
-            pfret,
             factors,
         }
     }
@@ -259,7 +271,7 @@ impl Specs {
     /// Returns a multiscale Specs struct
     #[allow(clippy::must_use_candidate)]
     pub fn multi() -> Self {
-        Self::init(655.0, 24, Variant::multi(), 43.0, 56.0, 8.0)
+        Self::init(655.0, 24, Variant::multi(), 43.0, 56.0)
     }
 
     #[allow(clippy::must_use_candidate)]
@@ -285,13 +297,21 @@ impl Specs {
         self.variant
     }
 
-    pub fn set_multi(&mut self, scale: Option<f64>) {
+    pub fn set_multi(&mut self, scale: Option<f64>, pfret: Option<f64>) {
         match scale {
             Some(s) => {
                 if let Some(hand) = self.variant.handedness() {
-                    self.variant = Variant::Multiscale { scale: s, handedness: hand };
+                    self.variant = Variant::Multiscale {
+                        scale: s,
+                        handedness: hand,
+                        pfret: pfret.unwrap_or(8.0)
+                    };
                 } else {
-                    self.variant = Variant::Multiscale { scale: s, handedness: Handedness::Right };
+                    self.variant = Variant::Multiscale {
+                        scale: s,
+                        handedness: Handedness::Right,
+                        pfret: pfret.unwrap_or(8.0)
+                    };
                 };
             }
             None => self.variant = Variant::Monoscale,
@@ -314,15 +334,6 @@ impl Specs {
 
     pub fn set_bridge(&mut self, bridge: f64) {
         self.bridge = bridge;
-    }
-
-    #[allow(clippy::must_use_candidate)]
-    pub fn pfret(&self) -> f64 {
-        self.pfret
-    }
-
-    pub fn set_pfret(&mut self, pfret: f64) {
-        self.pfret = pfret;
     }
 
     /// Returns the distance from bridge to nut on both sides of the fretboard
@@ -370,7 +381,13 @@ impl Specs {
                     Variant::Multiscale { scale: s, .. } => s,
                 },
             )
-            .set("PerpendicularFret", self.pfret)
+            .set(
+                "PerpendicularFret",
+                match self.variant {
+                    Variant::Monoscale => 8.0,
+                    Variant::Multiscale { pfret: x, .. } => x
+                },
+            )
             .set("BridgeSpacing", self.bridge - 6.0)
             .set("NutWidth", self.nut)
     }
@@ -383,9 +400,9 @@ impl Specs {
         };
         let mut line = match self.variant {
             Variant::Monoscale => format!("Scale: {:.2}{} |", self.scale, &units),
-            Variant::Multiscale { scale: s, .. } => format!(
+            Variant::Multiscale { scale: s, pfret: f, .. } => format!(
                 "ScaleBass: {:.2}{} | ScaleTreble: {:.2}{} | PerpendicularFret: {:.1} |",
-                self.scale, &units, s, &units, self.pfret
+                self.scale, &units, s, &units, f
             ),
         };
         let font_family = match &config.font {
@@ -574,7 +591,6 @@ pub struct SpecsBuilder {
     variant: Variant,
     nut: f64,
     bridge: f64,
-    pfret: f64,
 }
 
 impl Default for SpecsBuilder {
@@ -585,7 +601,6 @@ impl Default for SpecsBuilder {
             variant: Variant::Monoscale,
             nut: 43.0,
             bridge: 56.0,
-            pfret: 8.0,
         }
     }
 }
@@ -620,13 +635,8 @@ impl SpecsBuilder {
         self
     }
 
-    pub fn pfret(mut self, pfret: f64) -> Self {
-        self.pfret = pfret;
-        self
-    }
-
     pub fn build(self) -> Specs {
-        Specs::init(self.scale, self.count, self.variant, self.nut, self.bridge, self.pfret)
+        Specs::init(self.scale, self.count, self.variant, self.nut, self.bridge)
     }
 }
 
@@ -642,7 +652,11 @@ mod tests {
 
     #[test]
     fn variant_value() {
-        let var = Variant::Multiscale { scale: 23.5, handedness: Handedness::Right };
+        let var = Variant::Multiscale {
+            scale: 23.5,
+            handedness: Handedness::Right,
+            pfret: 8.0
+        };
         let val = var.scale();
         assert_eq!(val.unwrap(), 23.5);
         let hand = var.handedness();

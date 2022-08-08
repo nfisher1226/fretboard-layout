@@ -12,7 +12,7 @@ use fretboard_layout::{Config,Specs};
 
     // the [Specs] struct constains the specifications used to generate the svg
     let mut specs = Specs::default();
-    specs.set_multi(Some(615.0));
+    specs.set_multi(Some(615.0), Some(8.0));
     specs.set_scale(675.0);
     // the (optional) [Config] struct fine tunes the visual representation
     let mut cfg = Config::default();
