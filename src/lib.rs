@@ -42,12 +42,12 @@ pub enum Variant {
     /// bass side of the neck and a shorter scale along the treble side of the
     /// neck, allowing for more natural string tension, greater flexibility in
     /// tuning, and better ergonomics.
-    Multiscale(
+    Multiscale {
         /// The scale length along the treble side of the neck
-        f64,
+        scale: f64,
         /// Right or left handed output
-        Handedness,
-    ),
+        handedness: Handedness,
+    },
 }
 
 impl Default for Variant {
@@ -58,7 +58,7 @@ impl Default for Variant {
 
 impl Variant {
     fn multi() -> Self {
-        Self::Multiscale(610.0, Handedness::default())
+        Self::Multiscale {scale: 610.0, handedness: Handedness::default() }
     }
 
     /// Return the treble side scale length if the neck is `Multiscale`, or else
@@ -67,7 +67,7 @@ impl Variant {
     pub fn scale(&self) -> Option<f64> {
         match self {
             Self::Monoscale => None,
-            Self::Multiscale(x, _) => Some(*x),
+            Self::Multiscale { scale: x, .. } => Some(*x),
         }
     }
 
@@ -77,7 +77,7 @@ impl Variant {
     pub fn handedness(&self) -> Option<Handedness> {
         match self {
             Self::Monoscale => None,
-            Self::Multiscale(_, x) => Some(*x),
+            Self::Multiscale { handedness: x, .. } => Some(*x),
         }
     }
 }
@@ -112,7 +112,7 @@ impl Factors {
         let length_bass = scale / factor;
         let length_treble = match variant {
             Variant::Monoscale => length_bass,
-            Variant::Multiscale(s, _) => s / factor,
+            Variant::Multiscale { scale: s, .. } => s / factor,
         };
         let bass_pfret = x_ratio * length_bass;
         let treble_pfret = x_ratio * length_treble;
@@ -289,9 +289,9 @@ impl Specs {
         match scale {
             Some(s) => {
                 if let Some(hand) = self.variant.handedness() {
-                    self.variant = Variant::Multiscale(s, hand);
+                    self.variant = Variant::Multiscale { scale: s, handedness: hand };
                 } else {
-                    self.variant = Variant::Multiscale(s, Handedness::Right);
+                    self.variant = Variant::Multiscale { scale: s, handedness: Handedness::Right };
                 };
             }
             None => self.variant = Variant::Monoscale,
@@ -328,7 +328,7 @@ impl Specs {
     /// Returns the distance from bridge to nut on both sides of the fretboard
     fn get_nut(&self) -> Lengths {
         let length_treble = match self.variant {
-            Variant::Multiscale(s, _) => s,
+            Variant::Multiscale { scale: s, .. } => s,
             Variant::Monoscale => self.scale,
         };
         Lengths {
@@ -344,7 +344,7 @@ impl Specs {
         let length_bass = self.scale / factor;
         let length_treble = match self.variant {
             Variant::Monoscale => length_bass,
-            Variant::Multiscale(s, _) => s / factor,
+            Variant::Multiscale { scale: s, .. } => s / factor,
         };
         Lengths {
             length_bass,
@@ -360,14 +360,14 @@ impl Specs {
                 "Multiscale",
                 match self.variant {
                     Variant::Monoscale => false,
-                    Variant::Multiscale(_, _) => true,
+                    Variant::Multiscale { .. } => true,
                 },
             )
             .set(
                 "ScaleTreble",
                 match self.variant {
                     Variant::Monoscale => self.scale,
-                    Variant::Multiscale(s, _) => s,
+                    Variant::Multiscale { scale: s, .. } => s,
                 },
             )
             .set("PerpendicularFret", self.pfret)
@@ -383,7 +383,7 @@ impl Specs {
         };
         let mut line = match self.variant {
             Variant::Monoscale => format!("Scale: {:.2}{} |", self.scale, &units),
-            Variant::Multiscale(s, _) => format!(
+            Variant::Multiscale { scale: s, .. } => format!(
                 "ScaleBass: {:.2}{} | ScaleTreble: {:.2}{} | PerpendicularFret: {:.1} |",
                 self.scale, &units, s, &units, self.pfret
             ),
@@ -448,15 +448,15 @@ impl Specs {
     /// adds the bridge as a line between the outer strings
     fn draw_bridge(&self, config: &Config) -> svg::node::element::Path {
         let start_x = match self.variant {
-            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => config.border,
-            Variant::Multiscale(_, Handedness::Left) => config.border + self.scale,
+            Variant::Monoscale | Variant::Multiscale { handedness: Handedness::Right, .. } => config.border,
+            Variant::Multiscale { handedness: Handedness::Left, .. } => config.border + self.scale,
         };
         let start_y = config.border;
         let end_x = match self.variant {
-            Variant::Monoscale | Variant::Multiscale(_, Handedness::Right) => {
+            Variant::Monoscale | Variant::Multiscale { handedness: Handedness::Right, .. } => {
                 config.border + self.factors.treble_offset
             }
-            Variant::Multiscale(_, Handedness::Left) => {
+            Variant::Multiscale { handedness: Handedness::Left, .. } => {
                 config.border + self.scale - self.factors.treble_offset
             }
         };
@@ -642,7 +642,7 @@ mod tests {
 
     #[test]
     fn variant_value() {
-        let var = Variant::Multiscale(23.5, Handedness::Right);
+        let var = Variant::Multiscale { scale: 23.5, handedness: Handedness::Right };
         let val = var.scale();
         assert_eq!(val.unwrap(), 23.5);
         let hand = var.handedness();
