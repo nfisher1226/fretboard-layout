@@ -1,5 +1,6 @@
 #![warn(clippy::all, clippy::pedantic)]
 #![doc = include_str!("../README.md")]
+
 mod config;
 pub use {
     config::{Config, Font, FontWeight, Units},
@@ -9,7 +10,7 @@ pub use {
 use {
     rayon::prelude::*,
     serde::{Deserialize, Serialize},
-    std::f64,
+    std::{f64, fmt},
     svg::{
         node::element::{path::Data, Description, Group, Path},
         Document,
@@ -27,6 +28,15 @@ pub enum Handedness {
 impl Default for Handedness {
     fn default() -> Self {
         Self::Right
+    }
+}
+
+impl fmt::Display for Handedness {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", match self {
+            Self::Right => "right",
+            Self::Left => "left",
+        })
     }
 }
 
@@ -139,6 +149,7 @@ impl MultiscaleBuilder {
     }
 }
 
+#[derive(Deserialize, Serialize)]
 // This struct contains multiplication factors used to convert the raw lengths
 // from bridge to fret into x,y coordinates. It also contains an offset distance
 // used to correctly orient the two scales in a multiscale design so that the
@@ -265,6 +276,7 @@ impl Line {
     }
 }
 
+#[derive(Deserialize, Serialize)]
 /// This struct contains the user data used to create the svg output file
 pub struct Specs {
     /// Scale length. For multiscale designs this is the bass side scale length.
@@ -410,31 +422,19 @@ impl Specs {
 
     /// Embeds a text description into the svg
     fn create_description(&self) -> svg::node::element::Description {
-        Description::new()
+        let desc = Description::new()
             .set("Scale", self.scale)
-            .set(
-                "Multiscale",
-                match self.variant {
-                    Variant::Monoscale => false,
-                    Variant::Multiscale { .. } => true,
-                },
-            )
-            .set(
-                "ScaleTreble",
-                match self.variant {
-                    Variant::Monoscale => self.scale,
-                    Variant::Multiscale { scale: s, .. } => s,
-                },
-            )
-            .set(
-                "PerpendicularFret",
-                match self.variant {
-                    Variant::Monoscale => 8.0,
-                    Variant::Multiscale { pfret: x, .. } => x
-                },
-            )
             .set("BridgeSpacing", self.bridge - 6.0)
             .set("NutWidth", self.nut)
+            .set("FretCount", self.count);
+        match self.variant {
+            Variant::Multiscale { scale: scl, handedness: hnd, pfret: pf } => {
+                desc.set("ScaleTreble", scl)
+                    .set("PerpendicularFret", pf)
+                    .set("Handedness", hnd.to_string())
+            }
+            Variant::Monoscale => desc,
+        }
     }
 
     /// Prints the specs used in the rendered image
