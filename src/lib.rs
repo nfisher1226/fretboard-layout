@@ -10,7 +10,12 @@ pub use {
 use {
     rayon::prelude::*,
     serde::{Deserialize, Serialize},
-    std::{f64, fmt},
+    std::{
+        f64, fmt, io,
+        num::{ParseFloatError, ParseIntError},
+        path,
+        str::FromStr,
+    },
     svg::{
         node::element::{path::Data, Description, Group, Path},
         Document,
@@ -25,6 +30,29 @@ pub enum Handedness {
     Left,
 }
 
+#[derive(Debug)]
+pub struct ParseHandednessError;
+
+impl fmt::Display for ParseHandednessError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Parse Handedness Error")
+    }
+}
+
+impl std::error::Error for ParseHandednessError {}
+
+impl FromStr for Handedness {
+    type Err = ParseHandednessError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "right" | "Right" => Ok(Self::Right),
+            "left" | "Left" => Ok(Self::Left),
+            _ => Err(ParseHandednessError),
+        }
+    }
+}
+
 impl Default for Handedness {
     fn default() -> Self {
         Self::Right
@@ -33,10 +61,14 @@ impl Default for Handedness {
 
 impl fmt::Display for Handedness {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", match self {
-            Self::Right => "right",
-            Self::Left => "left",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Right => "right",
+                Self::Left => "left",
+            }
+        )
     }
 }
 
@@ -70,7 +102,11 @@ impl Default for Variant {
 
 impl Variant {
     fn multi() -> Self {
-        Self::Multiscale { scale: 610.0, handedness: Handedness::default(), pfret: 8.0 }
+        Self::Multiscale {
+            scale: 610.0,
+            handedness: Handedness::default(),
+            pfret: 8.0,
+        }
     }
 
     /// Return the treble side scale length if the neck is `Multiscale`, or else
@@ -144,7 +180,7 @@ impl MultiscaleBuilder {
         Variant::Multiscale {
             scale: self.scale,
             handedness: self.handedness,
-            pfret: self.pfret
+            pfret: self.pfret,
         }
     }
 }
@@ -276,6 +312,65 @@ impl Line {
     }
 }
 
+#[derive(Debug)]
+pub enum OpenError {
+    Io(io::Error),
+    ParseFloat(ParseFloatError),
+    ParseInt(ParseIntError),
+    ParseHandedness,
+    NoMetadata,
+    MissingField(&'static str),
+}
+
+impl fmt::Display for OpenError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Io(e) => write!(f, "{e}"),
+            Self::ParseFloat(e) => write!(f, "{e}"),
+            Self::ParseInt(e) => write!(f, "{e}"),
+            Self::ParseHandedness => write!(f, "Parse handedness error"),
+            Self::NoMetadata => write!(f, "No metadata"),
+            Self::MissingField(s) => write!(f, "Missing field: {s}"),
+        }
+    }
+}
+
+impl std::error::Error for OpenError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Io(e) => Some(e),
+            Self::ParseFloat(e) => Some(e),
+            Self::ParseInt(e) => Some(e),
+            Self::ParseHandedness => Some(&ParseHandednessError),
+            Self::NoMetadata | Self::MissingField(_) => None,
+        }
+    }
+}
+
+impl From<io::Error> for OpenError {
+    fn from(e: io::Error) -> Self {
+        Self::Io(e)
+    }
+}
+
+impl From<ParseFloatError> for OpenError {
+    fn from(e: ParseFloatError) -> Self {
+        Self::ParseFloat(e)
+    }
+}
+
+impl From<ParseIntError> for OpenError {
+    fn from(e: ParseIntError) -> Self {
+        Self::ParseInt(e)
+    }
+}
+
+impl From<ParseHandednessError> for OpenError {
+    fn from(_: ParseHandednessError) -> Self {
+        Self::ParseHandedness
+    }
+}
+
 #[derive(Deserialize, Serialize)]
 /// This struct contains the user data used to create the svg output file
 pub struct Specs {
@@ -303,13 +398,7 @@ impl Default for Specs {
 
 impl Specs {
     #[must_use]
-    pub fn init(
-        scale: f64,
-        count: u32,
-        variant: Variant,
-        nut: f64,
-        bridge: f64,
-    ) -> Self {
+    pub fn init(scale: f64, count: u32, variant: Variant, nut: f64, bridge: f64) -> Self {
         let factors = Factors::init(scale, &variant, nut, bridge);
         Self {
             scale,
@@ -361,13 +450,13 @@ impl Specs {
                     self.variant = Variant::Multiscale {
                         scale: s,
                         handedness: hand,
-                        pfret: pfret.unwrap_or(8.0)
+                        pfret: pfret.unwrap_or(8.0),
                     };
                 } else {
                     self.variant = Variant::Multiscale {
                         scale: s,
                         handedness: Handedness::Right,
-                        pfret: pfret.unwrap_or(8.0)
+                        pfret: pfret.unwrap_or(8.0),
                     };
                 };
             }
@@ -420,6 +509,52 @@ impl Specs {
         }
     }
 
+    /// Opens an svg file and extracts a Specs struct from it if it was created
+    /// by this library previously
+    pub fn open<T: AsRef<path::Path>>(path: T) -> Result<Self, OpenError> {
+        let mut content = String::new();
+        let event_iter = svg::open(path, &mut content)?;
+        for event in event_iter {
+            match event {
+                svg::parser::Event::Tag(svg::node::element::tag::Description, _, attributes) => {
+                    let scale = attributes
+                        .get("Scale")
+                        .ok_or(OpenError::MissingField("Scale"))?
+                        .parse()?;
+                    let bridge = attributes
+                        .get("BridgeSpacing")
+                        .ok_or(OpenError::MissingField("BridgeSpacing"))?
+                        .parse()?;
+                    let nut = attributes
+                        .get("NutWidth")
+                        .ok_or(OpenError::MissingField("NutWidth"))?
+                        .parse()?;
+                    let count = attributes
+                        .get("FretCount")
+                        .ok_or(OpenError::MissingField("FretCount"))?
+                        .parse()?;
+                    let variant = match attributes.get("ScaleTreble") {
+                        Some(scl) => Variant::Multiscale {
+                            scale: scl.parse::<f64>()?,
+                            handedness: attributes
+                                .get("Handedness")
+                                .ok_or(OpenError::MissingField("Handedness"))?
+                                .parse()?,
+                            pfret: attributes
+                                .get("PerpendicularFret")
+                                .ok_or(OpenError::MissingField("PerpendicularFret"))?
+                                .parse()?,
+                        },
+                        None => Variant::Monoscale,
+                    };
+                    return Ok(Self::init(scale, count, variant, nut, bridge));
+                }
+                _ => {}
+            }
+        }
+        Err(OpenError::NoMetadata)
+    }
+
     /// Embeds a text description into the svg
     fn create_description(&self) -> svg::node::element::Description {
         let desc = Description::new()
@@ -428,11 +563,14 @@ impl Specs {
             .set("NutWidth", self.nut)
             .set("FretCount", self.count);
         match self.variant {
-            Variant::Multiscale { scale: scl, handedness: hnd, pfret: pf } => {
-                desc.set("ScaleTreble", scl)
-                    .set("PerpendicularFret", pf)
-                    .set("Handedness", hnd.to_string())
-            }
+            Variant::Multiscale {
+                scale: scl,
+                handedness: hnd,
+                pfret: pf,
+            } => desc
+                .set("ScaleTreble", scl)
+                .set("PerpendicularFret", pf)
+                .set("Handedness", hnd.to_string()),
             Variant::Monoscale => desc,
         }
     }
@@ -445,7 +583,9 @@ impl Specs {
         };
         let mut line = match self.variant {
             Variant::Monoscale => format!("Scale: {:.2}{} |", self.scale, &units),
-            Variant::Multiscale { scale: s, pfret: f, .. } => format!(
+            Variant::Multiscale {
+                scale: s, pfret: f, ..
+            } => format!(
                 "ScaleBass: {:.2}{} | ScaleTreble: {:.2}{} | PerpendicularFret: {:.1} |",
                 self.scale, &units, s, &units, f
             ),
@@ -510,17 +650,27 @@ impl Specs {
     /// adds the bridge as a line between the outer strings
     fn draw_bridge(&self, config: &Config) -> svg::node::element::Path {
         let start_x = match self.variant {
-            Variant::Monoscale | Variant::Multiscale { handedness: Handedness::Right, .. } => config.border,
-            Variant::Multiscale { handedness: Handedness::Left, .. } => config.border + self.scale,
+            Variant::Monoscale
+            | Variant::Multiscale {
+                handedness: Handedness::Right,
+                ..
+            } => config.border,
+            Variant::Multiscale {
+                handedness: Handedness::Left,
+                ..
+            } => config.border + self.scale,
         };
         let start_y = config.border;
         let end_x = match self.variant {
-            Variant::Monoscale | Variant::Multiscale { handedness: Handedness::Right, .. } => {
-                config.border + self.factors.treble_offset
-            }
-            Variant::Multiscale { handedness: Handedness::Left, .. } => {
-                config.border + self.scale - self.factors.treble_offset
-            }
+            Variant::Monoscale
+            | Variant::Multiscale {
+                handedness: Handedness::Right,
+                ..
+            } => config.border + self.factors.treble_offset,
+            Variant::Multiscale {
+                handedness: Handedness::Left,
+                ..
+            } => config.border + self.scale - self.factors.treble_offset,
         };
         let end_y = config.border + self.bridge;
         let data = Data::new()
@@ -700,7 +850,7 @@ mod tests {
         let var = Variant::Multiscale {
             scale: 23.5,
             handedness: Handedness::Right,
-            pfret: 8.0
+            pfret: 8.0,
         };
         let val = var.scale();
         assert_eq!(val.unwrap(), 23.5);
