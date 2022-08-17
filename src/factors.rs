@@ -1,18 +1,22 @@
+//! Mathematical factors used in laying out the frets in 2d space
+
 use {
     crate::Variant,
     serde::{Deserialize, Serialize},
 };
 
 #[derive(Deserialize, Serialize)]
-// This struct contains multiplication factors used to convert the raw lengths
-// from bridge to fret into x,y coordinates. It also contains an offset distance
-// used to correctly orient the two scales in a multiscale design so that the
-// desired fret is perpendicular to the centerline.
+/// This struct contains multiplication factors used to convert the raw lengths
+/// from bridge to fret into x,y coordinates. It also contains an offset distance
+/// used to correctly orient the two scales in a multiscale design so that the
+/// desired fret is perpendicular to the centerline.
 pub struct Factors {
     pub x_ratio: f64,
+    /// This ratio is half the difference between the nut and bridge divided
+    /// by the scale and is used in determining the X ratio
     pub y_ratio: f64,
-    // How far forward the treble side of the bridge should start with respect
-    // to the trable side
+    /// How far forward the treble side of the bridge should start with respect
+    /// to the trable side
     pub treble_offset: f64,
 }
 
@@ -48,3 +52,23 @@ impl Factors {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::Specs;
+
+    #[test]
+    fn factors_default() {
+        let specs = Specs::default();
+        assert_eq!(specs.factors.x_ratio, 0.9999507592328689);
+        assert_eq!(specs.factors.y_ratio, 0.009923664122137405);
+        assert_eq!(specs.factors.treble_offset, 0.0);
+    }
+
+    #[test]
+    fn factors_multi() {
+        let specs = Specs::multi();
+        assert_eq!(specs.factors.x_ratio, 0.9999507592328689);
+        assert_eq!(specs.factors.y_ratio, 0.009923664122137405);
+        assert_eq!(specs.factors.treble_offset, 28.346827734356623);
+    }
+}

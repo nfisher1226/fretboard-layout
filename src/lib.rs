@@ -5,6 +5,7 @@
 mod config;
 mod factors;
 mod handedness;
+pub mod open;
 mod variant;
 
 pub use {
@@ -18,13 +19,8 @@ pub use {
 use {
     rayon::prelude::*,
     serde::{Deserialize, Serialize},
-    std::{
-        f64, fmt, io,
-        num::{ParseFloatError, ParseIntError},
-        path,
-    },
     svg::{
-        node::element::{path::Data, Description, Group, Path},
+        node::element::{path::Data, Description, Group, Path, Text},
         Document,
     },
     PrimaryColor::Blue,
@@ -59,6 +55,7 @@ impl Lengths {
         let y = opposite + config.border;
         Point(x, y)
     }
+
     /// Plots the end of a fret, nut or bridge along the treble side of the scale
     fn get_point_treble(&self, specs: &Specs, config: &Config) -> Point {
         let hand = specs.variant.handedness();
@@ -78,6 +75,7 @@ impl Lengths {
         let y = specs.bridge - opposite + config.border;
         Point(x, y)
     }
+
     /// Returns a Point struct containing both ends of a fret, nut or bridge
     /// which will form a line
     fn get_fret_line(&self, specs: &Specs, config: &Config) -> Line {
@@ -89,7 +87,7 @@ impl Lengths {
 
 impl Line {
     /// Returns an svg Path node representing a single fret
-    fn draw_fret(&self, fret: u32, config: &Config) -> svg::node::element::Path {
+    fn draw_fret(&self, fret: u32, config: &Config) -> Path {
         let id = if fret == 0 {
             "Nut".to_string()
         } else {
@@ -106,65 +104,6 @@ impl Line {
             .set("stroke-width", config.line_weight)
             .set("id", id)
             .set("d", data)
-    }
-}
-
-#[derive(Debug)]
-pub enum OpenError {
-    Io(io::Error),
-    ParseFloat(ParseFloatError),
-    ParseInt(ParseIntError),
-    ParseHandedness,
-    NoMetadata,
-    MissingField(&'static str),
-}
-
-impl fmt::Display for OpenError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Io(e) => write!(f, "{e}"),
-            Self::ParseFloat(e) => write!(f, "{e}"),
-            Self::ParseInt(e) => write!(f, "{e}"),
-            Self::ParseHandedness => write!(f, "Parse handedness error"),
-            Self::NoMetadata => write!(f, "No metadata"),
-            Self::MissingField(s) => write!(f, "Missing field: {s}"),
-        }
-    }
-}
-
-impl std::error::Error for OpenError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Io(e) => Some(e),
-            Self::ParseFloat(e) => Some(e),
-            Self::ParseInt(e) => Some(e),
-            Self::ParseHandedness => Some(&ParseHandednessError),
-            Self::NoMetadata | Self::MissingField(_) => None,
-        }
-    }
-}
-
-impl From<io::Error> for OpenError {
-    fn from(e: io::Error) -> Self {
-        Self::Io(e)
-    }
-}
-
-impl From<ParseFloatError> for OpenError {
-    fn from(e: ParseFloatError) -> Self {
-        Self::ParseFloat(e)
-    }
-}
-
-impl From<ParseIntError> for OpenError {
-    fn from(e: ParseIntError) -> Self {
-        Self::ParseInt(e)
-    }
-}
-
-impl From<ParseHandednessError> for OpenError {
-    fn from(_: ParseHandednessError) -> Self {
-        Self::ParseHandedness
     }
 }
 
@@ -306,53 +245,8 @@ impl Specs {
         }
     }
 
-    /// Opens an svg file and extracts a Specs struct from it if it was created
-    /// by this library previously
-    /// # Errors
-    /// See `OpenError` for a list of potential errors
-    pub fn open<T: AsRef<path::Path>>(path: T) -> Result<Self, OpenError> {
-        let mut content = String::new();
-        let event_iter = svg::open(path, &mut content)?;
-        for event in event_iter {
-            if let svg::parser::Event::Tag(svg::node::element::tag::Description, _, attributes) = event {
-                let scale = attributes
-                    .get("Scale")
-                    .ok_or(OpenError::MissingField("Scale"))?
-                    .parse()?;
-                let bridge = attributes
-                    .get("BridgeSpacing")
-                    .ok_or(OpenError::MissingField("BridgeSpacing"))?
-                    .parse()?;
-                let nut = attributes
-                    .get("NutWidth")
-                    .ok_or(OpenError::MissingField("NutWidth"))?
-                    .parse()?;
-                let count = attributes
-                    .get("FretCount")
-                    .ok_or(OpenError::MissingField("FretCount"))?
-                    .parse()?;
-                let variant = match attributes.get("ScaleTreble") {
-                    Some(scl) => Variant::Multiscale {
-                        scale: scl.parse::<f64>()?,
-                        handedness: attributes
-                            .get("Handedness")
-                            .ok_or(OpenError::MissingField("Handedness"))?
-                            .parse()?,
-                        pfret: attributes
-                            .get("PerpendicularFret")
-                            .ok_or(OpenError::MissingField("PerpendicularFret"))?
-                            .parse()?,
-                    },
-                    None => Variant::Monoscale,
-                };
-                return Ok(Self::init(scale, count, variant, nut, bridge));
-            }
-        }
-        Err(OpenError::NoMetadata)
-    }
-
     /// Embeds a text description into the svg
-    fn create_description(&self) -> svg::node::element::Description {
+    fn create_description(&self) -> Description {
         let desc = Description::new()
             .set("Scale", self.scale)
             .set("BridgeSpacing", self.bridge - 6.0)
@@ -372,7 +266,7 @@ impl Specs {
     }
 
     /// Prints the specs used in the rendered image
-    fn print_data(&self, config: &Config) -> svg::node::element::Text {
+    fn print_data(&self, config: &Config) -> Text {
         let units = match config.units {
             Units::Metric => String::from("mm"),
             Units::Imperial => String::from("in"),
@@ -415,7 +309,7 @@ impl Specs {
     }
 
     /// Adds the centerline to the svg data
-    fn draw_centerline(&self, config: &Config) -> svg::node::element::Path {
+    fn draw_centerline(&self, config: &Config) -> Path {
         let start_x = config.border;
         let start_y = (self.bridge / 2.0) + config.border;
         let end_x = config.border + self.scale;
@@ -444,7 +338,7 @@ impl Specs {
     }
 
     /// adds the bridge as a line between the outer strings
-    fn draw_bridge(&self, config: &Config) -> svg::node::element::Path {
+    fn draw_bridge(&self, config: &Config) -> Path {
         let start_x = match self.variant {
             Variant::Monoscale
             | Variant::Multiscale {
@@ -482,7 +376,7 @@ impl Specs {
     }
 
     /// Draws the outline of the fretboard
-    fn draw_fretboard(&self, config: &Config) -> svg::node::element::Path {
+    fn draw_fretboard(&self, config: &Config) -> Path {
         let nut = self.get_nut().get_fret_line(self, config);
         let end = self
             .get_fret_lengths(self.count + 1)
@@ -507,20 +401,20 @@ impl Specs {
     }
 
     /// draws a single fret
-    fn draw_fret(&self, config: &Config, num: u32) -> svg::node::element::Path {
+    fn draw_fret(&self, config: &Config, num: u32) -> Path {
         self.get_fret_lengths(num)
             .get_fret_line(self, config)
             .draw_fret(num, config)
     }
 
     /// Iterates through each fret, returning a group of svg Paths
-    fn draw_frets(&self, cfg: &Config) -> svg::node::element::Group {
+    fn draw_frets(&self, cfg: &Config) -> Group {
         let frets = Group::new().set("id", "Frets");
-        let f: Vec<svg::node::element::Path> = (0..=self.count)
+        let f: Vec<Path> = (0..=self.count)
             .into_par_iter()
             .map(|fret| self.draw_fret(cfg, fret))
             .collect();
-        f.into_iter().fold(frets, svg::node::element::Group::add)
+        f.into_iter().fold(frets, Group::add)
     }
 
     ///Returns the complete svg Document
@@ -643,41 +537,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn variant_default() {
-        let var = Variant::default();
-        assert_eq!(Variant::Monoscale, var);
-    }
-
-    #[test]
-    fn variant_value() {
-        let var = Variant::Multiscale {
-            scale: 23.5,
-            handedness: Handedness::Right,
-            pfret: 8.0,
-        };
-        let val = var.scale();
-        assert_eq!(val.unwrap(), 23.5);
-        let hand = var.handedness();
-        assert_eq!(hand.unwrap(), Handedness::Right);
-    }
-
-    #[test]
-    fn factors_default() {
-        let specs = Specs::default();
-        assert_eq!(specs.factors.x_ratio, 0.9999507592328689);
-        assert_eq!(specs.factors.y_ratio, 0.009923664122137405);
-        assert_eq!(specs.factors.treble_offset, 0.0);
-    }
-
-    #[test]
-    fn factors_multi() {
-        let specs = Specs::multi();
-        assert_eq!(specs.factors.x_ratio, 0.9999507592328689);
-        assert_eq!(specs.factors.y_ratio, 0.009923664122137405);
-        assert_eq!(specs.factors.treble_offset, 28.346827734356623);
-    }
-
-    #[test]
     fn lengths() {
         let specs = Specs::default();
         let lengths = specs.get_fret_lengths(12);
@@ -686,17 +545,5 @@ mod tests {
         let lengths = specs.get_fret_lengths(24);
         assert_eq!(lengths.length_bass, 163.75);
         assert_eq!(lengths.length_bass, lengths.length_treble);
-    }
-
-    #[test]
-    fn test_open() {
-        let specs = Specs::open("src/test.svg").unwrap();
-        assert_eq!(specs.scale, 648.0);
-        assert_eq!(specs.variant.scale(), Some(610.0));
-        assert_eq!(specs.variant.pfret(), Some(8.5));
-        assert_eq!(specs.variant.handedness(), Some(Handedness::Right));
-        assert_eq!(specs.bridge, 56.0);
-        assert_eq!(specs.nut, 43.0);
-        assert_eq!(specs.count, 24);
     }
 }

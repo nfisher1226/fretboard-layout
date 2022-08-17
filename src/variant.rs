@@ -42,7 +42,6 @@ impl Variant {
 
     /// Return the treble side scale length if the neck is `Multiscale`, or else
     /// `None`
-    #[allow(clippy::must_use_candidate)]
     pub fn scale(&self) -> Option<f64> {
         match self {
             Self::Monoscale => None,
@@ -52,7 +51,6 @@ impl Variant {
 
     /// Returns whether the resulting neck is right or left handed, or `None` if
     /// the neck is `Monoscale`
-    #[allow(clippy::must_use_candidate)]
     pub fn handedness(&self) -> Option<Handedness> {
         match self {
             Self::Monoscale => None,
@@ -62,7 +60,6 @@ impl Variant {
 
     /// Returns which fret is perpendicular to the centerline, or `None` if the
     /// fretboard is Monoscale
-    #[allow(clippy::must_use_candidate)]
     pub fn pfret(&self) -> Option<f64> {
         match self {
             Self::Monoscale => None,
@@ -71,6 +68,7 @@ impl Variant {
     }
 }
 
+/// A builder pattern struct for building a `Variant::Multiscale` struct
 pub struct MultiscaleBuilder {
     scale: f64,
     handedness: Handedness,
@@ -121,3 +119,26 @@ impl MultiscaleBuilder {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn variant_default() {
+        let var = Variant::default();
+        assert_eq!(Variant::Monoscale, var);
+    }
+
+    #[test]
+    fn variant_value() {
+        let var = Variant::Multiscale {
+            scale: 23.5,
+            handedness: Handedness::Right,
+            pfret: 8.0,
+        };
+        let val = var.scale();
+        assert_eq!(val.unwrap(), 23.5);
+        let hand = var.handedness();
+        assert_eq!(hand.unwrap(), Handedness::Right);
+    }
+}

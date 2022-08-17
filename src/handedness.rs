@@ -11,6 +11,7 @@ pub enum Handedness {
     Left,
 }
 
+/// An error occurred parsing the neck's Handedness from a str
 #[derive(Debug)]
 pub struct ParseHandednessError;
 
@@ -46,4 +47,3 @@ impl fmt::Display for Handedness {
         )
     }
 }
-
