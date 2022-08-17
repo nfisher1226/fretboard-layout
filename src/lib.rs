@@ -884,4 +884,16 @@ mod tests {
         assert_eq!(lengths.length_bass, 163.75);
         assert_eq!(lengths.length_bass, lengths.length_treble);
     }
+
+    #[test]
+    fn test_open() {
+        let specs = Specs::open("src/test.svg").unwrap();
+        assert_eq!(specs.scale, 648.0);
+        assert_eq!(specs.variant.scale(), Some(610.0));
+        assert_eq!(specs.variant.pfret(), Some(8.5));
+        assert_eq!(specs.variant.handedness(), Some(Handedness::Right));
+        assert_eq!(specs.bridge, 56.0);
+        assert_eq!(specs.nut, 43.0);
+        assert_eq!(specs.count, 24);
+    }
 }

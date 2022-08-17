@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" height="82mm" preserveAspectRatio="xMidYMid meet" viewBox="0 0 668 82" width="668mm">
+  <desc BridgeSpacing="56" FretCount="24" Handedness="right" NutWidth="43" PerpendicularFret="8.5" Scale="648" ScaleTreble="610"/>
+  <path d="M657.93036,19.5 L643.18896,63.0571 L177.17989,69.889755 L162.8912,12.241701 L657.93036,19.5 z" fill="#000000" fill-opacity="255" id="Fretboard" stroke="none"/>
+  <path d="M10,10 L33.254517,72 z" fill="none" id="Bridge" stroke="black" stroke-width="1"/>
+  <g id="Frets">
+    <path d="M657.93036,19.5 L643.18896,63.0571 z" fill="none" id="Nut" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M621.5648,18.966806 L608.956,63.559025 z" fill="none" id="Fret 1" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M587.24036,18.463537 L576.64435,64.03278 z" fill="none" id="Fret 2" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M554.84235,17.988516 L546.1462,64.47995 z" fill="none" id="Fret 3" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M524.2627,17.540155 L517.3598,64.902016 z" fill="none" id="Fret 4" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M495.39932,17.116959 L490.18906,65.30039 z" fill="none" id="Fret 5" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M468.15594,16.717514 L464.5433,65.676414 z" fill="none" id="Fret 6" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M442.44162,16.340488 L440.3369,66.03133 z" fill="none" id="Fret 7" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M418.17056,15.984625 L417.48914,66.366325 z" fill="none" id="Fret 8" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M395.2617,15.648734 L395.9237,66.68252 z" fill="none" id="Fret 9" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M373.6386,15.331695 L375.56866,66.980965 z" fill="none" id="Fret 10" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M353.22916,15.03245 L356.35605,67.262665 z" fill="none" id="Fret 11" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M333.96518,14.75 L338.22174,67.52855 z" fill="none" id="Fret 12" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M315.7824,14.483403 L321.10526,67.77951 z" fill="none" id="Fret 13" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M298.62018,14.231769 L304.94943,68.01639 z" fill="none" id="Fret 14" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M282.42117,13.994258 L289.70035,68.239975 z" fill="none" id="Fret 15" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M267.13135,13.770078 L275.30716,68.451004 z" fill="none" id="Fret 16" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M252.69966,13.558479 L261.7218,68.6502 z" fill="none" id="Fret 17" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M239.07797,13.358757 L248.89891,68.8382 z" fill="none" id="Fret 18" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M226.22081,13.170244 L236.79572,69.01566 z" fill="none" id="Fret 19" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M214.08528,12.992312 L225.37183,69.18316 z" fill="none" id="Fret 20" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M202.63084,12.824367 L214.58911,69.34126 z" fill="none" id="Fret 21" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M191.8193,12.665848 L204.41159,69.490486 z" fill="none" id="Fret 22" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M181.61458,12.516225 L194.80528,69.63133 z" fill="none" id="Fret 23" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+    <path d="M171.98259,12.375 L185.73813,69.764275 z" fill="none" id="Fret 24" stroke="#ffffff" stroke-opacity="255" stroke-width="1"/>
+  </g>
+  <text font-family="Sans" font-size="5px" font-weight="Normal" id="Specifications" x="10" y="79">
+ScaleBass: 648.00mm | ScaleTreble: 610.00mm | PerpendicularFret: 8.5 | NutWidth: 43.00mm | BridgeSpacing: 56.00mm
+</text>
+  <path d="M10,41 L658,41 z" fill="none" id="Centerline" stroke="#0000ff" stroke-dasharray="4.0, 8.0" stroke-dashoffset="0" stroke-opacity="65025" stroke-width="1"/>
+</svg>
