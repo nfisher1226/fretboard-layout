@@ -2,8 +2,10 @@
 #![doc = include_str!("../README.md")]
 
 mod config;
+mod handedness;
 pub use {
     config::{Config, Font, FontWeight, Units},
+    handedness::{Handedness, ParseHandednessError},
     rgba_simple::*,
 };
 
@@ -14,7 +16,6 @@ use {
         f64, fmt, io,
         num::{ParseFloatError, ParseIntError},
         path,
-        str::FromStr,
     },
     svg::{
         node::element::{path::Data, Description, Group, Path},
@@ -23,54 +24,6 @@ use {
     PrimaryColor::Blue,
 };
 
-/// Whether the output represents a right handed or left handed neck style
-#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub enum Handedness {
-    Right,
-    Left,
-}
-
-#[derive(Debug)]
-pub struct ParseHandednessError;
-
-impl fmt::Display for ParseHandednessError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Parse Handedness Error")
-    }
-}
-
-impl std::error::Error for ParseHandednessError {}
-
-impl FromStr for Handedness {
-    type Err = ParseHandednessError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "right" | "Right" => Ok(Self::Right),
-            "left" | "Left" => Ok(Self::Left),
-            _ => Err(ParseHandednessError),
-        }
-    }
-}
-
-impl Default for Handedness {
-    fn default() -> Self {
-        Self::Right
-    }
-}
-
-impl fmt::Display for Handedness {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{}",
-            match self {
-                Self::Right => "right",
-                Self::Left => "left",
-            }
-        )
-    }
-}
 
 /// Whether to output a traditional `Monoscale` style neck with the same scale
 /// across it's entire width, or a modern `Multiscale` neck, with a shorter scale
