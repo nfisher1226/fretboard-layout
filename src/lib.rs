@@ -1,12 +1,16 @@
 #![warn(clippy::all, clippy::pedantic)]
+#![allow(clippy::must_use_candidate)]
 #![doc = include_str!("../README.md")]
 
 mod config;
 mod handedness;
+mod variant;
+
 pub use {
     config::{Config, Font, FontWeight, Units},
     handedness::{Handedness, ParseHandednessError},
     rgba_simple::*,
+    variant::{MultiscaleBuilder, Variant},
 };
 
 use {
@@ -23,120 +27,6 @@ use {
     },
     PrimaryColor::Blue,
 };
-
-
-/// Whether to output a traditional `Monoscale` style neck with the same scale
-/// across it's entire width, or a modern `Multiscale` neck, with a shorter scale
-/// along the treble side, also known as *fan fret*.
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
-pub enum Variant {
-    /// A traditional fretbaord where the same scale length is used all of the
-    /// way across the fretboard.
-    Monoscale,
-    /// A modern style of neck where there is a longer scale length along the
-    /// bass side of the neck and a shorter scale along the treble side of the
-    /// neck, allowing for more natural string tension, greater flexibility in
-    /// tuning, and better ergonomics.
-    Multiscale {
-        /// The scale length along the treble side of the neck
-        scale: f64,
-        /// Right or left handed output
-        handedness: Handedness,
-        /// Which fret is perpendicular to the centerline
-        pfret: f64,
-    },
-}
-
-impl Default for Variant {
-    fn default() -> Self {
-        Self::Monoscale
-    }
-}
-
-impl Variant {
-    fn multi() -> Self {
-        Self::Multiscale {
-            scale: 610.0,
-            handedness: Handedness::default(),
-            pfret: 8.0,
-        }
-    }
-
-    /// Return the treble side scale length if the neck is `Multiscale`, or else
-    /// `None`
-    #[allow(clippy::must_use_candidate)]
-    pub fn scale(&self) -> Option<f64> {
-        match self {
-            Self::Monoscale => None,
-            Self::Multiscale { scale: x, .. } => Some(*x),
-        }
-    }
-
-    /// Returns whether the resulting neck is right or left handed, or `None` if
-    /// the neck is `Monoscale`
-    #[allow(clippy::must_use_candidate)]
-    pub fn handedness(&self) -> Option<Handedness> {
-        match self {
-            Self::Monoscale => None,
-            Self::Multiscale { handedness: x, .. } => Some(*x),
-        }
-    }
-
-    /// Returns which fret is perpendicular to the centerline, or `None` if the
-    /// fretboard is Monoscale
-    #[allow(clippy::must_use_candidate)]
-    pub fn pfret(&self) -> Option<f64> {
-        match self {
-            Self::Monoscale => None,
-            Self::Multiscale { pfret: x, .. } => Some(*x),
-        }
-    }
-}
-
-pub struct MultiscaleBuilder {
-    scale: f64,
-    handedness: Handedness,
-    pfret: f64,
-}
-
-impl Default for MultiscaleBuilder {
-    fn default() -> Self {
-        Self {
-            scale: 610.0,
-            handedness: Handedness::default(),
-            pfret: 8.0,
-        }
-    }
-}
-
-impl MultiscaleBuilder {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    pub fn scale(mut self, scale: f64) -> Self {
-        self.scale = scale;
-        self
-    }
-
-    pub fn handedness(mut self, handedness: Handedness) -> Self {
-        self.handedness = handedness;
-        self
-    }
-
-    pub fn pfret(mut self, pfret: f64) -> Self {
-        self.pfret = pfret;
-        self
-    }
-
-    pub fn build(self) -> Variant {
-        Variant::Multiscale {
-            scale: self.scale,
-            handedness: self.handedness,
-            pfret: self.pfret,
-        }
-    }
-}
 
 #[derive(Deserialize, Serialize)]
 // This struct contains multiplication factors used to convert the raw lengths
@@ -165,10 +55,7 @@ impl Factors {
         let height = (bridge - nut) / 2.0;
         let y_ratio = height / scale;
         let x_ratio = y_ratio.acos().sin();
-        let pfret = match variant.pfret() {
-            Some(x) => x,
-            None => 8.0,
-        };
+        let pfret = variant.pfret().unwrap_or(8.0);
         let factor = 2.0_f64.powf(pfret / 12.0);
         let length_bass = scale / factor;
         let length_treble = match variant {
@@ -464,45 +351,44 @@ impl Specs {
 
     /// Opens an svg file and extracts a Specs struct from it if it was created
     /// by this library previously
+    /// # Errors
+    /// See `OpenError` for a list of potential errors
     pub fn open<T: AsRef<path::Path>>(path: T) -> Result<Self, OpenError> {
         let mut content = String::new();
         let event_iter = svg::open(path, &mut content)?;
         for event in event_iter {
-            match event {
-                svg::parser::Event::Tag(svg::node::element::tag::Description, _, attributes) => {
-                    let scale = attributes
-                        .get("Scale")
-                        .ok_or(OpenError::MissingField("Scale"))?
-                        .parse()?;
-                    let bridge = attributes
-                        .get("BridgeSpacing")
-                        .ok_or(OpenError::MissingField("BridgeSpacing"))?
-                        .parse()?;
-                    let nut = attributes
-                        .get("NutWidth")
-                        .ok_or(OpenError::MissingField("NutWidth"))?
-                        .parse()?;
-                    let count = attributes
-                        .get("FretCount")
-                        .ok_or(OpenError::MissingField("FretCount"))?
-                        .parse()?;
-                    let variant = match attributes.get("ScaleTreble") {
-                        Some(scl) => Variant::Multiscale {
-                            scale: scl.parse::<f64>()?,
-                            handedness: attributes
-                                .get("Handedness")
-                                .ok_or(OpenError::MissingField("Handedness"))?
-                                .parse()?,
-                            pfret: attributes
-                                .get("PerpendicularFret")
-                                .ok_or(OpenError::MissingField("PerpendicularFret"))?
-                                .parse()?,
-                        },
-                        None => Variant::Monoscale,
-                    };
-                    return Ok(Self::init(scale, count, variant, nut, bridge));
-                }
-                _ => {}
+            if let svg::parser::Event::Tag(svg::node::element::tag::Description, _, attributes) = event {
+                let scale = attributes
+                    .get("Scale")
+                    .ok_or(OpenError::MissingField("Scale"))?
+                    .parse()?;
+                let bridge = attributes
+                    .get("BridgeSpacing")
+                    .ok_or(OpenError::MissingField("BridgeSpacing"))?
+                    .parse()?;
+                let nut = attributes
+                    .get("NutWidth")
+                    .ok_or(OpenError::MissingField("NutWidth"))?
+                    .parse()?;
+                let count = attributes
+                    .get("FretCount")
+                    .ok_or(OpenError::MissingField("FretCount"))?
+                    .parse()?;
+                let variant = match attributes.get("ScaleTreble") {
+                    Some(scl) => Variant::Multiscale {
+                        scale: scl.parse::<f64>()?,
+                        handedness: attributes
+                            .get("Handedness")
+                            .ok_or(OpenError::MissingField("Handedness"))?
+                            .parse()?,
+                        pfret: attributes
+                            .get("PerpendicularFret")
+                            .ok_or(OpenError::MissingField("PerpendicularFret"))?
+                            .parse()?,
+                    },
+                    None => Variant::Monoscale,
+                };
+                return Ok(Self::init(scale, count, variant, nut, bridge));
             }
         }
         Err(OpenError::NoMetadata)
@@ -754,35 +640,42 @@ impl Default for SpecsBuilder {
 }
 
 impl SpecsBuilder {
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
 
+    #[must_use]
     pub fn scale(mut self, scale: f64) -> Self {
         self.scale = scale;
         self
     }
 
+    #[must_use]
     pub fn count(mut self, count: u32) -> Self {
         self.count = count;
         self
     }
 
+    #[must_use]
     pub fn variant(mut self, variant: Variant) -> Self {
         self.variant = variant;
         self
     }
 
+    #[must_use]
     pub fn nut(mut self, nut: f64) -> Self {
         self.nut = nut;
         self
     }
 
+    #[must_use]
     pub fn bridge(mut self, bridge: f64) -> Self {
         self.bridge = bridge;
         self
     }
 
+    #[must_use]
     pub fn build(self) -> Specs {
         Specs::init(self.scale, self.count, self.variant, self.nut, self.bridge)
     }
