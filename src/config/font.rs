@@ -13,15 +13,15 @@ pub enum Style {
     Italic,
 }
 
-impl fmt::Display for Style {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 impl Default for Style {
     fn default() -> Self {
         Self::Normal
+    }
+}
+
+impl fmt::Display for Style {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
@@ -57,6 +57,16 @@ impl From<Style> for pango::Style {
             Style::Normal => pango::Style::Normal,
             Style::Oblique => pango::Style::Oblique,
             Style::Italic => pango::Style::Italic,
+        }
+    }
+}
+
+impl Style {
+    pub fn css_value(&self) -> &'static str {
+        match self {
+            Self::Normal => "Normal",
+            Self::Oblique => "Oblique",
+            Self::Italic => "Italic",
         }
     }
 }
@@ -155,6 +165,24 @@ impl From<Weight> for pango::Weight {
     }
 }
 
+impl Weight {
+    pub fn css_value(&self) -> &'static str {
+        match self {
+            Self::Thin => "100",
+            Self::Ultralight => "200",
+            Self::Light => "300",
+            Self::Semilight => "350",
+            Self::Book | Self::Normal => "400",
+            Self::Medium => "500",
+            Self::Semibold => "600",
+            Self::Bold => "700",
+            Self::Ultrabold => "800",
+            Self::Heavy => "900",
+            Self::Ultraheavy => "950",
+        }
+    }
+}
+
 /// The stretch of the font
 #[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
 pub enum Stretch {
@@ -231,6 +259,22 @@ impl From<Stretch> for pango::Stretch {
             Stretch::Expanded => Self::Expanded,
             Stretch::ExtraExpanded => Self::ExtraExpanded,
             Stretch::UltraExpanded => Self::UltraExpanded,
+        }
+    }
+}
+
+impl Stretch {
+    pub fn css_value(&self) -> &'static str {
+        match self {
+            Self::UltraCondensed => "ultra-condensed",
+            Self::ExtraCondensed => "extra-condensed",
+            Self::Condensed => "condensed",
+            Self::SemiCondensed => "semi-condensed",
+            Self::Normal => "normal",
+            Self::SemiExpanded => "semi-expanded",
+            Self::Expanded => "expanded",
+            Self::ExtraExpanded => "extra-expanded",
+            Self::UltraExpanded => "ultra-expanded",
         }
     }
 }
@@ -373,6 +417,14 @@ impl Font {
     /// Set the *size* of the font
     pub fn set_size(&mut self, size: i32) {
         self.size = size;
+    }
+
+    pub fn stretch(&self) -> Stretch {
+        self.stretch
+    }
+
+    pub fn set_stretch(&mut self, stretch: Stretch) {
+        self.stretch = stretch;
     }
 }
 

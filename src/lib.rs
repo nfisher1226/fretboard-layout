@@ -279,14 +279,7 @@ impl Specs {
                 self.scale, &units, s, &units, f
             ),
         };
-        let font_family = match &config.font {
-            Some(font) => String::from(&font.family()),
-            None => String::from("Sans"),
-        };
-        let font_weight = match &config.font {
-            Some(font) => font.weight().to_string(),
-            None => String::from("Regular"),
-        };
+        let font = config.font.clone().unwrap_or_default();
         let font_size = match config.units {
             Units::Metric => "5px",
             Units::Imperial => "0.25px",
@@ -300,8 +293,10 @@ impl Specs {
         svg::node::element::Text::new()
             .set("x", config.border)
             .set("y", (config.border * 1.7) + self.bridge)
-            .set("font-family", font_family)
-            .set("font-weight", font_weight)
+            .set("font-family", font.family())
+            .set("font-weight", font.weight().to_string())
+            .set("font-stretch", font.stretch().to_string())
+            .set("font-style", font.style().to_string())
             .set("font-size", font_size)
             .set("id", "Specifications")
             .add(svg::node::Text::new(line))
