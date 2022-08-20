@@ -235,6 +235,63 @@ impl From<Stretch> for pango::Stretch {
     }
 }
 
+pub struct FontBuilder {
+    family: String,
+    style: Style,
+    weight: Weight,
+    stretch: Stretch,
+    size: i32,
+}
+
+impl Default for FontBuilder {
+    fn default() -> Self {
+        Self {
+            family: String::from("Sans"),
+            style: Style::default(),
+            weight: Weight::default(),
+            stretch: Stretch::default(),
+            size: 12288,
+        }
+    }
+}
+
+impl FontBuilder {
+    pub fn family(mut self, family: &str) -> Self {
+        self.family = String::from(family);
+        self
+    }
+
+    pub fn style(mut self, style: Style) -> Self {
+        self.style = style;
+        self
+    }
+
+    pub fn weight(mut self, weight: Weight) -> Self {
+        self.weight = weight;
+        self
+    }
+
+    pub fn stretch(mut self, stretch: Stretch) -> Self {
+        self.stretch = stretch;
+        self
+    }
+
+    pub fn size(mut self, size: i32) -> Self {
+        self.size = size;
+        self
+    }
+
+    pub fn build(self) -> Font {
+        Font {
+            family: self.family,
+            style: self.style,
+            weight: self.weight,
+            stretch: self.stretch,
+            size: self.size,
+        }
+    }
+}
+
 #[derive(Clone, Deserialize, Debug, Serialize)]
 pub struct Font {
     family: String,
@@ -270,6 +327,10 @@ impl Default for Font {
 }
 
 impl Font {
+    pub fn builder() -> FontBuilder {
+        FontBuilder::default()
+    }
+
     /// Get the *family* of the font
     #[must_use]
     pub fn family(&self) -> String {
