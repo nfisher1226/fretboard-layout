@@ -9,7 +9,7 @@ pub mod open;
 mod variant;
 
 pub use {
-    config::{Config, Font, FontWeight, Units},
+    config::{Config, font::Font, font::Weight, Units},
     factors::Factors,
     handedness::{Handedness, ParseHandednessError},
     rgba_simple::*,
@@ -280,11 +280,11 @@ impl Specs {
             ),
         };
         let font_family = match &config.font {
-            Some(font) => String::from(&font.family),
+            Some(font) => String::from(&font.family()),
             None => String::from("Sans"),
         };
         let font_weight = match &config.font {
-            Some(font) => font.weight.to_string(),
+            Some(font) => font.weight().to_string(),
             None => String::from("Regular"),
         };
         let font_size = match config.units {

@@ -22,3 +22,8 @@ rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple" }
 [dependencies.serde]
 version = "~1.0"
 features = ["derive"]
+
+[dependencies.pango]
+version = "*"
+package = "pango"
+optional = true
