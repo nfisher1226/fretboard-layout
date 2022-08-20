@@ -2,8 +2,7 @@
 
 use {
     crate::{
-        Primary,
-        PrimaryColor::{Black, Blue, White},
+        PrimaryColor,
         RGBA,
     },
     serde::{Deserialize, Serialize},
@@ -170,9 +169,9 @@ impl Default for Config {
             units: Units::default(),
             border: 10.0,
             line_weight: 1.0,
-            fretline_color: RGBA::primary(White),
-            fretboard_color: RGBA::primary(Black),
-            centerline_color: Some(RGBA::primary(Blue)),
+            fretline_color: PrimaryColor::White.into(),
+            fretboard_color: PrimaryColor::Black.into(),
+            centerline_color: Some(PrimaryColor::Blue.into()),
             font: Some(Font::default()),
         }
     }

@@ -23,7 +23,6 @@ use {
         node::element::{path::Data, Description, Group, Path, Text},
         Document,
     },
-    PrimaryColor::Blue,
 };
 
 /// Distance from bridge to fret along each side of the fretboard.
@@ -316,7 +315,7 @@ impl Specs {
         let end_y = (self.bridge / 2.0) + config.border;
         let (hex, opacity) = match &config.centerline_color {
             Some(c) => (c.to_hex(), f32::from(c.alpha) * 255.0),
-            None => (RGBA::<u8>::primary(Blue).to_hex(), 1.0),
+            None => (RGBA::<u8>::from(PrimaryColor::Blue).to_hex(), 1.0),
         };
         let dasharray = match config.units {
             Units::Metric => "4.0, 8.0",

@@ -489,9 +489,8 @@ dependencies = [
 
 [[package]]
 name = "rgba_simple"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7af1ac45b3df82125e12bdd27553ae4eef52a66fc5db9aa32c3c0d06189a2f8"
+version = "0.7.0"
+source = "git+https://codeberg.org/jeang3nie/rgba-simple#a73df39f42aa69b94772941fb2862f3e3e3cb62a"
 dependencies = [
  "gdk4",
  "serde",
