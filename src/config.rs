@@ -1,10 +1,7 @@
 #![warn(clippy::all, clippy::pedantic)]
 
 use {
-    crate::{
-        PrimaryColor,
-        RGBA,
-    },
+    crate::{PrimaryColor, RGBA},
     serde::{Deserialize, Serialize},
     std::{error::Error, fmt, str::FromStr},
 };
@@ -16,6 +13,42 @@ pub enum Units {
     Metric,
     /// Output measurements are given in *inches*
     Imperial,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct ParseUnitsError;
+
+impl fmt::Display for ParseUnitsError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Error parsing units from string")
+    }
+}
+
+impl Error for ParseUnitsError {}
+
+impl FromStr for Units {
+    type Err = ParseUnitsError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "metric" | "Metric" => Ok(Self::Metric),
+            "imperial" | "Imperial" => Ok(Self::Imperial),
+            _ => Err(ParseUnitsError),
+        }
+    }
+}
+
+impl fmt::Display for Units {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Metric => "metric",
+                Self::Imperial => "imperial",
+            }
+        )
+    }
 }
 
 /// The weight, or style, of the font
@@ -47,12 +80,6 @@ pub struct Font {
 /// Error returned if unable to parse a font from a given `str`
 #[derive(Debug, Eq, PartialEq)]
 pub struct ParseFontError;
-
-impl fmt::Display for Units {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
 
 impl Default for Units {
     /// Returns `Units::Metric`

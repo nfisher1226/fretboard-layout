@@ -5,10 +5,7 @@ use {
         num::{ParseFloatError, ParseIntError},
         path,
     },
-    svg::{
-        node::element::tag,
-        parser::Event,
-    },
+    svg::{node::element::tag, parser::Event},
 };
 
 #[derive(Debug)]
@@ -84,8 +81,7 @@ pub fn open<T: AsRef<path::Path>>(path: T) -> Result<Specs, Error> {
     let mut content = String::new();
     let event_iter = svg::open(path, &mut content)?;
     for event in event_iter {
-        if let Event::Tag(tag::Description, _, attributes) = event
-        {
+        if let Event::Tag(tag::Description, _, attributes) = event {
             let scale = attributes
                 .get("Scale")
                 .ok_or(Error::MissingField("Scale"))?
@@ -124,7 +120,7 @@ pub fn open<T: AsRef<path::Path>>(path: T) -> Result<Specs, Error> {
 
 #[cfg(test)]
 mod tests {
-    use {crate::Handedness, super::*};
+    use {super::*, crate::Handedness};
 
     #[test]
     fn test_open() {
