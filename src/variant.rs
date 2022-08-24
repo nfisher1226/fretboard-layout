@@ -1,12 +1,13 @@
-use {
-    crate::Handedness,
-    serde::{Deserialize, Serialize},
-};
+use crate::Handedness;
+
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Whether to output a traditional `Monoscale` style neck with the same scale
 /// across it's entire width, or a modern `Multiscale` neck, with a shorter scale
 /// along the treble side, also known as *fan fret*.
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Variant {
     /// A traditional fretbaord where the same scale length is used all of the
     /// way across the fretboard.

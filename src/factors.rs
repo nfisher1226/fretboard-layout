@@ -1,11 +1,11 @@
 //! Mathematical factors used in laying out the frets in 2d space
 
-use {
-    crate::Variant,
-    serde::{Deserialize, Serialize},
-};
+use crate::Variant;
 
-#[derive(Deserialize, Serialize)]
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 /// This struct contains multiplication factors used to convert the raw lengths
 /// from bridge to fret into x,y coordinates. It also contains an offset distance
 /// used to correctly orient the two scales in a multiscale design so that the

@@ -5,12 +5,15 @@ pub mod font;
 use {
     crate::{PrimaryColor, RGBA},
     font::Font,
-    serde::{Deserialize, Serialize},
     std::{error::Error, fmt, str::FromStr},
 };
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 /// Whether to use Metric (millimeters) or Imperial (inches) measurements
-#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Units {
     /// Output measurements are given in *millimeters*
     Metric,
@@ -63,7 +66,8 @@ impl Default for Units {
 
 /// All of the configuration values which can be set in config.toml get stored
 /// in this struct
-#[derive(Clone, Deserialize, Debug, Serialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Config {
     /// Whether to use Millimeters (mm) or Inches (in) when displaying lengths
     pub units: Units,

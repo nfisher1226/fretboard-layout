@@ -18,12 +18,14 @@ pub use {
 
 use {
     rayon::prelude::*,
-    serde::{Deserialize, Serialize},
     svg::{
         node::element::{path::Data, Description, Group, Path, Text},
         Document,
     },
 };
+
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Distance from bridge to fret along each side of the fretboard.
 struct Lengths {
@@ -106,7 +108,7 @@ impl Line {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 /// This struct contains the user data used to create the svg output file
 pub struct Specs {
     /// Scale length. For multiscale designs this is the bass side scale length.

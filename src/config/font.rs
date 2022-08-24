@@ -1,12 +1,13 @@
 #![warn(clippy::all, clippy::pedantic)]
 
-use {
-    serde::{Deserialize, Serialize},
-    std::{error::Error, fmt, str::FromStr},
-};
+use std::{error::Error, fmt, str::FromStr};
+
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// The style of the font
-#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Style {
     Normal,
     Oblique,
@@ -72,7 +73,8 @@ impl Style {
 }
 
 /// The weight of the font
-#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Weight {
     Thin,
     Ultralight,
@@ -184,7 +186,8 @@ impl Weight {
 }
 
 /// The stretch of the font
-#[derive(Clone, Copy, Deserialize, Debug, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Stretch {
     UltraCondensed,
     ExtraCondensed,
@@ -336,7 +339,8 @@ impl FontBuilder {
     }
 }
 
-#[derive(Clone, Deserialize, Debug, Serialize)]
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub struct Font {
     family: String,
     style: Style,

@@ -1,10 +1,11 @@
-use {
-    serde::{Deserialize, Serialize},
-    std::{error::Error, fmt, str::FromStr},
-};
+use std::{error::Error, fmt, str::FromStr};
+
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 /// Whether the output represents a right handed or left handed neck style
-#[derive(Clone, Copy, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Deserialize, Serialize))]
 pub enum Handedness {
     #[default]
     Right,
