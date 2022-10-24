@@ -9,7 +9,7 @@ pub mod open;
 mod variant;
 
 pub use {
-    config::{Config, font::Font, font::Weight, Units},
+    config::{font::{Font, Weight}, Config, Units},
     factors::Factors,
     handedness::{Handedness, ParseHandednessError},
     rgba_simple::*,
@@ -92,7 +92,7 @@ impl Line {
         let id = if fret == 0 {
             "Nut".to_string()
         } else {
-            format!("Fret {}", fret)
+            format!("Fret {fret}")
         };
         let data = Data::new()
             .move_to((self.start.0, self.start.1))
@@ -277,8 +277,8 @@ impl Specs {
             Variant::Multiscale {
                 scale: s, pfret: f, ..
             } => format!(
-                "ScaleBass: {:.2}{} | ScaleTreble: {:.2}{} | PerpendicularFret: {:.1} |",
-                self.scale, &units, s, &units, f
+                "ScaleBass: {:.2}{} | ScaleTreble: {s:.2}{} | PerpendicularFret: {f:.1} |",
+                self.scale, &units, &units
             ),
         };
         let font = config.font.clone().unwrap_or_default();
@@ -286,12 +286,12 @@ impl Specs {
             Units::Metric => "5px",
             Units::Imperial => "0.25px",
         };
-        line = format!("{} NutWidth: {:.2}{} |", line, self.nut, &units);
+        line = format!("{line} NutWidth: {:.2}{} |", self.nut, &units);
         let bridge = match config.units {
             Units::Metric => self.bridge - 6.0,
             Units::Imperial => self.bridge - (6.0 / 20.4),
         };
-        line = format!("{} BridgeSpacing: {:.2}{}", line, bridge, &units);
+        line = format!("{line} BridgeSpacing: {bridge:.2}{}", &units);
         svg::node::element::Text::new()
             .set("x", config.border)
             .set("y", (config.border * 1.7) + self.bridge)
@@ -432,9 +432,9 @@ impl Specs {
             Units::Metric => "mm",
             Units::Imperial => "in",
         };
-        let widthmm = format!("{}{}", width, units);
+        let widthmm = format!("{width}{units}");
         let height = (config.border * 2.0) + self.bridge;
-        let heightmm = format!("{}{}", height, units);
+        let heightmm = format!("{height}{units}");
         // Todo - investigate generating these values async
         let description = self.create_description();
         let fretboard = self.draw_fretboard(&config);

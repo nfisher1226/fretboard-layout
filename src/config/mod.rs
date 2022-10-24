@@ -167,6 +167,7 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
+    use crate::{Weight, config::font::ParseFontError};
     use super::*;
 
     #[test]

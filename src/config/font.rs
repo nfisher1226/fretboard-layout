@@ -22,7 +22,7 @@ impl Default for Style {
 
 impl fmt::Display for Style {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -63,7 +63,8 @@ impl From<Style> for pango::Style {
 }
 
 impl Style {
-    pub fn css_value(&self) -> &'static str {
+    #[must_use]
+    pub fn css_value(self) -> &'static str {
         match self {
             Self::Normal => "Normal",
             Self::Oblique => "Oblique",
@@ -92,7 +93,7 @@ pub enum Weight {
 
 impl fmt::Display for Weight {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -168,7 +169,8 @@ impl From<Weight> for pango::Weight {
 }
 
 impl Weight {
-    pub fn css_value(&self) -> &'static str {
+    #[must_use]
+    pub fn css_value(self) -> &'static str {
         match self {
             Self::Thin => "100",
             Self::Ultralight => "200",
@@ -202,7 +204,7 @@ pub enum Stretch {
 
 impl fmt::Display for Stretch {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -267,7 +269,7 @@ impl From<Stretch> for pango::Stretch {
 }
 
 impl Stretch {
-    pub fn css_value(&self) -> &'static str {
+    pub fn css_value(self) -> &'static str {
         match self {
             Self::UltraCondensed => "ultra-condensed",
             Self::ExtraCondensed => "extra-condensed",
@@ -282,6 +284,7 @@ impl Stretch {
     }
 }
 
+#[allow(clippy::module_name_repetitions)]
 pub struct FontBuilder {
     family: String,
     style: Style,
@@ -355,7 +358,7 @@ pub struct ParseFontError;
 
 impl fmt::Display for ParseFontError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -375,6 +378,7 @@ impl Default for Font {
 }
 
 impl Font {
+    #[must_use]
     pub fn builder() -> FontBuilder {
         FontBuilder::default()
     }
@@ -423,6 +427,7 @@ impl Font {
         self.size = size;
     }
 
+    #[must_use]
     pub fn stretch(&self) -> Stretch {
         self.stretch
     }

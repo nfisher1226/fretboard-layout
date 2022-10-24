@@ -84,30 +84,30 @@ pub fn open<T: AsRef<path::Path>>(path: T) -> Result<Specs, Error> {
         if let Event::Tag(tag::Description, _, attributes) = event {
             let scale = attributes
                 .get("Scale")
-                .ok_or(Error::MissingField("Scale"))?
+                .ok_or_else(|| Error::MissingField("Scale"))?
                 .parse()?;
             let bridge = attributes
                 .get("BridgeSpacing")
-                .ok_or(Error::MissingField("BridgeSpacing"))?
+                .ok_or_else(|| Error::MissingField("BridgeSpacing"))?
                 .parse()?;
             let nut = attributes
                 .get("NutWidth")
-                .ok_or(Error::MissingField("NutWidth"))?
+                .ok_or_else(|| Error::MissingField("NutWidth"))?
                 .parse()?;
             let count = attributes
                 .get("FretCount")
-                .ok_or(Error::MissingField("FretCount"))?
+                .ok_or_else(|| Error::MissingField("FretCount"))?
                 .parse()?;
             let variant = match attributes.get("ScaleTreble") {
                 Some(scl) => Variant::Multiscale {
                     scale: scl.parse::<f64>()?,
                     handedness: attributes
                         .get("Handedness")
-                        .ok_or(Error::MissingField("Handedness"))?
+                        .ok_or_else(|| Error::MissingField("Handedness"))?
                         .parse()?,
                     pfret: attributes
                         .get("PerpendicularFret")
-                        .ok_or(Error::MissingField("PerpendicularFret"))?
+                        .ok_or_else(|| Error::MissingField("PerpendicularFret"))?
                         .parse()?,
                 },
                 None => Variant::Monoscale,
