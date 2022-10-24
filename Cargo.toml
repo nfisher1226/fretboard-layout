@@ -16,9 +16,9 @@ gdk = ["rgba_simple/gdk"]
 serde = ["rgba_simple/serde", "dep:serde"]
 
 [dependencies]
-svg = "~0.10"
-rayon = "~1.5"
-rgba_simple = { git = "https://codeberg.org/jeang3nie/rgba-simple" }
+svg = "0.10"
+rayon = "1.5"
+rgba_simple = "0.8"
 
 [dependencies.serde]
 version = "1.0"

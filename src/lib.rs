@@ -9,7 +9,10 @@ pub mod open;
 mod variant;
 
 pub use {
-    config::{font::{Font, Weight}, Config, Units},
+    config::{
+        font::{Font, Weight},
+        Config, Units,
+    },
     factors::Factors,
     handedness::{Handedness, ParseHandednessError},
     rgba_simple::*,
