@@ -26,6 +26,6 @@ features = ["derive"]
 optional = true
 
 [dependencies.pango]
-version = "*"
+version = "0.16"
 package = "pango"
 optional = true
