@@ -1,6 +1,6 @@
 [package]
 name = "fretboard_layout"
-version = "0.5.1"
+version = "0.6.0"
 authors = ["Nathan Fisher <nfisher.sr@gmail.com>"]
 edition = "2021"
 license = "BSD-2-Clause"
@@ -16,9 +16,9 @@ gdk = ["rgba_simple/gdk"]
 serde = ["rgba_simple/serde", "dep:serde"]
 
 [dependencies]
-svg = "0.12"
+svg = "0.13"
 rayon = "1.5"
-rgba_simple = "0.8"
+rgba_simple = "0.9"
 
 [dependencies.serde]
 version = "1.0"
@@ -26,6 +26,6 @@ features = ["derive"]
 optional = true
 
 [dependencies.pango]
-version = "0.16"
+version = "0.17"
 package = "pango"
 optional = true
